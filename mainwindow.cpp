@@ -36,7 +36,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QShortcut>
 #include <QMessageBox>
 #include <QComboBox>
+#include <QAction>
 #include <QLabel>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -45,20 +47,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     //code to add non buttons to toolbar
-    QComboBox* gameComboBox = new QComboBox;
+    gameComboBox = new QComboBox(this);
     gameComboBox->setMinimumContentsLength(20);
     QLabel* spaceLabel = new QLabel("   ");
     QLabel* gameLabel = new QLabel("Game ");
 
+    QAction* actionAddGame = new QAction(this);
+    actionAddGame->setObjectName(QString("actionAddGame"));
+    QIcon addIcon;
+    addIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/plus.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionAddGame->setIcon(addIcon);
+
+    QAction* actionDelGame = new QAction(this);
+    actionDelGame->setObjectName(QString("actionDelGame"));
+    QIcon delIcon;
+    delIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/minus.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionDelGame->setIcon(delIcon);
+
     ui->toolBar->addWidget(spaceLabel);
     ui->toolBar->addWidget(gameLabel);
     ui->toolBar->addWidget(gameComboBox);
+    ui->toolBar->addAction(actionAddGame);
+    ui->toolBar->addAction(actionDelGame);
 
 
     connect(ui->actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
     connect(ui->actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
     connect(ui->resetButton,SIGNAL( clicked() ),this,SLOT( resetScores() ));
     connect(ui->swapButton,SIGNAL( clicked() ),this,SLOT( swapNames() ));
+    connect(actionAddGame,SIGNAL( triggered() ),this,SLOT( addGame() ));
+    connect(actionDelGame,SIGNAL( triggered() ),this,SLOT( delGame() ));
 
     cWindow = new ConfigWindow(this);
 
@@ -86,7 +104,17 @@ void MainWindow::loadSettings() {
 
         xsplitPath = xsplitPathE.text();
 
+        QDomElement gamesE = settingsXML.namedItem("games").toElement();
+
+        for(QDomNode n = gamesE.firstChild(); !n.isNull(); n = n.nextSibling())
+         {
+            QDomElement gameE = n.toElement();
+            gameComboBox->addItem(gameE.text());
+         }
+
         settings["xsplitPath"] = xsplitPath;
+
+        //gameComboBox->addItem("Persona 4: Arena");
 
     } else {
         QFile xsplitExe32("C:\\Program Files\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
@@ -104,14 +132,23 @@ void MainWindow::loadSettings() {
 
             settings["xsplitPath"] = xsplitPath;
 
-            saveSettings();
-
         } else {
             QMessageBox msgBox;
             msgBox.setText("Please be sure to configure StreamControl before you start.");
             msgBox.exec();
             xsplitPath = "";
         }
+
+
+        //set some default games if none already set
+        gameComboBox->addItem("Super Street Fighter IV");
+        gameComboBox->addItem("Ultimate Marvel vs Capcom 3");
+        gameComboBox->addItem("Persona 4: Arena");
+        gameComboBox->addItem("Tekken Tag Tournament 2");
+        gameComboBox->addItem("Soul Calibur V");
+        gameComboBox->addItem("King of Fighters XIII");
+
+        saveSettings();
     }
 
     //settings["xsplitPath"] = xsplitPath;
@@ -131,6 +168,18 @@ void MainWindow::saveSettings() {
 
     QDomCDATASection xsplitPathT = doc.createCDATASection(settings["xsplitPath"]);
     xsplitPathE.appendChild(xsplitPathT);
+
+    QDomElement gamesE = doc.createElement("games");
+    settingsXML.appendChild(gamesE);
+
+
+    for (int i = 0; i < gameComboBox->count(); ++i) {
+        QDomElement gameE = doc.createElement("game");
+        gamesE.appendChild(gameE);
+        QDomCDATASection gameText = doc.createCDATASection(gameComboBox->itemText(i));
+        gameE.appendChild(gameText);
+    }
+
 
     QTextStream out(&file);
     out.setCodec("UTF-8");
@@ -280,6 +329,13 @@ void MainWindow::saveData()
     mText4.appendChild(mText4t);
 
 
+    QDomElement gameE = doc.createElement("game");
+    items.appendChild(gameE);
+
+    QDomCDATASection gameT = doc.createCDATASection(gameComboBox->currentText());
+    gameE.appendChild(gameT);
+
+
     QTextStream out(&file);
     out.setCodec("UTF-8");
     out << doc.toString();
@@ -323,4 +379,20 @@ void MainWindow::openConfig() {
 
     }
     //this->setDisabled(false);
+}
+
+void MainWindow::addGame() {
+    bool ok;
+    QString game = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+                                              tr("Game:"), QLineEdit::Normal,
+                                              "", &ok);
+    if (ok && !game.isEmpty()) {
+             gameComboBox->addItem(game);
+             saveSettings();
+    }
+}
+
+void MainWindow::delGame() {
+    gameComboBox->removeItem(gameComboBox->currentIndex());
+    saveSettings();
 }

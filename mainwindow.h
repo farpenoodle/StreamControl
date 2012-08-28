@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMainWindow>
 #include "configwindow.h"
 #include <QMap>
+#include <QComboBox>
 #include "config.h"
 
 namespace Ui {
@@ -48,6 +49,8 @@ public:
     void loadData();
     void loadSettings();
 
+    QComboBox *gameComboBox;
+
     //void saveData();
 
 public slots:
@@ -58,6 +61,8 @@ public slots:
     void resetScores();
     void swapNames();
     void openConfig();
+    void addGame();
+    void delGame();
 
 private:
     Ui::MainWindow *ui;

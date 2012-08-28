@@ -7,5 +7,7 @@
         <file>icons/fugue/bonus/icons-24/gear.png</file>
         <file>icons/fugue/icons/cross-small-white.png</file>
         <file>images/Qt-logo.png</file>
+        <file>icons/fugue/bonus/icons-24/plus.png</file>
+        <file>icons/fugue/bonus/icons-24/minus.png</file>
     </qresource>
 </RCC>
