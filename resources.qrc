@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/StreamControl">
+        <file>icons/r1logo2trans-crop.png</file>
+        <file>icons/fugue/bonus/icons-24/arrow-circle-double.png</file>
+        <file>icons/fugue/bonus/icons-24/disk.png</file>
+        <file>images/r1logo.png</file>
+        <file>icons/fugue/bonus/icons-24/gear.png</file>
+        <file>icons/fugue/icons/cross-small-white.png</file>
+        <file>images/Qt-logo.png</file>
+    </qresource>
+</RCC>
