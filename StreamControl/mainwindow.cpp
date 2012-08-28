@@ -151,7 +151,6 @@ void MainWindow::loadSettings() {
         saveSettings();
     }
 
-    //settings["xsplitPath"] = xsplitPath;
 }
 
 void MainWindow::saveSettings() {
@@ -362,7 +361,6 @@ void MainWindow::swapNames()
 
 void MainWindow::openConfig() {
     cWindow->setConfig(settings);
-    //this->setDisabled(true);
     cWindow->show();
 
     if (cWindow->exec() == 1) {
@@ -370,20 +368,15 @@ void MainWindow::openConfig() {
 
         settings["xsplitPath"] = configSettings["xsplitPath"];
 
-        /*QMessageBox msgBox;
-        msgBox.setText(settings["xsplitPath"]);
-        msgBox.exec();*/
-
         saveSettings();
 
 
     }
-    //this->setDisabled(false);
 }
 
 void MainWindow::addGame() {
     bool ok;
-    QString game = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+    QString game = QInputDialog::getText(this, tr("Input"),
                                               tr("Game:"), QLineEdit::Normal,
                                               "", &ok);
     if (ok && !game.isEmpty()) {
