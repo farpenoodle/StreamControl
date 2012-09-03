@@ -67,6 +67,7 @@ package  {
 			board.y=boardY-120;
 			board.pName1.text = "";
 			board.pName2.text = "";
+			board.game.text = "";
 			loadData();
 			
 			//hide all pips
