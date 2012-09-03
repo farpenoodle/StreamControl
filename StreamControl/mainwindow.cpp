@@ -226,7 +226,7 @@ void MainWindow::loadData()
     int gameIndex = gameComboBox->findText(game.text());
     if (gameIndex != -1) {
         gameComboBox->setCurrentIndex(gameIndex);
-    } else {
+    } else if (game.text() != "") {
         gameComboBox->addItem(game.text());
         gameComboBox->setCurrentIndex(gameComboBox->findText(game.text()));
         saveSettings();
