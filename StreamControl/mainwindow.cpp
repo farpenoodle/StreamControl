@@ -370,7 +370,7 @@ void MainWindow::openConfig() {
 
         saveSettings();
 
-
+        loadData();
     }
 }
 

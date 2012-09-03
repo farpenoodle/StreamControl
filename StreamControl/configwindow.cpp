@@ -66,5 +66,6 @@ void ConfigWindow::findXSplit() {
         XSplit.chop(15);
         XSplit.replace("/","\\");
         ui->xsplitPathTB->setText(XSplit);
+        configsettings["xsplitPath"] = XSplit;
     }
 }
