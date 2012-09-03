@@ -38,6 +38,7 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->browseButton,SIGNAL( clicked() ),this,SLOT( findXSplit() ));
+    connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
 
     ui->xsplitPathTB->setDisabled(true);
     ui->streamControlLabel->setText(QString("StreamControl ") + QString(SC_VERSION) );
@@ -53,6 +54,11 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
 
     configsettings = settings;
     ui->xsplitPathTB->setText(configsettings["xsplitPath"]);
+    if (configsettings["useCDATA"] == "1") {
+        ui->CDATACheckBox->setCheckState(Qt::Checked);
+    } else {
+        ui->CDATACheckBox->setCheckState(Qt::Unchecked);
+    }
 
 }
 
@@ -67,5 +73,13 @@ void ConfigWindow::findXSplit() {
         XSplit.replace("/","\\");
         ui->xsplitPathTB->setText(XSplit);
         configsettings["xsplitPath"] = XSplit;
+    }
+}
+
+void ConfigWindow::CDATAToggle( int state ) {
+    if (state == 2) {
+        configsettings["useCDATA"] = "1";
+    } else {
+        configsettings["useCDATA"] = "0";
     }
 }

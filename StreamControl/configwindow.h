@@ -49,6 +49,7 @@ public:
 
 public slots:
     void findXSplit();
+    void CDATAToggle( int state );
     
 private:
     QMap<QString, QString> configsettings;

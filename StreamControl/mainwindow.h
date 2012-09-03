@@ -68,6 +68,7 @@ private:
     Ui::MainWindow *ui;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
+    bool useCDATA;
 };
 
 #endif // MAINWINDOW_H

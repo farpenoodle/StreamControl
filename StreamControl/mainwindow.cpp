@@ -104,13 +104,23 @@ void MainWindow::loadSettings() {
 
         xsplitPath = xsplitPathE.text();
 
+        QDomElement useCDATAE = settingsXML.namedItem("useCDATA").toElement();
+
+        if (useCDATAE.text() == "1") {
+            useCDATA = true;
+            settings["useCDATA"] = "1";
+        } else {
+            useCDATA = false;
+            settings["useCDATA"] = "0";
+        }
+
         QDomElement gamesE = settingsXML.namedItem("games").toElement();
 
         for(QDomNode n = gamesE.firstChild(); !n.isNull(); n = n.nextSibling())
-         {
-            QDomElement gameE = n.toElement();
-            gameComboBox->addItem(gameE.text());
-         }
+        {
+           QDomElement gameE = n.toElement();
+           gameComboBox->addItem(gameE.text());
+        }
 
         settings["xsplitPath"] = xsplitPath;
 
@@ -167,6 +177,12 @@ void MainWindow::saveSettings() {
 
     QDomCDATASection xsplitPathT = doc.createCDATASection(settings["xsplitPath"]);
     xsplitPathE.appendChild(xsplitPathT);
+
+    QDomElement useCDATAE = doc.createElement("useCDATA");
+    settingsXML.appendChild(useCDATAE);
+
+    QDomText useCDATAT = doc.createTextNode(settings["useCDATA"]);
+    useCDATAE.appendChild(useCDATAT);
 
     QDomElement gamesE = doc.createElement("games");
     settingsXML.appendChild(gamesE);
@@ -258,8 +274,13 @@ void MainWindow::saveData()
     QDomElement pName1 = doc.createElement("pName1");
     items.appendChild(pName1);
 
-    QDomCDATASection pName1t = doc.createCDATASection(ui->pName1->text());
-    pName1.appendChild(pName1t);
+    if (useCDATA) {
+        QDomCDATASection pName1t = doc.createCDATASection(ui->pName1->text());
+        pName1.appendChild(pName1t);
+    } else {
+        QDomText pName1t = doc.createTextNode(ui->pName1->text());
+        pName1.appendChild(pName1t);
+    }
 
     QDomElement pScore1 = doc.createElement("pScore1");
     items.appendChild(pScore1);
@@ -272,8 +293,13 @@ void MainWindow::saveData()
     QDomElement pName2 = doc.createElement("pName2");
     items.appendChild(pName2);
 
-    QDomCDATASection pName2t = doc.createCDATASection(ui->pName2->text());
-    pName2.appendChild(pName2t);
+    if (useCDATA) {
+        QDomCDATASection pName2t = doc.createCDATASection(ui->pName2->text());
+        pName2.appendChild(pName2t);
+    } else {
+        QDomText pName2t = doc.createTextNode(ui->pName2->text());
+        pName2.appendChild(pName2t);
+    }
 
     QDomElement pScore2 = doc.createElement("pScore2");
     items.appendChild(pScore2);
@@ -294,55 +320,90 @@ void MainWindow::saveData()
     QDomElement cTitle1 = doc.createElement("cTitle1");
     items.appendChild(cTitle1);
 
-    QDomCDATASection cTitle1t = doc.createCDATASection(ui->cTitle1->text());
-    cTitle1.appendChild(cTitle1t);
+    if (useCDATA) {
+        QDomCDATASection cTitle1t = doc.createCDATASection(ui->cTitle1->text());
+        cTitle1.appendChild(cTitle1t);
+    } else {
+        QDomText cTitle1t = doc.createTextNode(ui->cTitle1->text());
+        cTitle1.appendChild(cTitle1t);
+    }
 
 
 
     QDomElement cTitle2 = doc.createElement("cTitle2");
     items.appendChild(cTitle2);
 
-    QDomCDATASection cTitle2t = doc.createCDATASection(ui->cTitle2->text());
-    cTitle2.appendChild(cTitle2t);
+    if (useCDATA) {
+        QDomCDATASection cTitle2t = doc.createCDATASection(ui->cTitle2->text());
+        cTitle2.appendChild(cTitle2t);
+    } else {
+        QDomText cTitle2t = doc.createTextNode(ui->cTitle2->text());
+        cTitle2.appendChild(cTitle2t);
+    }
 
 
 
     QDomElement mText1 = doc.createElement("mText1");
     items.appendChild(mText1);
 
-    QDomCDATASection mText1t = doc.createCDATASection(ui->mText1->text());
-    mText1.appendChild(mText1t);
+    if (useCDATA) {
+        QDomCDATASection mText1t = doc.createCDATASection(ui->mText1->text());
+        mText1.appendChild(mText1t);
+    } else {
+        QDomText mText1t = doc.createTextNode(ui->mText1->text());
+        mText1.appendChild(mText1t);
+    }
 
 
-
+    
     QDomElement mText2 = doc.createElement("mText2");
     items.appendChild(mText2);
 
-    QDomCDATASection mText2t = doc.createCDATASection(ui->mText2->text());
-    mText2.appendChild(mText2t);
+    if (useCDATA) {
+        QDomCDATASection mText2t = doc.createCDATASection(ui->mText2->text());
+        mText2.appendChild(mText2t);
+    } else {
+        QDomText mText2t = doc.createTextNode(ui->mText2->text());
+        mText2.appendChild(mText2t);
+    }
 
 
 
     QDomElement mText3 = doc.createElement("mText3");
     items.appendChild(mText3);
 
-    QDomCDATASection mText3t = doc.createCDATASection(ui->mText3->text());
-    mText3.appendChild(mText3t);
+    if (useCDATA) {
+        QDomCDATASection mText3t = doc.createCDATASection(ui->mText3->text());
+        mText3.appendChild(mText3t);
+    } else {
+        QDomText mText3t = doc.createTextNode(ui->mText3->text());
+        mText3.appendChild(mText3t);
+    }
 
 
 
     QDomElement mText4 = doc.createElement("mText4");
     items.appendChild(mText4);
 
-    QDomCDATASection mText4t = doc.createCDATASection(ui->mText4->text());
-    mText4.appendChild(mText4t);
+    if (useCDATA) {
+        QDomCDATASection mText4t = doc.createCDATASection(ui->mText4->text());
+        mText4.appendChild(mText4t);
+    } else {
+        QDomText mText4t = doc.createTextNode(ui->mText4->text());
+        mText4.appendChild(mText4t);
+    }
 
 
     QDomElement gameE = doc.createElement("game");
     items.appendChild(gameE);
 
-    QDomCDATASection gameT = doc.createCDATASection(gameComboBox->currentText());
-    gameE.appendChild(gameT);
+    if (useCDATA) {
+        QDomCDATASection gameT = doc.createCDATASection(gameComboBox->currentText());
+        gameE.appendChild(gameT);
+    } else {
+        QDomText gameT = doc.createTextNode(gameComboBox->currentText());
+        gameE.appendChild(gameT);
+    }
 
 
     QTextStream out(&file);
@@ -377,6 +438,13 @@ void MainWindow::openConfig() {
         QMap<QString, QString> configSettings = cWindow->getConfig();
 
         settings["xsplitPath"] = configSettings["xsplitPath"];
+        settings["useCDATA"] = configSettings["useCDATA"];
+
+        if (settings["useCDATA"] == "1") {
+            useCDATA = true;
+        } else {
+            useCDATA = false;
+        }
 
         saveSettings();
 
