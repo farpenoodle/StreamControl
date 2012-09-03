@@ -209,6 +209,7 @@ void MainWindow::loadData()
     QDomElement mText2 = items.namedItem("mText2").toElement();
     QDomElement mText3 = items.namedItem("mText3").toElement();
     QDomElement mText4 = items.namedItem("mText4").toElement();
+    QDomElement game = items.namedItem("game").toElement();
 
     ui->pName1->setText(pName1.text());
     ui->pScore1->setValue(pScore1.text().toInt());
@@ -221,6 +222,15 @@ void MainWindow::loadData()
     ui->mText2->setText(mText2.text());
     ui->mText3->setText(mText3.text());
     ui->mText4->setText(mText4.text());
+
+    int gameIndex = gameComboBox->findText(game.text());
+    if (gameIndex != -1) {
+        gameComboBox->setCurrentIndex(gameIndex);
+    } else {
+        gameComboBox->addItem(game.text());
+        gameComboBox->setCurrentIndex(gameComboBox->findText(game.text()));
+        saveSettings();
+    }
 
 }
 
@@ -381,6 +391,7 @@ void MainWindow::addGame() {
                                               "", &ok);
     if (ok && !game.isEmpty()) {
              gameComboBox->addItem(game);
+             gameComboBox->setCurrentIndex(gameComboBox->findText(game));
              saveSettings();
     }
 }
