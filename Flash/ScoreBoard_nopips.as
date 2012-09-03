@@ -42,7 +42,7 @@ package  {
 	import flash.text.TextField;
 	
 	
-	public class ScoreBoard extends MovieClip {
+	public class ScoreBoard_nopips extends MovieClip {
 		
 		//Set up needed variables. If you need to use more fields add them here.
 		var timestampOld:Number;
@@ -51,15 +51,12 @@ package  {
 		var pScore1:Number;
 		var pName2:String;
 		var pScore2:Number;
-		var rounds:Number;
-		var roundsOld:Number=0;
 		var game:String;
-		
-		
+			
 		var animating:Boolean = false;
 		var doUpdate:Boolean = false;
 		
-		public function ScoreBoard() {
+		public function ScoreBoard_nopips() {
 			// constructor code
 			
 			FilterShortcuts.init();
@@ -67,18 +64,11 @@ package  {
 			board.y=boardY-120;
 			board.pName1.text = "";
 			board.pName2.text = "";
+			board.pScore1.text = "";
+			board.pScore2.text = "";
+			board.game.text = "";
+
 			loadData();
-			
-			//hide all pips
-			for (var i:Number = 1; i <= 10; i++) {
-					var p1p_mc:MovieClip;
-					p1p_mc = MovieClip(board.getChildByName("p1p" + i));
-					p1p_mc.alpha = 0;
-					
-					var p2p_mc:MovieClip;
-					p2p_mc = MovieClip(board.getChildByName("p2p" + i));
-					p2p_mc.alpha = 0;
-			}
 			
 			Tweener.addTween(board, {y:boardY, time:0.8, transition:"easeOut"});
 			
@@ -103,8 +93,6 @@ package  {
 				game = streamData.elements("game");
 				timestampOld = timestamp;
 				timestamp = streamData.elements("timestamp");
-				roundsOld = rounds;
-				rounds = streamData.elements("rounds");
 			}
 		
 		}
@@ -179,6 +167,62 @@ package  {
 					}
 				});
 			}
+
+			if (board.pScore1.text != pScore1 || board.pScore1.text == "") {
+				animating = true;
+				var currY:Number = board.pScore1.y;
+				Tweener.addTween(board.pScore1, {
+					y:currY-30,
+					alpha:0,
+					_Blur_blurY: 10,
+					_Blur_quality:1,
+					time:0.5,
+					transition:"easeIn",
+					onComplete: function() {
+						board.pScore1.text = pScore1;
+					}
+				});
+				Tweener.addTween(board.pScore1, {
+					y:currY,
+					alpha:1,
+					_Blur_blurY: 0,
+					_Blur_quality:1,
+					delay:0.5,
+					time:0.5,
+					transition:"easeOut",
+					onComplete: function() {
+						animating = false;
+					}
+				});
+			}
+			
+			if (board.pScore2.text != pScore2 || board.pScore1.text == "") {
+				animating = true;
+				var currY:Number = board.pScore2.y;
+				Tweener.addTween(board.pScore2, {
+					y:currY-30,
+					alpha:0,
+					_Blur_blurY: 10,
+					_Blur_quality:1,
+					time:0.5,
+					transition:"easeIn",
+					onComplete: function() {
+						board.pScore2.text = pScore2;
+					}
+				});
+				Tweener.addTween(board.pScore2, {
+					y:currY,
+					alpha:1,
+					_Blur_blurY: 0,
+					_Blur_quality:1,
+					delay:0.5,
+					time:0.5,
+					transition:"easeOut",
+					onComplete: function() {
+						animating = false;
+					}
+				});
+			}
 			
 			if (board.game.text != game) {
 				animating = true;
@@ -208,80 +252,7 @@ package  {
 				});
 			}
 			
-			//call to update the pips
-			updatePips();
-			
 			doUpdate = false;
-		}
-		
-		//This stuff could probably be made easier but it works. 
-		//If someone has a better way to do it please feel free to submit a patch.
-		public function updatePips() {
-			if (roundsOld != rounds) {
-				animating = true;
-				var pipY = board.p1p1.y;
-				for (var i:Number = 1; i <= 10; i++) {
-					var p1p_mc:MovieClip;
-					p1p_mc = MovieClip(board.getChildByName("p1p" + i));
-					var p2p_mc:MovieClip;
-					p2p_mc = MovieClip(board.getChildByName("p2p" + i));
-					
-						if (pScore1 >= i) {
-							Tweener.addTween(p1p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete: function() {this.gotoAndStop(2);}});
-						} else {
-							Tweener.addTween(p1p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete: function() {this.gotoAndStop(1);}});
-						}
-						if (pScore2 >= i) {
-							Tweener.addTween(p2p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete: function() {this.gotoAndStop(2);}});
-						} else {
-							Tweener.addTween(p2p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete: function() {this.gotoAndStop(1);}});
-						}
-					
-					if (i <= rounds) {
-
-						Tweener.addTween(p1p_mc,{y: pipY, _Blur_blurY: 0,_Blur_quality:1,alpha:1,time:0.5,delay:.5,transition:"easeOut",onComplete:function() {animating = false}});
-						Tweener.addTween(p2p_mc,{y: pipY, _Blur_blurY: 0,_Blur_quality:1,alpha:1,time:0.5,delay:.5,transition:"easeOut",onComplete:function() {animating = false}});
-					}
-				}
-				
-			} else { //end number of rounds and update regularly
-				for (var i:Number = 1; i <= rounds; i++) {
-					
-					var p1p_mc:MovieClip;
-					p1p_mc = MovieClip(board.getChildByName("p1p" + i));
-					var p2p_mc:MovieClip;
-					p2p_mc = MovieClip(board.getChildByName("p2p" + i));
-					if (pScore1 >= i) {
-						
-						if (p1p_mc.currentFrame != 2) {
-							animating = true;
-							Tweener.addTween(p1p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete:function() {this.gotoAndStop(2);}});
-							Tweener.addTween(p1p_mc,{y: pipY, _Blur_blurY: 0,_Blur_quality:1,alpha:1,time:0.5,delay:.5,transition:"easeOut",onComplete:function() {animating = false}});
-						} 
-					} else {
-						if (p1p_mc.currentFrame == 2) {
-							animating = true;
-							Tweener.addTween(p1p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete:function() {this.gotoAndStop(1)}});
-							Tweener.addTween(p1p_mc,{y: pipY, _Blur_blurY: 0,_Blur_quality:1,alpha:1,time:0.5,delay:.5,transition:"easeOut",onComplete:function() {animating = false}});
-						}
-					}
-					
-					if (pScore2 >= i) {
-						if (p2p_mc.currentFrame != 2) {
-							animating = true;
-							Tweener.addTween(p2p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete:function() {this.gotoAndStop(2);}});
-							Tweener.addTween(p2p_mc,{y: pipY, _Blur_blurY: 0,_Blur_quality:1,alpha:1,time:0.5,delay:.5,transition:"easeOut",onComplete:function() {animating = false}});
-						} 
-					} else {
-						if (p2p_mc.currentFrame == 2) {
-							animating = true;
-							Tweener.addTween(p2p_mc,{y:pipY-20, _Blur_blurY: 10,_Blur_quality:1,alpha:0,time:0.5,transition:"easeIn",onComplete:function() {this.gotoAndStop(1);}});
-							Tweener.addTween(p2p_mc,{y: pipY, _Blur_blurY: 0,_Blur_quality:1,alpha:1,time:0.5,delay:.5,transition:"easeOut",onComplete:function() {animating = false}});
-						}
-					}
-					
-				}
-			}
 		}
 		
 

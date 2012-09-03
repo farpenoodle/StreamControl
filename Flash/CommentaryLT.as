@@ -57,11 +57,12 @@ package  {
 			// constructor code
 			
 			FilterShortcuts.init();
-			board.x = -816;
+			var boardX = board.x
+			board.x = boardX-850;
 			board.cTitle1.alpha=0;
 			board.cTitle2.alpha=0;
 			
-			Tweener.addTween(board, {x:-8, time:0.8, transition:"easeOut"});
+			Tweener.addTween(board, {x:boardX, time:0.8, transition:"easeOut"});
 			
 			//Set up poller. Loading from the xml file every 250ms seems like a decent choice. Feel free to make it higher or lower.
 			var poller:Timer = new Timer(250);
