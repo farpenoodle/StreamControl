@@ -77,7 +77,7 @@ void ConfigWindow::findXSplit() {
 }
 
 void ConfigWindow::CDATAToggle( int state ) {
-    if (state == 2) {
+    if (state == Qt::Checked) {
         configsettings["useCDATA"] = "1";
     } else {
         configsettings["useCDATA"] = "0";
