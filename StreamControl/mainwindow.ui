@@ -297,7 +297,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Misc 1</string>
+     <string>Misc 2</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_12">
