@@ -67,10 +67,11 @@ QMap<QString, QString> ConfigWindow::getConfig() {
 }
 
 void ConfigWindow::findXSplit() {
-    QString XSplit = QFileDialog::getOpenFileName(this, tr("Find XSplit"), configsettings["xsplitPath"], tr("XSplit.Core.exe"));
+
+    QString XSplit = QFileDialog::getExistingDirectory(this, tr("Find XSplit"), configsettings["xsplitPath"], QFileDialog::ShowDirsOnly);
     if (XSplit != "") {
-        XSplit.chop(15);
         XSplit.replace("/","\\");
+        XSplit = XSplit + "\\";
         ui->xsplitPathTB->setText(XSplit);
         configsettings["xsplitPath"] = XSplit;
     }
