@@ -58,12 +58,14 @@ package  {
 		
 		var animating:Boolean = false;
 		var doUpdate:Boolean = false;
+		var pipY:Number;
 		
 		public function ScoreBoard() {
 			// constructor code
 			
 			FilterShortcuts.init();
 			var boardY = board.y;
+			pipY = board.p1p1.y;
 			board.y=boardY-120;
 			board.pName1.text = "";
 			board.pName2.text = "";
@@ -220,7 +222,7 @@ package  {
 		public function updatePips() {
 			if (roundsOld != rounds) {
 				animating = true;
-				var pipY = board.p1p1.y;
+				
 				for (var i:Number = 1; i <= 10; i++) {
 					var p1p_mc:MovieClip;
 					p1p_mc = MovieClip(board.getChildByName("p1p" + i));
