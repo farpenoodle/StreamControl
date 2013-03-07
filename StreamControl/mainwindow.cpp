@@ -124,7 +124,6 @@ void MainWindow::loadSettings() {
 
         settings["xsplitPath"] = xsplitPath;
 
-        //gameComboBox->addItem("Persona 4: Arena");
 
     } else {
         QFile xsplitExe32("C:\\Program Files\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");

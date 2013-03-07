@@ -27,20 +27,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QFile>
 #include <QTextStream>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "mainwindow.h"
-#include <QtPlugin>
-#include <QPlastiqueStyle>
-
-//Q_IMPORT_PLUGIN(qcncodecs)
-//Q_IMPORT_PLUGIN(qjpcodecs)
-//Q_IMPORT_PLUGIN(qkrcodecs)
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QStyle *style = new QPlastiqueStyle;
-    QApplication::setStyle(style);
+    a.setStyle("fusion");
     MainWindow mainWindow;
     mainWindow.show();
     mainWindow.loadSettings();

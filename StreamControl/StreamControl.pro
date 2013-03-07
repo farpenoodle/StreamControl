@@ -4,18 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
+QT       += core gui xml widgets
 
 TARGET = StreamControl
 TEMPLATE = app
-
-
-CONFIG += static
-static { // Everything below takes effect with CONFIG += static
-    CONFIG += static
-    DEFINES += STATIC
-    message("Static build.")
-}
 
 SOURCES += main.cpp\
         mainwindow.cpp \
