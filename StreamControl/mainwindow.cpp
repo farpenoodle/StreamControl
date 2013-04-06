@@ -39,12 +39,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QAction>
 #include <QLabel>
 #include <QInputDialog>
+#include <QToolButton>
+#include <QMenu>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    QMenu *configMenu = new QMenu();
+    QAction *actionConfig = new QAction("Configuration", this);
+    configMenu->addAction(actionConfig);
+    QAction *actionAlwaysOnTop = new QAction("Always on top", this);
+    actionAlwaysOnTop->setCheckable(true);
+    configMenu->addAction(actionAlwaysOnTop);
+
+    QToolButton* configButton = new QToolButton();
+    configButton->setMenu(configMenu);
+    configButton->setPopupMode(QToolButton::InstantPopup);
+    QIcon configIcon;
+    configIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/gear.png"), QSize(), QIcon::Normal, QIcon::Off);
+    configButton->setIcon(configIcon);
 
     //code to add non buttons to toolbar
     gameComboBox = new QComboBox(this);
@@ -64,14 +80,15 @@ MainWindow::MainWindow(QWidget *parent) :
     delIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/minus.png"), QSize(), QIcon::Normal, QIcon::Off);
     actionDelGame->setIcon(delIcon);
 
+    ui->toolBar->addWidget(configButton);
     ui->toolBar->addWidget(spaceLabel);
     ui->toolBar->addWidget(gameLabel);
     ui->toolBar->addWidget(gameComboBox);
     ui->toolBar->addAction(actionAddGame);
     ui->toolBar->addAction(actionDelGame);
 
-
-    connect(ui->actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
+    connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
+    connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
     connect(ui->actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
     connect(ui->resetButton,SIGNAL( clicked() ),this,SLOT( resetScores() ));
     connect(ui->swapButton,SIGNAL( clicked() ),this,SLOT( swapNames() ));
@@ -466,4 +483,16 @@ void MainWindow::addGame() {
 void MainWindow::delGame() {
     gameComboBox->removeItem(gameComboBox->currentIndex());
     saveSettings();
+}
+
+void MainWindow::toggleAlwaysOnTop(bool checked) {
+    Qt::WindowFlags flags = this->windowFlags();
+    if (checked)
+    {
+        this->setWindowFlags(flags | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+        this->show();
+    } else {
+        this->setWindowFlags(flags ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
+        this->show();
+    }
 }

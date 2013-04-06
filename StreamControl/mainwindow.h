@@ -63,6 +63,7 @@ public slots:
     void openConfig();
     void addGame();
     void delGame();
+    void toggleAlwaysOnTop(bool);
 
 private:
     Ui::MainWindow *ui;

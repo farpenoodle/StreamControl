@@ -472,8 +472,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionSave"/>
-   <addaction name="actionConfig"/>
-   <addaction name="separator"/>
   </widget>
   <action name="actionSave">
    <property name="icon">
