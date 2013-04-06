@@ -73,6 +73,8 @@ private:
     QMap<QString, QWidget*> widgetList;
     QMap<QString, QString> widgetType;
     QMap<QString, QList<QString> > resetList;
+    QMap<QString, QList<QString> > swapSets;
+    QMap<QString, QList<QString> > swapList;
     bool useCDATA;
 };
 

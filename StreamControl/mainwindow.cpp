@@ -143,6 +143,24 @@ MainWindow::MainWindow(QWidget *parent) :
     widgetList["mText4"]->setGeometry(QRect(60, 340, 321, 20));
     widgetType["mText4"] = "lineEdit";
 
+    QList<QString> swapset;
+    swapset.insert(0,"swapset1");
+    swapset.insert(1,"swapset2");
+
+    swapSets.insert("swap1",swapset);
+
+    QList<QString> swapl1;
+    swapl1.insert(0,"pName1");
+    swapl1.insert(1,"pScore1");
+
+    swapList.insert("swapset1",swapl1);
+
+    QList<QString> swapl2;
+    swapl2.insert(0,"pName2");
+    swapl2.insert(1,"pScore2");
+
+    swapList.insert("swapset2",swapl2);
+
     ui->toolBar->addWidget(configButton);
     ui->toolBar->addWidget(spaceLabel);
     ui->toolBar->addWidget(gameLabel);
@@ -542,12 +560,36 @@ void MainWindow::resetScores()
 
 void MainWindow::swapNames()
 {
-    QString tempName = ((QLineEdit*)widgetList["pName1"])->text();
+
+    QString swSet1 = swapSets["swap1"][0];
+    QString swSet2 = swapSets["swap1"][1];
+
+    QList<QString> swList1 = swapList[swSet1];
+    QList<QString> swList2 = swapList[swSet2];
+
+
+    for (int i = 0; i < swList1.size(); ++i) {
+        QString currField = swList1[i];
+        QString newField = swList2[i];
+        QString tempData;
+
+        if (widgetType[currField] == "lineEdit"){
+            tempData = ((QLineEdit*)widgetList[currField])->text();
+            ((QLineEdit*)widgetList[currField])->setText(((QLineEdit*)widgetList[newField])->text());
+            ((QLineEdit*)widgetList[newField])->setText(tempData);
+        } else if (widgetType[currField] == "spinBox") {
+            tempData = ((QSpinBox*)widgetList[currField])->text();
+            ((QSpinBox*)widgetList[currField])->setValue(((QSpinBox*)widgetList[newField])->text().toInt());
+            ((QSpinBox*)widgetList[newField])->setValue(tempData.toInt());
+        }
+     }
+
+    /*QString tempName = ((QLineEdit*)widgetList["pName1"])->text();
     ((QLineEdit*)widgetList["pName1"])->setText(((QLineEdit*)widgetList["pName2"])->text());
     ((QLineEdit*)widgetList["pName2"])->setText(tempName);
     int tempscore = ((QSpinBox*)widgetList["pScore1"])->text().toInt();
     ((QSpinBox*)widgetList["pScore1"])->setValue(((QSpinBox*)widgetList["pScore2"])->text().toInt());
-    ((QSpinBox*)widgetList["pScore2"])->setValue(tempscore);
+    ((QSpinBox*)widgetList["pScore2"])->setValue(tempscore);*/
 }
 
 
