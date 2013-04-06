@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMainWindow>
 #include "configwindow.h"
 #include <QMap>
+#include <QList>
 #include <QComboBox>
 #include "config.h"
 
@@ -69,6 +70,9 @@ private:
     Ui::MainWindow *ui;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
+    QMap<QString, QWidget*> widgetList;
+    QMap<QString, QString> widgetType;
+    QMap<QString, QList<QString> > resetList;
     bool useCDATA;
 };
 

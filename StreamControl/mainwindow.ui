@@ -59,52 +59,6 @@
      <string>Player 2</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="pName1">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>40</y>
-      <width>171</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="pName2">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>70</y>
-      <width>171</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="pScore1">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>40</y>
-      <width>42</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>999</number>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="pScore2">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>70</y>
-      <width>42</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>999</number>
-    </property>
-   </widget>
    <widget class="Line" name="line">
     <property name="geometry">
      <rect>
@@ -181,32 +135,6 @@
     </property>
     <property name="text">
      <string>Title 1</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="cTitle1">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>130</y>
-      <width>321</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="cTitle2">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>160</y>
-      <width>321</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -311,71 +239,6 @@
     </property>
     <property name="text">
      <string>Title 1</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="mText1">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>220</y>
-      <width>321</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="mText2">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>250</y>
-      <width>321</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="mText3">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>310</y>
-      <width>321</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="mText4">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>340</y>
-      <width>321</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="rounds">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>40</y>
-      <width>42</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>999</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_13">
