@@ -87,6 +87,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction(actionAddGame);
     ui->toolBar->addAction(actionDelGame);
 
+    ui->toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
+
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
     connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
     connect(ui->actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
