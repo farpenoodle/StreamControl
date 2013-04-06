@@ -111,7 +111,6 @@ MainWindow::MainWindow(QWidget *parent) :
     widgetList["rounds"]->setGeometry(QRect(340, 40, 42, 22));
     ((QSpinBox*)widgetList["rounds"])->setMaximum(999);
     widgetType["rounds"] = "spinBox";
-    resetList["button"].append("rounds");
 
     widgetList["cTitle1"] = new QLineEdit(ui->centralWidget);
     widgetList["cTitle1"]->setObjectName(QStringLiteral("cTitle1"));
