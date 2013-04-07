@@ -33,48 +33,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMap>
 #include <QList>
 #include <QComboBox>
+#include <QSignalMapper>
 #include "config.h"
-
-namespace Ui {
-class MainWindow;
-}
+#include <QtXml/QDomDocument>
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
     
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow();
     ~MainWindow();
 
     void loadData();
     void loadSettings();
 
     QComboBox *gameComboBox;
-
-    //void saveData();
+    QWidget *centralWidget;
 
 public slots:
 
     void saveData();
     void saveSettings();
+    void loadLayout();
+    void parseLayout(QDomElement, QWidget*);
+    void addLabel(QDomElement, QWidget*);
+    void addButton(QDomElement, QWidget*);
+    void addLineEdit(QDomElement, QWidget*);
+    void addSpinBox(QDomElement, QWidget*);
+    QDomDocument getDefaultLayout();
 
-    void resetScores();
-    void swapNames();
+    void resetFields(QString);
+    void swapFields(QString);
     void openConfig();
     void addGame();
     void delGame();
     void toggleAlwaysOnTop(bool);
 
 private:
-    Ui::MainWindow *ui;
+    QSignalMapper *resetMapper;
+    QSignalMapper *swapMapper;
+    int layoutIterator;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
     QMap<QString, QWidget*> widgetList;
+    QMap<QString, QWidget*> visualList;
     QMap<QString, QString> widgetType;
     QMap<QString, QList<QString> > resetList;
     QMap<QString, QList<QString> > swapSets;
     QMap<QString, QList<QString> > swapList;
+    QMap<QString, QList<QString> > dataSets;
+    QMap<QString, QList<QString> > dataAssoc;
+    QMap<QString, QList<QString> > dataFollows;
+
     bool useCDATA;
 };
 

@@ -11,13 +11,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    configwindow.cpp
+    configwindow.cpp \
+    csv.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
-    config.h
+    config.h \
+    csv.h
 
-FORMS    += mainwindow.ui \
+FORMS    += \
     configwindow.ui
 
 RESOURCES += \

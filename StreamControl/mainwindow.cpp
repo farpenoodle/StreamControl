@@ -30,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QTextStream>
 #include <QDateTime>
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "configwindow.h"
 #include <QtDebug>
 #include <QShortcut>
@@ -43,12 +42,53 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMenu>
 #include <QSpinBox>
 #include <QLineEdit>
+#include <QSignalMapper>
+#include <QPainter>
+#include <QToolbar>
+#include <QPushButton>
+#include "csv.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow()
 {
-    ui->setupUi(this);
+
+    if (objectName().isEmpty())
+                setObjectName(QStringLiteral("MainWindow"));
+
+    //Set up signalmappers
+    resetMapper = new QSignalMapper (this) ;
+    swapMapper = new QSignalMapper (this) ;
+
+    //some defaults
+    resize(50, 50);
+    setFixedSize(50, 50);
+
+    QIcon icon;
+    icon.addFile(QStringLiteral(":/StreamControl/icons/r1logo2trans-crop.png"), QSize(), QIcon::Normal, QIcon::Off);
+    setWindowIcon(icon);
+    setAnimated(true);
+    setWindowFlags(windowFlags()^Qt::WindowMaximizeButtonHint);
+
+    resize(400, 410);
+    setFixedSize(400, 410);
+
+    centralWidget = new QWidget(this);
+    centralWidget->setObjectName(QStringLiteral("centralWidget"));
+    setCentralWidget(centralWidget);
+
+    QToolBar* toolBar = new QToolBar();
+    toolBar->setObjectName(QStringLiteral("toolBar"));
+    toolBar->setLayoutDirection(Qt::LeftToRight);
+    toolBar->setMovable(false);
+    toolBar->setFloatable(false);
+    addToolBar(Qt::TopToolBarArea, toolBar);
+
+    QAction* actionSave = new QAction(this);
+    actionSave->setObjectName(QStringLiteral("actionSave"));
+    QIcon icon1;
+    icon1.addFile(QStringLiteral(":/StreamControl/icons/fugue/bonus/icons-24/disk.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionSave->setIcon(icon1);
+    actionSave->setShortcuts(QKeySequence::Save);
+    connect(actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
 
     QMenu *configMenu = new QMenu();
     QAction *actionConfig = new QAction("Configuration", this);
@@ -57,12 +97,17 @@ MainWindow::MainWindow(QWidget *parent) :
     actionAlwaysOnTop->setCheckable(true);
     configMenu->addAction(actionAlwaysOnTop);
 
+
     QToolButton* configButton = new QToolButton();
     configButton->setMenu(configMenu);
     configButton->setPopupMode(QToolButton::InstantPopup);
     QIcon configIcon;
     configIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/gear.png"), QSize(), QIcon::Normal, QIcon::Off);
     configButton->setIcon(configIcon);
+    connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
+    connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
+
+
 
     //code to add non buttons to toolbar
     gameComboBox = new QComboBox(this);
@@ -82,108 +127,24 @@ MainWindow::MainWindow(QWidget *parent) :
     delIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/minus.png"), QSize(), QIcon::Normal, QIcon::Off);
     actionDelGame->setIcon(delIcon);
 
-    widgetList["pName1"] = new QLineEdit(ui->centralWidget);
-    widgetList["pName1"]->setObjectName(QStringLiteral("pName1"));
-    widgetList["pName1"]->setGeometry(QRect(60, 40, 171, 20));
-    widgetType["pName1"] = "lineEdit";
-
-    widgetList["pName2"] = new QLineEdit(ui->centralWidget);
-    widgetList["pName2"]->setObjectName(QStringLiteral("pName2"));
-    widgetList["pName2"]->setGeometry(QRect(60, 70, 171, 20));
-    widgetType["pName2"] = "lineEdit";
-
-    widgetList["pScore1"] = new QSpinBox(ui->centralWidget);
-    widgetList["pScore1"]->setObjectName(QStringLiteral("pScore1"));
-    widgetList["pScore1"]->setGeometry(QRect(250, 40, 42, 22));
-    ((QSpinBox*)widgetList["pScore1"])->setMaximum(999);
-    widgetType["pScore1"] = "spinBox";
-    resetList["button"].append("pScore1");
-
-    widgetList["pScore2"] = new QSpinBox(ui->centralWidget);
-    widgetList["pScore2"]->setObjectName(QStringLiteral("pScore2"));
-    widgetList["pScore2"]->setGeometry(QRect(250, 70, 42, 22));
-    ((QSpinBox*)widgetList["pScore2"])->setMaximum(999);
-    widgetType["pScore2"] = "spinBox";
-    resetList["button"].append("pScore2");
-
-    widgetList["rounds"] = new QSpinBox(ui->centralWidget);
-    widgetList["rounds"]->setObjectName(QStringLiteral("rounds"));
-    widgetList["rounds"]->setGeometry(QRect(340, 40, 42, 22));
-    ((QSpinBox*)widgetList["rounds"])->setMaximum(999);
-    widgetType["rounds"] = "spinBox";
-
-    widgetList["cTitle1"] = new QLineEdit(ui->centralWidget);
-    widgetList["cTitle1"]->setObjectName(QStringLiteral("cTitle1"));
-    widgetList["cTitle1"]->setGeometry(QRect(60, 130, 321, 20));
-    widgetType["cTitle1"] = "lineEdit";
-
-    widgetList["cTitle2"] = new QLineEdit(ui->centralWidget);
-    widgetList["cTitle2"]->setObjectName(QStringLiteral("cTitle2"));
-    widgetList["cTitle2"]->setGeometry(QRect(60, 160, 321, 20));
-    widgetType["cTitle2"] = "lineEdit";
-
-    widgetList["mText1"] = new QLineEdit(ui->centralWidget);
-    widgetList["mText1"]->setObjectName(QStringLiteral("mText1"));
-    widgetList["mText1"]->setGeometry(QRect(60, 220, 321, 20));
-    widgetType["mText1"] = "lineEdit";
-
-    widgetList["mText2"] = new QLineEdit(ui->centralWidget);
-    widgetList["mText2"]->setObjectName(QStringLiteral("mText2"));
-    widgetList["mText2"]->setGeometry(QRect(60, 250, 321, 20));
-    widgetType["mText2"] = "lineEdit";
-
-    widgetList["mText3"] = new QLineEdit(ui->centralWidget);
-    widgetList["mText3"]->setObjectName(QStringLiteral("mText3"));
-    widgetList["mText3"]->setGeometry(QRect(60, 310, 321, 20));
-    widgetType["mText3"] = "lineEdit";
-
-    widgetList["mText4"] = new QLineEdit(ui->centralWidget);
-    widgetList["mText4"]->setObjectName(QStringLiteral("mText4"));
-    widgetList["mText4"]->setGeometry(QRect(60, 340, 321, 20));
-    widgetType["mText4"] = "lineEdit";
-
-    QList<QString> swapset;
-    swapset.insert(0,"swapset1");
-    swapset.insert(1,"swapset2");
-
-    swapSets.insert("swap1",swapset);
-
-    QList<QString> swapl1;
-    swapl1.insert(0,"pName1");
-    swapl1.insert(1,"pScore1");
-
-    swapList.insert("swapset1",swapl1);
-
-    QList<QString> swapl2;
-    swapl2.insert(0,"pName2");
-    swapl2.insert(1,"pScore2");
-
-    swapList.insert("swapset2",swapl2);
-
-    ui->toolBar->addWidget(configButton);
-    ui->toolBar->addWidget(spaceLabel);
-    ui->toolBar->addWidget(gameLabel);
-    ui->toolBar->addWidget(gameComboBox);
-    ui->toolBar->addAction(actionAddGame);
-    ui->toolBar->addAction(actionDelGame);
-
-    ui->toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
-
-    connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
-    connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
-    connect(ui->actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
-    connect(ui->resetButton,SIGNAL( clicked() ),this,SLOT( resetScores() ));
-    connect(ui->swapButton,SIGNAL( clicked() ),this,SLOT( swapNames() ));
-    connect(actionAddGame,SIGNAL( triggered() ),this,SLOT( addGame() ));
-    connect(actionDelGame,SIGNAL( triggered() ),this,SLOT( delGame() ));
+    toolBar->addAction(actionSave);
+    toolBar->addWidget(configButton);
+    toolBar->addWidget(spaceLabel);
+    toolBar->addWidget(gameLabel);
+    toolBar->addWidget(gameComboBox);
+    toolBar->addAction(actionAddGame);
+    toolBar->addAction(actionDelGame);
+    toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
     cWindow = new ConfigWindow(this);
+
+    loadLayout();
 
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    //delete ui;
 }
 
 void MainWindow::loadSettings() {
@@ -259,6 +220,7 @@ void MainWindow::loadSettings() {
         saveSettings();
     }
 
+
 }
 
 void MainWindow::saveSettings() {
@@ -312,17 +274,6 @@ void MainWindow::loadData()
 
     QDomElement items = doc.namedItem("items").toElement();
 
-    /*/QDomElement pName1 = items.namedItem("pName1").toElement();
-    //QDomElement pName2 = items.namedItem("pName2").toElement();
-    //QDomElement pScore1 = items.namedItem("pScore1").toElement();
-    //QDomElement pScore2 = items.namedItem("pScore2").toElement();
-    QDomElement rounds = items.namedItem("rounds").toElement();
-    QDomElement cTitle1 = items.namedItem("cTitle1").toElement();
-    QDomElement cTitle2 = items.namedItem("cTitle2").toElement();
-    QDomElement mText1 = items.namedItem("mText1").toElement();
-    QDomElement mText2 = items.namedItem("mText2").toElement();
-    QDomElement mText3 = items.namedItem("mText3").toElement();
-    QDomElement mText4 = items.namedItem("mText4").toElement();*/
     QDomElement game = items.namedItem("game").toElement();
 
     QMapIterator<QString, QWidget *> i(widgetList);
@@ -337,19 +288,6 @@ void MainWindow::loadData()
             ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
         }
     }
-
-
-
-    /*/ui->pScore1->setValue(pScore1.text().toInt());
-    //ui->pName2->setText(pName2.text());
-    //ui->pScore2->setValue(pScore2.text().toInt());
-    //ui->rounds->setValue(rounds.text().toInt());
-    ui->cTitle1->setText(cTitle1.text());
-    ui->cTitle2->setText(cTitle2.text());
-    ui->mText1->setText(mText1.text());
-    ui->mText2->setText(mText2.text());
-    ui->mText3->setText(mText3.text());
-    ui->mText4->setText(mText4.text());*/
 
     int gameIndex = gameComboBox->findText(game.text());
     if (gameIndex != -1) {
@@ -406,126 +344,6 @@ void MainWindow::saveData()
         }
     }
 
-    /*if (useCDATA) {
-        QDomCDATASection pName1t = doc.createCDATASection(((QLineEdit*)widgetList["pName1"])->text());
-        pName1.appendChild(pName1t);
-    } else {
-        QDomText pName1t = doc.createTextNode(((QLineEdit*)widgetList["pName1"])->text());
-        pName1.appendChild(pName1t);
-    }
-
-    QDomElement pScore1 = doc.createElement("pScore1");
-    items.appendChild(pScore1);
-
-    QDomText pScore1t = doc.createTextNode(ui->pScore1->text());
-    pScore1.appendChild(pScore1t);
-
-
-
-    QDomElement pName2 = doc.createElement("pName2");
-    items.appendChild(pName2);
-
-    if (useCDATA) {
-        QDomCDATASection pName2t = doc.createCDATASection(ui->pName2->text());
-        pName2.appendChild(pName2t);
-    } else {
-        QDomText pName2t = doc.createTextNode(ui->pName2->text());
-        pName2.appendChild(pName2t);
-    }
-
-    QDomElement pScore2 = doc.createElement("pScore2");
-    items.appendChild(pScore2);
-
-    QDomText pScore2t = doc.createTextNode(ui->pScore2->text());
-    pScore2.appendChild(pScore2t);
-
-
-
-    QDomElement rounds = doc.createElement("rounds");
-    items.appendChild(rounds);
-
-    QDomText roundst = doc.createTextNode(ui->rounds->text());
-    rounds.appendChild(roundst);
-
-
-
-    QDomElement cTitle1 = doc.createElement("cTitle1");
-    items.appendChild(cTitle1);
-
-    if (useCDATA) {
-        QDomCDATASection cTitle1t = doc.createCDATASection(ui->cTitle1->text());
-        cTitle1.appendChild(cTitle1t);
-    } else {
-        QDomText cTitle1t = doc.createTextNode(ui->cTitle1->text());
-        cTitle1.appendChild(cTitle1t);
-    }
-
-
-
-    QDomElement cTitle2 = doc.createElement("cTitle2");
-    items.appendChild(cTitle2);
-
-    if (useCDATA) {
-        QDomCDATASection cTitle2t = doc.createCDATASection(ui->cTitle2->text());
-        cTitle2.appendChild(cTitle2t);
-    } else {
-        QDomText cTitle2t = doc.createTextNode(ui->cTitle2->text());
-        cTitle2.appendChild(cTitle2t);
-    }
-
-
-
-    QDomElement mText1 = doc.createElement("mText1");
-    items.appendChild(mText1);
-
-    if (useCDATA) {
-        QDomCDATASection mText1t = doc.createCDATASection(ui->mText1->text());
-        mText1.appendChild(mText1t);
-    } else {
-        QDomText mText1t = doc.createTextNode(ui->mText1->text());
-        mText1.appendChild(mText1t);
-    }
-
-
-    
-    QDomElement mText2 = doc.createElement("mText2");
-    items.appendChild(mText2);
-
-    if (useCDATA) {
-        QDomCDATASection mText2t = doc.createCDATASection(ui->mText2->text());
-        mText2.appendChild(mText2t);
-    } else {
-        QDomText mText2t = doc.createTextNode(ui->mText2->text());
-        mText2.appendChild(mText2t);
-    }
-
-
-
-    QDomElement mText3 = doc.createElement("mText3");
-    items.appendChild(mText3);
-
-    if (useCDATA) {
-        QDomCDATASection mText3t = doc.createCDATASection(ui->mText3->text());
-        mText3.appendChild(mText3t);
-    } else {
-        QDomText mText3t = doc.createTextNode(ui->mText3->text());
-        mText3.appendChild(mText3t);
-    }
-
-
-
-    QDomElement mText4 = doc.createElement("mText4");
-    items.appendChild(mText4);
-
-    if (useCDATA) {
-        QDomCDATASection mText4t = doc.createCDATASection(ui->mText4->text());
-        mText4.appendChild(mText4t);
-    } else {
-        QDomText mText4t = doc.createTextNode(ui->mText4->text());
-        mText4.appendChild(mText4t);
-    }
-    */
-
 
     QDomElement gameE = doc.createElement("game");
     items.appendChild(gameE);
@@ -546,26 +364,28 @@ void MainWindow::saveData()
 
 }
 
-void MainWindow::resetScores()
+void MainWindow::resetFields(QString widget)
 {
-    QListIterator<QString> i(resetList["button"]);
+
+    QListIterator<QString> i(resetList[widget]);
     while (i.hasNext()) {
         QString key = i.next();
         if (widgetType[key] == "spinBox") {
             ((QSpinBox*)widgetList[key])->setValue(0);
+        } else if (widgetType[key] == "lineEdit") {
+            ((QLineEdit*)widgetList[key])->setText("");
         }
     }
 }
 
-void MainWindow::swapNames()
+void MainWindow::swapFields(QString widget)
 {
+    QString swSet1 = swapSets[widget][0];
+    QString swSet2 = swapSets[widget][1];
 
-    QString swSet1 = swapSets["swap1"][0];
-    QString swSet2 = swapSets["swap1"][1];
 
     QList<QString> swList1 = swapList[swSet1];
     QList<QString> swList2 = swapList[swSet2];
-
 
     for (int i = 0; i < swList1.size(); ++i) {
         QString currField = swList1[i];
@@ -583,12 +403,6 @@ void MainWindow::swapNames()
         }
      }
 
-    /*QString tempName = ((QLineEdit*)widgetList["pName1"])->text();
-    ((QLineEdit*)widgetList["pName1"])->setText(((QLineEdit*)widgetList["pName2"])->text());
-    ((QLineEdit*)widgetList["pName2"])->setText(tempName);
-    int tempscore = ((QSpinBox*)widgetList["pScore1"])->text().toInt();
-    ((QSpinBox*)widgetList["pScore1"])->setValue(((QSpinBox*)widgetList["pScore2"])->text().toInt());
-    ((QSpinBox*)widgetList["pScore2"])->setValue(tempscore);*/
 }
 
 
@@ -641,4 +455,151 @@ void MainWindow::toggleAlwaysOnTop(bool checked) {
         this->setWindowFlags(flags ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
         this->show();
     }
+}
+
+void MainWindow::loadLayout() {
+    layoutIterator = 0;
+    /*QFile file("layout.xml");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    QDomDocument doc;
+    doc.setContent(&file);
+
+    file.close();*/
+
+    QDomDocument doc = getDefaultLayout();
+
+    QDomElement layout = doc.namedItem("layout").toElement();
+
+    qDebug() << layout.attribute("width") << "x" << layout.attribute("height");
+    parseLayout(layout, centralWidget);
+
+}
+
+void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
+    QDomNode child = element.firstChild();
+    while (!child.isNull()) {
+        QString tagName = child.toElement().tagName();
+        if(tagName == "label") {
+            addLabel(child.toElement(), parent);
+        } else if (tagName == "button") {
+            addButton(child.toElement(), parent);
+        } else if (tagName == "lineEdit") {
+            addLineEdit(child.toElement(), parent);
+        } else if (tagName == "spinBox") {
+            addSpinBox(child.toElement(), parent);
+        }
+        qDebug()<< tagName;
+        child = child.nextSibling();
+    }
+}
+
+void MainWindow::addLabel(QDomElement element, QWidget *parent) {
+    //qDebug() << element.tagName() << element.text();
+
+    QString newLabel = "label"+layoutIterator;
+
+    visualList[newLabel] = new QLabel(parent);
+    visualList[newLabel]->setObjectName(newLabel);
+    visualList[newLabel]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                          element.attribute("y").toInt(),
+                                                          element.attribute("width").toInt(),
+                                                          element.attribute("height").toInt()));
+    ((QLabel*)visualList[newLabel])->setText(element.text());
+
+    layoutIterator++;
+}
+
+void MainWindow::addButton(QDomElement element, QWidget *parent) {
+    if (element.attribute("type") == "reset") {
+
+        QString newButton = element.attribute("id");
+
+        QList<QString> resetL = CSV::parseFromString(element.attribute("reset"))[0];
+
+        resetList.insert(newButton,resetL);
+
+        visualList[newButton] = new QPushButton(parent);
+        visualList[newButton]->setObjectName(newButton);
+        visualList[newButton]->setGeometry(QRect(element.attribute("x").toInt(),
+                                           element.attribute("y").toInt(),
+                                           element.attribute("width").toInt(),
+                                           element.attribute("height").toInt()));
+        ((QPushButton*)visualList[newButton])->setText(element.text());
+
+        connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), resetMapper, SLOT(map()));
+        resetMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
+        connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
+
+
+    } else if (element.attribute("type") == "swap") {
+
+        QString newButton = element.attribute("id");
+
+        QList<QString> swapl1 = CSV::parseFromString(element.attribute("swapSet1"))[0];
+        QList<QString> swapl2 = CSV::parseFromString(element.attribute("swapSet2"))[0];
+
+        QList<QString> swapset;
+        swapset.insert(0,newButton + "1");
+        swapset.insert(1,newButton + "2");
+
+        swapSets.insert(newButton,swapset);
+
+        swapList.insert(newButton + "1",swapl1);
+
+        swapList.insert(newButton + "2",swapl2);
+
+        visualList[newButton] = new QPushButton(parent);
+        visualList[newButton]->setObjectName(newButton);
+        visualList[newButton]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                 element.attribute("y").toInt(),
+                                                 element.attribute("width").toInt(),
+                                                 element.attribute("height").toInt()));
+        ((QPushButton*)visualList[newButton])->setText(element.text());
+
+        connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), swapMapper, SLOT(map()));
+        swapMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
+        connect (swapMapper, SIGNAL(mapped(QString)), this, SLOT(swapFields(QString))) ;
+
+
+
+    }
+}
+
+void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
+
+    QString newLineEdit = element.attribute("id");
+
+    widgetList[newLineEdit] = new QLineEdit(parent);
+    widgetList[newLineEdit]->setObjectName(newLineEdit);
+    widgetList[newLineEdit]->setGeometry(QRect(element.attribute("x").toInt(),
+                                             element.attribute("y").toInt(),
+                                             element.attribute("width").toInt(),
+                                             element.attribute("height").toInt()));
+    widgetType[newLineEdit] = "lineEdit";
+
+}
+
+void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
+
+    QString newSpinBox = element.attribute("id");
+
+    widgetList[newSpinBox] = new QSpinBox(parent);
+    widgetList[newSpinBox]->setObjectName(newSpinBox);
+    widgetList[newSpinBox]->setGeometry(QRect(element.attribute("x").toInt(),
+                                              element.attribute("y").toInt(),
+                                              element.attribute("width").toInt(),
+                                              element.attribute("height").toInt()));
+    if(!element.attribute("maximum").isEmpty()) {
+        ((QSpinBox*)widgetList[newSpinBox])->setMaximum(element.attribute("maximum").toInt());
+    }
+    widgetType[newSpinBox] = "spinBox";
+
+}
+
+QDomDocument MainWindow::getDefaultLayout() {
+    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"410\">\r\n <label x=\"10\" y=\"10\" width=\"71\" height=\"16\">Match Info</label>\r\n <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">Player 1</label>\r\n <label x=\"10\" y=\"70\" width=\"46\" height=\"13\">Player 2</label>\r\n <label x=\"300\" y=\"40\" width=\"46\" height=\"13\">Rounds</label>\r\n <label x=\"10\" y=\"100\" width=\"71\" height=\"16\">Commentary</label>\r\n <label x=\"10\" y=\"130\" width=\"46\" height=\"13\">Title 1</label>\r\n <label x=\"10\" y=\"160\" width=\"46\" height=\"13\">Title 2</label>\r\n <label x=\"10\" y=\"190\" width=\"71\" height=\"16\">Misc 1</label>\r\n <label x=\"10\" y=\"220\" width=\"46\" height=\"13\">mText 1</label>\r\n <label x=\"10\" y=\"250\" width=\"46\" height=\"13\">mText 2</label>\r\n <label x=\"10\" y=\"280\" width=\"71\" height=\"16\">Misc 2</label>\r\n <label x=\"10\" y=\"310\" width=\"46\" height=\"13\">mText 3</label>\r\n <label x=\"10\" y=\"340\" width=\"46\" height=\"13\">mText 4</label>\r\n <button type=\"reset\" x=\"300\" y=\"70\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n <button type=\"swap\" x=\"340\" y=\"70\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n <lineEdit id=\"pName1\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n <lineEdit id=\"pName2\" x=\"60\" y=\"70\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n <spinBox id=\"pScore1\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n <spinBox id=\"pScore2\" x=\"250\" y=\"70\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n <spinBox id=\"rounds\" x=\"340\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n <lineEdit id=\"cTitle1\" x=\"60\" y=\"130\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"cTitle2\" x=\"60\" y=\"160\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText1\" x=\"60\" y=\"220\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText2\" x=\"60\" y=\"250\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText3\" x=\"60\" y=\"310\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText4\" x=\"60\" y=\"340\" width=\"321\" height=\"20\" />\r\n</layout>\r\n";
+    QDomDocument doc;
+    doc.setContent(xmlcontent);
+    return doc;
 }
