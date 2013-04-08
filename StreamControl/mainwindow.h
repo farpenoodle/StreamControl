@@ -57,10 +57,12 @@ public slots:
     void saveSettings();
     void loadLayout();
     void parseLayout(QDomElement, QWidget*);
+    void parseTabLayout(QDomElement, QWidget*);
     void addLabel(QDomElement, QWidget*);
     void addButton(QDomElement, QWidget*);
     void addLineEdit(QDomElement, QWidget*);
     void addSpinBox(QDomElement, QWidget*);
+    QString addTabWidget(QDomElement, QWidget*);
     QDomDocument getDefaultLayout();
 
     void resetFields(QString);

@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
+#include <QtDebug>
 
 ConfigWindow::ConfigWindow(QWidget *parent) :
     QDialog(parent),
@@ -37,10 +38,12 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->browseButton,SIGNAL( clicked() ),this,SLOT( findXSplit() ));
+    connect(ui->xsplitButton,SIGNAL( clicked() ),this,SLOT( findXSplit() ));
+    connect(ui->layoutButton,SIGNAL( clicked() ),this,SLOT( findLayout() ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
 
     ui->xsplitPathTB->setDisabled(true);
+    ui->layoutPathTB->setDisabled(true);
     ui->streamControlLabel->setText(QString("StreamControl ") + QString(SC_VERSION) );
     ui->qtLabel->setText(QString("This program uses Qt version ")+ QString(qVersion() + QString(".")) );
 }
@@ -54,6 +57,7 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
 
     configsettings = settings;
     ui->xsplitPathTB->setText(configsettings["xsplitPath"]);
+    ui->layoutPathTB->setText(configsettings["layoutPath"]);
     if (configsettings["useCDATA"] == "1") {
         ui->CDATACheckBox->setCheckState(Qt::Checked);
     } else {
@@ -74,6 +78,19 @@ void ConfigWindow::findXSplit() {
         XSplit = XSplit + "\\";
         ui->xsplitPathTB->setText(XSplit);
         configsettings["xsplitPath"] = XSplit;
+    }
+}
+
+void ConfigWindow::findLayout() {
+
+    QString layoutPath = QFileDialog::getOpenFileName(this, tr("Find XSplit"), configsettings["layoutPath"], tr("*.xml"));
+    if (layoutPath != "") {
+        layoutPath.replace("/","\\");
+        ui->layoutPathTB->setText(layoutPath);
+        configsettings["layoutPath"] = layoutPath;
+    } else {
+        ui->layoutPathTB->setText(layoutPath);
+        configsettings["layoutPath"] = layoutPath;
     }
 }
 

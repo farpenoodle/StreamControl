@@ -68,14 +68,9 @@ MainWindow::MainWindow()
     setAnimated(true);
     setWindowFlags(windowFlags()^Qt::WindowMaximizeButtonHint);
 
-    resize(400, 410);
-    setFixedSize(400, 410);
+    cWindow = new ConfigWindow(this);
 
-    centralWidget = new QWidget(this);
-    centralWidget->setObjectName(QStringLiteral("centralWidget"));
-    setCentralWidget(centralWidget);
-
-    QToolBar* toolBar = new QToolBar();
+    QToolBar* toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
     toolBar->setLayoutDirection(Qt::LeftToRight);
     toolBar->setMovable(false);
@@ -120,12 +115,15 @@ MainWindow::MainWindow()
     QIcon addIcon;
     addIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/plus.png"), QSize(), QIcon::Normal, QIcon::Off);
     actionAddGame->setIcon(addIcon);
+    connect(actionAddGame,SIGNAL( triggered() ),this,SLOT( addGame() ));
 
     QAction* actionDelGame = new QAction(this);
     actionDelGame->setObjectName(QString("actionDelGame"));
     QIcon delIcon;
     delIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/minus.png"), QSize(), QIcon::Normal, QIcon::Off);
     actionDelGame->setIcon(delIcon);
+    connect(actionDelGame,SIGNAL( triggered() ),this,SLOT( delGame() ));
+
 
     toolBar->addAction(actionSave);
     toolBar->addWidget(configButton);
@@ -136,9 +134,9 @@ MainWindow::MainWindow()
     toolBar->addAction(actionDelGame);
     toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    cWindow = new ConfigWindow(this);
-
+    loadSettings();
     loadLayout();
+    loadData();
 
 }
 
@@ -151,6 +149,7 @@ void MainWindow::loadSettings() {
 
     QFile file("settings.xml");
     QString xsplitPath;
+    QString layoutPath;
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 
         QDomDocument doc;
@@ -161,8 +160,10 @@ void MainWindow::loadSettings() {
         QDomElement settingsXML = doc.namedItem("settings").toElement();
 
         QDomElement xsplitPathE = settingsXML.namedItem("xsplitPath").toElement();
+        QDomElement layoutPathE = settingsXML.namedItem("layoutPath").toElement();
 
         xsplitPath = xsplitPathE.text();
+        layoutPath = layoutPathE.text();
 
         QDomElement useCDATAE = settingsXML.namedItem("useCDATA").toElement();
 
@@ -183,6 +184,7 @@ void MainWindow::loadSettings() {
         }
 
         settings["xsplitPath"] = xsplitPath;
+        settings["layoutPath"] = layoutPath;
 
 
     } else {
@@ -237,6 +239,12 @@ void MainWindow::saveSettings() {
 
     QDomCDATASection xsplitPathT = doc.createCDATASection(settings["xsplitPath"]);
     xsplitPathE.appendChild(xsplitPathT);
+
+    QDomElement layoutPathE = doc.createElement("layoutPath");
+    settingsXML.appendChild(layoutPathE);
+
+    QDomCDATASection layoutPathT = doc.createCDATASection(settings["layoutPath"]);
+    layoutPathE.appendChild(layoutPathT);
 
     QDomElement useCDATAE = doc.createElement("useCDATA");
     settingsXML.appendChild(useCDATAE);
@@ -325,8 +333,6 @@ void MainWindow::saveData()
     while (i.hasNext()) {
         i.next();
         QString wType = widgetType[i.key()];
-        //qDebug() << i.key() << ": " << i.value() << ": " << wType;
-
         QDomElement newItem = doc.createElement(i.key());
         items.appendChild(newItem);
 
@@ -414,6 +420,7 @@ void MainWindow::openConfig() {
         QMap<QString, QString> configSettings = cWindow->getConfig();
 
         settings["xsplitPath"] = configSettings["xsplitPath"];
+        settings["layoutPath"] = configSettings["layoutPath"];
         settings["useCDATA"] = configSettings["useCDATA"];
 
         if (settings["useCDATA"] == "1") {
@@ -423,6 +430,8 @@ void MainWindow::openConfig() {
         }
 
         saveSettings();
+
+        loadLayout();
 
         loadData();
     }
@@ -458,23 +467,57 @@ void MainWindow::toggleAlwaysOnTop(bool checked) {
 }
 
 void MainWindow::loadLayout() {
+
     layoutIterator = 0;
-    /*QFile file("layout.xml");
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
 
     QDomDocument doc;
-    doc.setContent(&file);
 
-    file.close();*/
+    QFile file(settings["layoutPath"]);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 
-    QDomDocument doc = getDefaultLayout();
+        doc.setContent(&file);
+
+        file.close();
+    } else {
+
+        doc = getDefaultLayout();
+
+    }
 
     QDomElement layout = doc.namedItem("layout").toElement();
 
-    qDebug() << layout.attribute("width") << "x" << layout.attribute("height");
-    parseLayout(layout, centralWidget);
+    //Set up the main window
+    int layoutWidth = layout.attribute("width").toInt();
+    int layoutHeight = layout.attribute("height").toInt();
+
+    if (layoutWidth < 50) {
+        layoutWidth = 50;
+    }
+    if (layoutHeight < 50) {
+        layoutHeight = 50;
+    }
+
+
+    resize(layoutWidth, layoutHeight);
+    setFixedSize(layoutWidth, layoutHeight);
+
+    if(layout.attribute("tabbed") == "1") {
+        centralWidget = new QTabWidget(this);
+    } else {
+        centralWidget = new QWidget(this);
+    }
+
+    setCentralWidget(centralWidget);
+
+
+    if(layout.attribute("tabbed") == "1"){
+        parseTabLayout(layout,centralWidget);
+    } else {
+        parseLayout(layout, centralWidget);
+    }
 
 }
+
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
     QDomNode child = element.firstChild();
@@ -488,17 +531,37 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addLineEdit(child.toElement(), parent);
         } else if (tagName == "spinBox") {
             addSpinBox(child.toElement(), parent);
+        } else if (tagName == "tabSet") {
+            QString newTabSet = addTabWidget(child.toElement(), parent);
+            parseTabLayout(child.toElement(), visualList[newTabSet]);
         }
-        qDebug()<< tagName;
+
+        child = child.nextSibling();
+    }
+}
+
+void MainWindow::parseTabLayout(QDomElement element, QWidget *parent) {
+    QDomNode child = element.firstChild();
+    while (!child.isNull()) {
+        QString tagName = child.toElement().tagName();
+        if(tagName == "tab") {
+            QString newTabName = child.toElement().attribute("name");
+            QString newTab = "tab"+QString::number(layoutIterator);
+            visualList[newTab] =  new QWidget(parent);
+            parseLayout(child.toElement(),visualList[newTab]);
+
+            ((QTabWidget*)parent)->addTab(visualList[newTab],newTabName);
+
+            layoutIterator++;
+        }
+
         child = child.nextSibling();
     }
 }
 
 void MainWindow::addLabel(QDomElement element, QWidget *parent) {
-    //qDebug() << element.tagName() << element.text();
 
-    QString newLabel = "label"+layoutIterator;
-
+    QString newLabel = "label"+QString::number(layoutIterator);
     visualList[newLabel] = new QLabel(parent);
     visualList[newLabel]->setObjectName(newLabel);
     visualList[newLabel]->setGeometry(QRect(element.attribute("x").toInt(),
@@ -597,8 +660,22 @@ void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
 
 }
 
+QString MainWindow::addTabWidget(QDomElement element, QWidget *parent) {
+
+    QString tabSet = "tabSet"+QString::number(layoutIterator);
+    visualList[tabSet] = new QTabWidget(parent);
+    visualList[tabSet]->setObjectName(tabSet);
+    visualList[tabSet]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                          element.attribute("y").toInt(),
+                                                          element.attribute("width").toInt(),
+                                                          element.attribute("height").toInt()));
+
+    layoutIterator++;
+    return tabSet;
+}
+
 QDomDocument MainWindow::getDefaultLayout() {
-    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"410\">\r\n <label x=\"10\" y=\"10\" width=\"71\" height=\"16\">Match Info</label>\r\n <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">Player 1</label>\r\n <label x=\"10\" y=\"70\" width=\"46\" height=\"13\">Player 2</label>\r\n <label x=\"300\" y=\"40\" width=\"46\" height=\"13\">Rounds</label>\r\n <label x=\"10\" y=\"100\" width=\"71\" height=\"16\">Commentary</label>\r\n <label x=\"10\" y=\"130\" width=\"46\" height=\"13\">Title 1</label>\r\n <label x=\"10\" y=\"160\" width=\"46\" height=\"13\">Title 2</label>\r\n <label x=\"10\" y=\"190\" width=\"71\" height=\"16\">Misc 1</label>\r\n <label x=\"10\" y=\"220\" width=\"46\" height=\"13\">mText 1</label>\r\n <label x=\"10\" y=\"250\" width=\"46\" height=\"13\">mText 2</label>\r\n <label x=\"10\" y=\"280\" width=\"71\" height=\"16\">Misc 2</label>\r\n <label x=\"10\" y=\"310\" width=\"46\" height=\"13\">mText 3</label>\r\n <label x=\"10\" y=\"340\" width=\"46\" height=\"13\">mText 4</label>\r\n <button type=\"reset\" x=\"300\" y=\"70\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n <button type=\"swap\" x=\"340\" y=\"70\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n <lineEdit id=\"pName1\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n <lineEdit id=\"pName2\" x=\"60\" y=\"70\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n <spinBox id=\"pScore1\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n <spinBox id=\"pScore2\" x=\"250\" y=\"70\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n <spinBox id=\"rounds\" x=\"340\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n <lineEdit id=\"cTitle1\" x=\"60\" y=\"130\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"cTitle2\" x=\"60\" y=\"160\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText1\" x=\"60\" y=\"220\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText2\" x=\"60\" y=\"250\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText3\" x=\"60\" y=\"310\" width=\"321\" height=\"20\" />\r\n <lineEdit id=\"mText4\" x=\"60\" y=\"340\" width=\"321\" height=\"20\" />\r\n</layout>\r\n";
+    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"140\" tabbed=\"1\">\r\n <tab name=\"Match Info\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">Player 1</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">Player 2</label>\r\n  <label x=\"300\" y=\"10\" width=\"46\" height=\"13\">Rounds</label>\r\n  <lineEdit id=\"pName1\" x=\"60\" y=\"10\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <lineEdit id=\"pName2\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <spinBox id=\"pScore1\" x=\"250\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"pScore2\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"rounds\" x=\"340\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <button type=\"reset\" x=\"300\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n  <button type=\"swap\" x=\"340\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n </tab>\r\n <tab name=\"Commentary\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">Title 1</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">Title 2</label>\r\n  <lineEdit id=\"cTitle1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"cTitle2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 1\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">mText 1</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">mText 2</label>\r\n  <lineEdit id=\"mText1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 2\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">mText 3</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">mText 4</label>\r\n  <lineEdit id=\"mText3\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText4\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n</layout>\r\n";
     QDomDocument doc;
     doc.setContent(xmlcontent);
     return doc;

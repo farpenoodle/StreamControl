@@ -35,8 +35,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setStyle("fusion");
     MainWindow mainWindow;
-    mainWindow.loadSettings();
-    mainWindow.loadData();
+    //mainWindow.loadSettings();
+    //mainWindow.loadLayout();
+    //mainWindow.loadData();
     mainWindow.show();
     return a.exec();
 }

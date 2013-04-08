@@ -49,6 +49,7 @@ public:
 
 public slots:
     void findXSplit();
+    void findLayout();
     void CDATAToggle( int state );
     
 private:

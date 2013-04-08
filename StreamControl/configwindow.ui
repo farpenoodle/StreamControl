@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>350</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>350</height>
+    <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>400</width>
-    <height>340</height>
+    <height>400</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>100</y>
+     <y>150</y>
      <width>341</width>
      <height>30</height>
     </rect>
@@ -71,7 +71,7 @@
     <string>XSplit Path. (Usually C:\Program Files (x86)\SplitMediaLabs\XSplit\)</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="browseButton">
+  <widget class="QPushButton" name="xsplitButton">
    <property name="geometry">
     <rect>
      <x>310</x>
@@ -88,7 +88,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>130</y>
+     <y>190</y>
      <width>381</width>
      <height>200</height>
     </rect>
@@ -267,7 +267,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>60</y>
+     <y>110</y>
      <width>351</width>
      <height>31</height>
     </rect>
@@ -275,6 +275,45 @@ p, li { white-space: pre-wrap; }
    <property name="text">
     <string>Use CDATA (Useful if you want to use html tags in your SWFs.)
 Do not check if you want to use with XSplit title plugin.</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>50</y>
+     <width>351</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Layout Path</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="layoutPathTB">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>80</y>
+     <width>281</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="layoutButton">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>80</y>
+     <width>71</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Browse</string>
    </property>
   </widget>
  </widget>

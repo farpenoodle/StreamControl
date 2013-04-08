@@ -1,0 +1,33 @@
+<!DOCTYPE StreamControlLayout>
+<layout width="400" height="140" tabbed="1">
+ <tab name="Match Info">
+  <label x="10" y="10" width="46" height="13">Player 1</label>
+  <label x="10" y="40" width="46" height="13">Player 2</label>
+  <label x="300" y="10" width="46" height="13">Rounds</label>
+  <lineEdit id="pName1" x="60" y="10" width="171" height="20" dataset="players.txt" />
+  <lineEdit id="pName2" x="60" y="40" width="171" height="20" dataset="players.txt" />
+  <spinBox id="pScore1" x="250" y="10" width="42" height="22" maximum="999" />
+  <spinBox id="pScore2" x="250" y="40" width="42" height="22" maximum="999" />
+  <spinBox id="rounds" x="340" y="10" width="42" height="22" maximum="999" />
+  <button type="reset" x="300" y="40" width="41" height="23" tooltip="Reset the Scores" id="reset" reset="pScore1,pScore2">Reset</button>
+  <button type="swap" x="340" y="40" width="41" height="23" tooltip="Swap the Scores" id="swap1" swapSet1="pName1,pScore1" swapSet2="pName2,pScore2">Swap</button>
+ </tab>
+ <tab name="Commentary">
+  <label x="10" y="10" width="46" height="13">Title 1</label>
+  <label x="10" y="40" width="46" height="13">Title 2</label>
+  <lineEdit id="cTitle1" x="60" y="10" width="321" height="20" />
+  <lineEdit id="cTitle2" x="60" y="40" width="321" height="20" />
+ </tab>
+ <tab name="Misc 1">
+  <label x="10" y="10" width="46" height="13">mText 1</label>
+  <label x="10" y="40" width="46" height="13">mText 2</label>
+  <lineEdit id="mText1" x="60" y="10" width="321" height="20" />
+  <lineEdit id="mText2" x="60" y="40" width="321" height="20" />
+ </tab>
+ <tab name="Misc 2">
+  <label x="10" y="10" width="46" height="13">mText 3</label>
+  <label x="10" y="40" width="46" height="13">mText 4</label>
+  <lineEdit id="mText3" x="60" y="10" width="321" height="20" />
+  <lineEdit id="mText4" x="60" y="40" width="321" height="20" />
+ </tab>
+</layout>
