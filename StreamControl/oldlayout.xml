@@ -1,18 +1,22 @@
 <!DOCTYPE StreamControlLayout>
 <layout width="400" height="410">
  <label x="10" y="10" width="71" height="16">Match Info</label>
- <label x="10" y="40" width="46" height="13">Player 1</label>
- <label x="10" y="70" width="46" height="13">Player 2</label>
- <label x="300" y="40" width="46" height="13">Rounds</label>
+ <line x="10" y="31" width="370" height="3" />
+ <label x="10" y="44" width="46" height="13">Player 1</label>
+ <label x="10" y="74" width="46" height="13">Player 2</label>
+ <label x="300" y="44" width="46" height="13">Rounds</label>
  <label x="10" y="100" width="71" height="16">Commentary</label>
- <label x="10" y="130" width="46" height="13">Title 1</label>
- <label x="10" y="160" width="46" height="13">Title 2</label>
+ <line x="10" y="121" width="370" height="3" />
+ <label x="10" y="134" width="46" height="13">Title 1</label>
+ <label x="10" y="164" width="46" height="13">Title 2</label>
  <label x="10" y="190" width="71" height="16">Misc 1</label>
- <label x="10" y="220" width="46" height="13">mText 1</label>
- <label x="10" y="250" width="46" height="13">mText 2</label>
+ <line x="10" y="211" width="370" height="3" />
+ <label x="10" y="224" width="46" height="13">mText 1</label>
+ <label x="10" y="254" width="46" height="13">mText 2</label>
  <label x="10" y="280" width="71" height="16">Misc 2</label>
- <label x="10" y="310" width="46" height="13">mText 3</label>
- <label x="10" y="340" width="46" height="13">mText 4</label>
+ <line x="10" y="301" width="370" height="3" />
+ <label x="10" y="314" width="46" height="13">mText 3</label>
+ <label x="10" y="344" width="46" height="13">mText 4</label>
  <button type="reset" x="300" y="70" width="41" height="23" tooltip="Reset the Scores" id="reset" reset="pScore1,pScore2">Reset</button>
  <button type="swap" x="340" y="70" width="41" height="23" tooltip="Swap the Scores" id="swap1" swapSet1="pName1,pScore1" swapSet2="pName2,pScore2">Swap</button>
  <lineEdit id="pName1" x="60" y="40" width="171" height="20" dataset="players.txt" />

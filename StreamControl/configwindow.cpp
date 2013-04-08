@@ -83,7 +83,7 @@ void ConfigWindow::findXSplit() {
 
 void ConfigWindow::findLayout() {
 
-    QString layoutPath = QFileDialog::getOpenFileName(this, tr("Find XSplit"), configsettings["layoutPath"], tr("*.xml"));
+    QString layoutPath = QFileDialog::getOpenFileName(this, tr("Find XSplit"), QFileInfo(configsettings["layoutPath"]).path(), tr("XML Files (*.xml)"));
     if (layoutPath != "") {
         layoutPath.replace("/","\\");
         ui->layoutPathTB->setText(layoutPath);

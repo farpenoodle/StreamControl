@@ -455,20 +455,21 @@ void MainWindow::delGame() {
 }
 
 void MainWindow::toggleAlwaysOnTop(bool checked) {
-    Qt::WindowFlags flags = this->windowFlags();
     if (checked)
     {
-        this->setWindowFlags(flags | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
-        this->show();
+        setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     } else {
-        this->setWindowFlags(flags ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
-        this->show();
+        setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
     }
+    qDebug() << windowFlags();
+    show();
 }
 
 void MainWindow::loadLayout() {
 
     layoutIterator = 0;
+
+    clearMaps();
 
     QDomDocument doc;
 
@@ -525,6 +526,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
         QString tagName = child.toElement().tagName();
         if(tagName == "label") {
             addLabel(child.toElement(), parent);
+        } else if (tagName == "line") {
+            addLine(child.toElement(), parent);
         } else if (tagName == "button") {
             addButton(child.toElement(), parent);
         } else if (tagName == "lineEdit") {
@@ -569,6 +572,21 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
     ((QLabel*)visualList[newLabel])->setText(element.text());
+
+    layoutIterator++;
+}
+
+void MainWindow::addLine(QDomElement element, QWidget *parent) {
+
+    QString newLine = "line"+QString::number(layoutIterator);
+    visualList[newLine] = new QLabel(parent);
+    visualList[newLine]->setObjectName(newLine);
+    visualList[newLine]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                          element.attribute("y").toInt(),
+                                                          element.attribute("width").toInt(),
+                                                          element.attribute("height").toInt()));
+    ((QFrame*)visualList[newLine])->setFrameShape(QFrame::HLine);
+    ((QFrame*)visualList[newLine])->setFrameShadow(QFrame::Sunken);
 
     layoutIterator++;
 }
@@ -675,8 +693,20 @@ QString MainWindow::addTabWidget(QDomElement element, QWidget *parent) {
 }
 
 QDomDocument MainWindow::getDefaultLayout() {
-    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"140\" tabbed=\"1\">\r\n <tab name=\"Match Info\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">Player 1</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">Player 2</label>\r\n  <label x=\"300\" y=\"10\" width=\"46\" height=\"13\">Rounds</label>\r\n  <lineEdit id=\"pName1\" x=\"60\" y=\"10\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <lineEdit id=\"pName2\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <spinBox id=\"pScore1\" x=\"250\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"pScore2\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"rounds\" x=\"340\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <button type=\"reset\" x=\"300\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n  <button type=\"swap\" x=\"340\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n </tab>\r\n <tab name=\"Commentary\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">Title 1</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">Title 2</label>\r\n  <lineEdit id=\"cTitle1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"cTitle2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 1\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">mText 1</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">mText 2</label>\r\n  <lineEdit id=\"mText1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 2\">\r\n  <label x=\"10\" y=\"10\" width=\"46\" height=\"13\">mText 3</label>\r\n  <label x=\"10\" y=\"40\" width=\"46\" height=\"13\">mText 4</label>\r\n  <lineEdit id=\"mText3\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText4\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n</layout>\r\n";
+    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"140\" tabbed=\"1\">\r\n <tab name=\"Match Info\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">Player 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">Player 2</label>\r\n  <label x=\"300\" y=\"14\" width=\"46\" height=\"13\">Rounds</label>\r\n  <lineEdit id=\"pName1\" x=\"60\" y=\"10\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <lineEdit id=\"pName2\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <spinBox id=\"pScore1\" x=\"250\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"pScore2\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"rounds\" x=\"340\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <button type=\"reset\" x=\"300\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n  <button type=\"swap\" x=\"340\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n </tab>\r\n <tab name=\"Commentary\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">Title 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">Title 2</label>\r\n  <lineEdit id=\"cTitle1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"cTitle2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 1\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">mText 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">mText 2</label>\r\n  <lineEdit id=\"mText1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 2\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">mText 3</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">mText 4</label>\r\n  <lineEdit id=\"mText3\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText4\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n</layout>\r\n";
     QDomDocument doc;
     doc.setContent(xmlcontent);
     return doc;
+}
+
+void MainWindow::clearMaps() {
+    widgetList.clear();
+    visualList.clear();
+    widgetType.clear();
+    resetList.clear();
+    swapSets.clear();
+    swapList.clear();
+    dataSets.clear();
+    dataAssoc.clear();
+    dataFollows.clear();
 }
