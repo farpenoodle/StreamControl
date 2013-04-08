@@ -607,6 +607,9 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
                                            element.attribute("width").toInt(),
                                            element.attribute("height").toInt()));
         ((QPushButton*)visualList[newButton])->setText(element.text());
+        if (!element.attribute("tooltip").isEmpty()) {
+            ((QPushButton*)visualList[newButton])->setToolTip(element.attribute("tooltip"));
+        }
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), resetMapper, SLOT(map()));
         resetMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
@@ -637,6 +640,9 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
                                                  element.attribute("width").toInt(),
                                                  element.attribute("height").toInt()));
         ((QPushButton*)visualList[newButton])->setText(element.text());
+        if (!element.attribute("tooltip").isEmpty()) {
+            ((QPushButton*)visualList[newButton])->setToolTip(element.attribute("tooltip"));
+        }
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), swapMapper, SLOT(map()));
         swapMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
