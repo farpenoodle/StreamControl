@@ -1,0 +1,12 @@
+0.2 - April 8 2013
+-----------------------------------------
+Updated to Qt 5.01
+Added always on top function (somewhat broken)
+Prevent hiding of toolbar
+New xml based layout system
+New default tabbed layout (old layout available by loading)
+
+
+0.1
+-----------------------------------------
+First Public Version
