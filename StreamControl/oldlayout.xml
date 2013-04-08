@@ -19,8 +19,8 @@
  <label x="10" y="344" width="46" height="13">mText 4</label>
  <button type="reset" x="300" y="70" width="41" height="23" tooltip="Reset the Scores" id="reset" reset="pScore1,pScore2">Reset</button>
  <button type="swap" x="340" y="70" width="41" height="23" tooltip="Swap the Scores" id="swap1" swapSet1="pName1,pScore1" swapSet2="pName2,pScore2">Swap</button>
- <lineEdit id="pName1" x="60" y="40" width="171" height="20" dataset="players.txt" />
- <lineEdit id="pName2" x="60" y="70" width="171" height="20" dataset="players.txt" />
+ <lineEdit id="pName1" x="60" y="40" width="171" height="20" />
+ <lineEdit id="pName2" x="60" y="70" width="171" height="20" />
  <spinBox id="pScore1" x="250" y="40" width="42" height="22" maximum="999" />
  <spinBox id="pScore2" x="250" y="70" width="42" height="22" maximum="999" />
  <spinBox id="rounds" x="340" y="40" width="42" height="22" maximum="999" />

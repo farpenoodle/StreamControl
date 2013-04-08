@@ -4,8 +4,8 @@
   <label x="10" y="14" width="46" height="13">Player 1</label>
   <label x="10" y="44" width="46" height="13">Player 2</label>
   <label x="300" y="14" width="46" height="13">Rounds</label>
-  <lineEdit id="pName1" x="60" y="10" width="171" height="20" dataset="players.txt" />
-  <lineEdit id="pName2" x="60" y="40" width="171" height="20" dataset="players.txt" />
+  <lineEdit id="pName1" x="60" y="10" width="171" height="20" />
+  <lineEdit id="pName2" x="60" y="40" width="171" height="20" />
   <spinBox id="pScore1" x="250" y="10" width="42" height="22" maximum="999" />
   <spinBox id="pScore2" x="250" y="40" width="42" height="22" maximum="999" />
   <spinBox id="rounds" x="340" y="10" width="42" height="22" maximum="999" />
