@@ -82,6 +82,7 @@ public slots:
     QStringList checkLineEdit(QDomElement);
     QStringList checkSpinBox(QDomElement);
     QStringList checkTabLayout(QDomElement);
+    QList<QStringList> processDataSet(QList<QStringList>);
 
 private:
     QSignalMapper *resetMapper;
@@ -91,11 +92,12 @@ private:
     QMap<QString, QString> settings;
     QMap<QString, QWidget*> widgetList;
     QMap<QString, QWidget*> visualList;
+    QMap<QString, QCompleter*> completerList;
     QMap<QString, QString> widgetType;
     QMap<QString, QList<QString> > resetList;
     QMap<QString, QList<QString> > swapSets;
     QMap<QString, QList<QString> > swapList;
-    QMap<QString, QList<QString> > dataSets;
+    QMap<QString, QList<QStringList> > dataSets;
     QMap<QString, QList<QString> > dataAssoc;
     QMap<QString, QList<QString> > dataFollows;
 

@@ -47,6 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QToolbar>
 #include <QPushButton>
 #include "csv.h"
+#include <QCompleter>
+#include <QFileInfo>
 
 MainWindow::MainWindow()
 {
@@ -411,7 +413,6 @@ void MainWindow::swapFields(QString widget)
 
 }
 
-
 void MainWindow::openConfig() {
     cWindow->setConfig(settings);
     cWindow->show();
@@ -532,7 +533,6 @@ void MainWindow::loadLayout() {
 
     setCentralWidget(centralWidget);
 
-
     if(layout.attribute("tabbed") == "1"){
         parseTabLayout(layout,centralWidget);
     } else {
@@ -540,7 +540,6 @@ void MainWindow::loadLayout() {
     }
 
 }
-
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
     QDomNode child = element.firstChild();
@@ -685,6 +684,34 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
                                              element.attribute("height").toInt()));
     widgetType[newLineEdit] = "lineEdit";
 
+    if(element.hasAttribute("dataSet")) {
+        QString dataSetName = element.attribute("dataSet");
+        if (dataSets[dataSetName].isEmpty()) {
+            QString setPath = QFileInfo(settings["layoutPath"]).path() +"/"+ dataSetName;
+            QList<QStringList> newDataSet = CSV::parseFromFile(setPath,"UTF-8");
+            dataSets[dataSetName] = processDataSet(newDataSet);
+        }
+        completerList[newLineEdit] = new QCompleter(dataSets[dataSetName][0], parent);
+        completerList[newLineEdit]->setCaseSensitivity(Qt::CaseInsensitive);
+
+        ((QLineEdit*)widgetList[newLineEdit])->setCompleter(completerList[newLineEdit]);
+
+    }
+
+}
+
+QList<QStringList> MainWindow::processDataSet(QList<QStringList> oldSet) {
+    int items = oldSet.length() - 1;
+    int sets = oldSet[0].length() - 1;
+    QList<QStringList> newSet;
+    for (int i = 0; i <= sets; i++){
+        QStringList newList;
+        for (int i2 = 0; i2 <= items; i2++){
+            newList.append(oldSet[i2][i]);
+        }
+        newSet.append(newList);
+    }
+    return newSet;
 }
 
 void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
