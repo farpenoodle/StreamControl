@@ -94,7 +94,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="aboutTab">
     <attribute name="title">
@@ -182,7 +182,7 @@
    </widget>
    <widget class="QWidget" name="qtTab">
     <attribute name="title">
-     <string>QT</string>
+     <string>Qt</string>
     </attribute>
     <widget class="QLabel" name="qtLabel">
      <property name="geometry">

@@ -74,6 +74,15 @@ public slots:
     void delGame();
     void toggleAlwaysOnTop(bool);
 
+    QStringList checkLayout(QDomDocument);
+    QStringList checkElements(QDomElement);
+    QStringList checkLabel(QDomElement);
+    QStringList checkLine(QDomElement);
+    QStringList checkButton(QDomElement);
+    QStringList checkLineEdit(QDomElement);
+    QStringList checkSpinBox(QDomElement);
+    QStringList checkTabLayout(QDomElement);
+
 private:
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
