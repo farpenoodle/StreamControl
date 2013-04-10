@@ -3,7 +3,7 @@
 
 #include <QCompleter>
 
-namespace farp {
+
 
     class ScCompleter : public QCompleter
     {
@@ -25,7 +25,6 @@ namespace farp {
 
     };
 
-}
 
 #endif // SCCOMPLETER_H
 

@@ -76,6 +76,7 @@ public slots:
     void delGame();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
+    void checkLineDataSet(QString);
 
     QStringList checkLayout(QDomDocument);
     QStringList checkElements(QDomElement);
@@ -97,7 +98,7 @@ private:
     QMap<QString, QString> settings;
     QMap<QString, QWidget*> widgetList;
     QMap<QString, QWidget*> visualList;
-    QMap<QString, farp::ScCompleter*> completerList;
+    QMap<QString, ScCompleter*> completerList;
     QMap<QString, QString> widgetType;
     QMap<QString, QList<QString> > resetList;
     QMap<QString, QList<QString> > swapSets;

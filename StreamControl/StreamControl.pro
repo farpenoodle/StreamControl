@@ -13,13 +13,15 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     configwindow.cpp \
     csv.cpp \
-    ScCompleter.cpp
+    ScCompleter.cpp \
+    ScLineEdit.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
     config.h \
     csv.h \
-    ScCompleter.h
+    ScCompleter.h \
+    ScLineEdit.h
 
 FORMS    += \
     configwindow.ui

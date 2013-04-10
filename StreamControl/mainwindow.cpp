@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QFileInfo>
 #include <scCompleter.h>
 #include <QStringListModel>
+#include <ScLineEdit.h>
 
 MainWindow::MainWindow()
 {
@@ -296,7 +297,7 @@ void MainWindow::loadData()
         QDomElement currElement = items.namedItem(i.key()).toElement();
 
         if (wType == "lineEdit") {
-            ((QLineEdit*)widgetList[i.key()])->setText(currElement.text());
+            ((ScLineEdit*)widgetList[i.key()])->setText(currElement.text());
         } else if (wType == "spinBox") {
             ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
         }
@@ -343,10 +344,10 @@ void MainWindow::saveData()
 
         if (wType == "lineEdit") {
             if (useCDATA) {
-                QDomCDATASection newItemt = doc.createCDATASection(((QLineEdit*)widgetList[i.key()])->text());
+                QDomCDATASection newItemt = doc.createCDATASection(((ScLineEdit*)widgetList[i.key()])->text());
                 newItem.appendChild(newItemt);
             } else {
-                QDomText newItemt = doc.createTextNode(((QLineEdit*)widgetList[i.key()])->text());
+                QDomText newItemt = doc.createTextNode(((ScLineEdit*)widgetList[i.key()])->text());
                 newItem.appendChild(newItemt);
             }
         } else if (wType == "spinBox") {
@@ -384,7 +385,7 @@ void MainWindow::resetFields(QString widget)
         if (widgetType[key] == "spinBox") {
             ((QSpinBox*)widgetList[key])->setValue(0);
         } else if (widgetType[key] == "lineEdit") {
-            ((QLineEdit*)widgetList[key])->setText("");
+            ((ScLineEdit*)widgetList[key])->setText("");
         }
     }
 }
@@ -404,9 +405,9 @@ void MainWindow::swapFields(QString widget)
         QString tempData;
 
         if (widgetType[currField] == "lineEdit"){
-            tempData = ((QLineEdit*)widgetList[currField])->text();
-            ((QLineEdit*)widgetList[currField])->setText(((QLineEdit*)widgetList[newField])->text());
-            ((QLineEdit*)widgetList[newField])->setText(tempData);
+            tempData = ((ScLineEdit*)widgetList[currField])->text();
+            ((ScLineEdit*)widgetList[currField])->setText(((ScLineEdit*)widgetList[newField])->text());
+            ((ScLineEdit*)widgetList[newField])->setText(tempData);
         } else if (widgetType[currField] == "spinBox") {
             tempData = ((QSpinBox*)widgetList[currField])->text();
             ((QSpinBox*)widgetList[currField])->setValue(((QSpinBox*)widgetList[newField])->text().toInt());
@@ -465,7 +466,6 @@ void MainWindow::toggleAlwaysOnTop(bool checked) {
     } else {
         setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
     }
-    qDebug() << windowFlags();
     show();
 }
 
@@ -679,7 +679,7 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
 
     QString newLineEdit = element.attribute("id");
 
-    widgetList[newLineEdit] = new QLineEdit(parent);
+    widgetList[newLineEdit] = new ScLineEdit(parent);
     widgetList[newLineEdit]->setObjectName(newLineEdit);
     widgetList[newLineEdit]->setGeometry(QRect(element.attribute("x").toInt(),
                                              element.attribute("y").toInt(),
@@ -703,21 +703,26 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
             }
         }
         dataAssoc[newLineEdit] = dataField;
-        completerList[newLineEdit] = new farp::ScCompleter(parent);
+        completerList[newLineEdit] = new ScCompleter(parent);
+
+        ((ScLineEdit*)widgetList[newLineEdit])->setName(newLineEdit,dataSetName);
         if (element.hasAttribute("master")) {
             QStringListModel *model = new QStringListModel(condensedDataSets[dataSetName][dataField]);
             completerList[newLineEdit]->setModel(model);
             dataMaster[element.attribute("master")].append(newLineEdit);
+            ((ScLineEdit*)widgetList[newLineEdit])->setButtonVisible(false);
         } else {
             QStringListModel *model = new QStringListModel(dataSets[dataSetName][dataField]);
             completerList[newLineEdit]->setModel(model);
+            connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(textChanged(QString)), this, SLOT(checkLineDataSet(QString)));
+            //((ScLineEdit*)widgetList[newLineEdit])->setButtonVisible(true);
 
         }
         completerList[newLineEdit]->setName(newLineEdit,dataSetName);
         completerList[newLineEdit]->setCaseSensitivity(Qt::CaseInsensitive);
         completerList[newLineEdit]->setCompletionMode(QCompleter::PopupCompletion);
 
-        ((QLineEdit*)widgetList[newLineEdit])->setCompleter(completerList[newLineEdit]);
+        ((ScLineEdit*)widgetList[newLineEdit])->setCompleter(completerList[newLineEdit]);
 
         connect(completerList[newLineEdit], SIGNAL(activated(QString)), this, SLOT(completerActivate(QString)));
 
@@ -725,17 +730,30 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
 }
 
 void MainWindow::completerActivate(QString item) {
-    QString scSender = ((farp::ScCompleter*)sender())->getName();
-    QString scSetName = ((farp::ScCompleter*)sender())->getSetName();
+    QString scSender = ((ScCompleter*)sender())->getName();
+    QString scSetName = ((ScCompleter*)sender())->getSetName();
     int field = dataAssoc[scSender];
     int index = dataSets[scSetName][field].indexOf(item);
 
     for (int i = 0; i < dataMaster[scSender].length();i++) {
         QString id = dataMaster[scSender][i];
         int newField = dataAssoc[id];
-        ((QLineEdit*)widgetList[id])->setText(dataSets[scSetName][newField][index]);
+        ((ScLineEdit*)widgetList[id])->setText(dataSets[scSetName][newField][index]);
     }
-    qDebug() << index;
+}
+
+void MainWindow::checkLineDataSet(QString line) {
+    qDebug() << "test";
+    QString scSender = ((ScLineEdit*)sender())->getName();
+    QString scSetName = ((ScLineEdit*)sender())->getSetName();
+    int field = dataAssoc[scSender];
+    int index = dataSets[scSetName][field].indexOf(line);
+
+    if(index != -1) {
+        ((ScLineEdit*)widgetList[scSender])->setButtonVisible(true);
+    } else {
+        ((ScLineEdit*)widgetList[scSender])->setButtonVisible(false);
+    }
 }
 
 QList<QStringList> MainWindow::processDataSet(QList<QStringList> oldSet) {

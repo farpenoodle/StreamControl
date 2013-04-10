@@ -1,0 +1,34 @@
+#ifndef SCLINEEDIT_H
+#define SCLINEEDIT_H
+
+#include <QLineEdit>
+
+    class QToolButton;
+
+    class ScLineEdit : public QLineEdit
+    {
+        Q_OBJECT
+
+    public:
+        ScLineEdit(QWidget *parent = 0);
+
+    protected:
+        void resizeEvent(QResizeEvent *);
+
+    private slots:
+
+    public slots:
+        void setName(QString,QString);
+        QString getName();
+        QString getSetName();
+        void setButtonVisible(bool);
+
+
+    private:
+        QToolButton *clearButton;
+        QString lineEditName;
+        QString dataSetName;
+    };
+
+
+#endif // SCLINEEDIT_H

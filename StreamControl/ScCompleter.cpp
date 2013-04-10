@@ -1,6 +1,6 @@
 #include "ScCompleter.h"
 
-using farp::ScCompleter;
+
 
 ScCompleter::ScCompleter(QObject* parent) :
     QCompleter(parent)
