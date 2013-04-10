@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QPainter>
 #include <QToolbar>
 #include <QPushButton>
+#include <QCheckBox>
 #include "csv.h"
 #include <QCompleter>
 #include <QFileInfo>
@@ -300,6 +301,8 @@ void MainWindow::loadData()
             ((ScLineEdit*)widgetList[i.key()])->setText(currElement.text());
         } else if (wType == "spinBox") {
             ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
+        } else if (wType == "spinBox") {
+            ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
         }
     }
 
@@ -353,7 +356,15 @@ void MainWindow::saveData()
         } else if (wType == "spinBox") {
             QDomText newItemt = doc.createTextNode(((QSpinBox*)widgetList[i.key()])->text());
             newItem.appendChild(newItemt);
+        } else if (wType == "checkBox") {
+            QString checked = "0";
+            if (((QCheckBox*)widgetList[i.key()])->isChecked()) {
+                checked = "1";
+            }
+            QDomText newItemt = doc.createTextNode(checked);
+            newItem.appendChild(newItemt);
         }
+
     }
 
 
@@ -562,6 +573,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addLineEdit(child.toElement(), parent);
         } else if (tagName == "spinBox") {
             addSpinBox(child.toElement(), parent);
+        } else if (tagName == "checkBox") {
+            addCheckBox(child.toElement(), parent);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -617,6 +630,20 @@ void MainWindow::addLine(QDomElement element, QWidget *parent) {
     ((QFrame*)visualList[newLine])->setFrameShadow(QFrame::Sunken);
 
     layoutIterator++;
+}
+
+void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
+
+    QString newCheckBox = element.attribute("id");
+    widgetType[newCheckBox] = "checkBox";
+    widgetList[newCheckBox] = new QCheckBox(parent);
+    widgetList[newCheckBox]->setObjectName(newCheckBox);
+    widgetList[newCheckBox]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                          element.attribute("y").toInt(),
+                                                          element.attribute("width").toInt(),
+                                                          element.attribute("height").toInt()));
+    ((QCheckBox*)widgetList[newCheckBox])->setText(element.text());
+
 }
 
 void MainWindow::addButton(QDomElement element, QWidget *parent) {
@@ -697,7 +724,6 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
             QString setPath = QFileInfo(settings["layoutPath"]).path() +"/"+ dataSetName;
             QList<QStringList> newDataSet = CSV::parseFromFile(setPath,"UTF-8");
 
-            //qDebug() <<  newDataSet.isEmpty();
             dataSets[dataSetName] = processDataSet(newDataSet);
             condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
         }
@@ -715,9 +741,6 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
                 condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
             }
 
-            //if (dataField > dataSets[dataSetName].length() - 1) {
-            //    dataField = 0;
-            //}
         }
 
         dataAssoc[newLineEdit] = dataField;
@@ -735,7 +758,6 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
             completerList[newLineEdit]->setModel(model);
             connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(textChanged(QString)), this, SLOT(checkLineDataSet(QString)));
             connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(clearButtonClicked()), this, SLOT(removeFromDataSet()));
-            //((ScLineEdit*)widgetList[newLineEdit])->setButtonVisible(true);
             hasMaster = false;
 
         }
@@ -892,7 +914,6 @@ void MainWindow::saveDataSets() {
 
                 ((ScLineEdit*)widgetList[name])->setButtonVisible(true);
 
-                qDebug() << updatedSets;
             } else if (currentVal != "") { //if has in set
                 //find each field that has name as master
                 int slaveNum = dataMaster[name].length();
@@ -931,7 +952,6 @@ void MainWindow::saveDataSets() {
         QList<QStringList> newList = processDataSet(dataSets[updatedSets[i]]);
 
         QString outputFile = QFileInfo(settings["layoutPath"]).path() +"/"+ updatedSets[i];
-        qDebug() << outputFile;
         CSV::write(newList,outputFile,"UTF-8");
 
     }

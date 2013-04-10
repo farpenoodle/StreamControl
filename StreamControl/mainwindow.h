@@ -66,6 +66,7 @@ public slots:
     void addButton(QDomElement, QWidget*);
     void addLineEdit(QDomElement, QWidget*);
     void addSpinBox(QDomElement, QWidget*);
+    void addCheckBox(QDomElement, QWidget*);
     QString addTabWidget(QDomElement, QWidget*);
     QDomDocument getDefaultLayout();
 
