@@ -22,12 +22,17 @@
         QString getName();
         QString getSetName();
         void setButtonVisible(bool);
+        void clearButtonSlot();
 
 
     private:
         QToolButton *clearButton;
         QString lineEditName;
         QString dataSetName;
+
+    signals:
+        void clearButtonClicked();
+
     };
 
 

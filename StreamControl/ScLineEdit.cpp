@@ -1,6 +1,7 @@
 #include "ScLineEdit.h"
 #include <QToolButton>
 #include <QStyle>
+#include <QDebug>
 
 
 ScLineEdit::ScLineEdit(QWidget *parent)
@@ -11,7 +12,7 @@ ScLineEdit::ScLineEdit(QWidget *parent)
     clearButton->setCursor(Qt::ArrowCursor);
     clearButton->setStyleSheet("QToolButton { border: none; padding: 0px; }");
     clearButton->hide();
-    connect(clearButton, SIGNAL(clicked()), this, SLOT(clear()));
+    connect(clearButton, SIGNAL(clicked()), this, SLOT(clearButtonSlot()));
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
     QSize msz = minimumSizeHint();
     setMinimumSize(qMax(msz.width(), clearButton->sizeHint().height() + frameWidth * 2 + 2),
@@ -49,3 +50,6 @@ void ScLineEdit::setButtonVisible(bool visible) {
     }
 }
 
+void ScLineEdit::clearButtonSlot(){
+    emit clearButtonClicked();
+}

@@ -7,9 +7,11 @@ ScCompleter::ScCompleter(QObject* parent) :
 {
 }
 
-void ScCompleter::setName(QString name,QString setName) {
+void ScCompleter::setName(QString name,QString setName,int field, bool mast) {
     lineEditName = name;
     dataSetName = setName;
+    dataSetField = field;
+    master = mast;
 }
 
 QString ScCompleter::getName() {
@@ -18,4 +20,13 @@ QString ScCompleter::getName() {
 
 QString ScCompleter::getSetName() {
     return dataSetName;
+}
+
+
+int ScCompleter::getDataField() {
+    return dataSetField;
+}
+
+bool ScCompleter::hasMaster() {
+    return master;
 }

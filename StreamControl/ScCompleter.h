@@ -15,13 +15,17 @@
     private:
         QString lineEditName;
         QString dataSetName;
+        int dataSetField;
+        bool master;
 
     signals:
 
     public slots:
-        void setName(QString,QString);
+        void setName(QString,QString,int,bool);
         QString getName();
         QString getSetName();
+        int getDataField();
+        bool hasMaster();
 
     };
 

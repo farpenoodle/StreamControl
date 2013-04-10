@@ -704,21 +704,24 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
         }
         dataAssoc[newLineEdit] = dataField;
         completerList[newLineEdit] = new ScCompleter(parent);
-
+        bool hasMaster;
         ((ScLineEdit*)widgetList[newLineEdit])->setName(newLineEdit,dataSetName);
         if (element.hasAttribute("master")) {
             QStringListModel *model = new QStringListModel(condensedDataSets[dataSetName][dataField]);
             completerList[newLineEdit]->setModel(model);
             dataMaster[element.attribute("master")].append(newLineEdit);
             ((ScLineEdit*)widgetList[newLineEdit])->setButtonVisible(false);
+            hasMaster = true;
         } else {
             QStringListModel *model = new QStringListModel(dataSets[dataSetName][dataField]);
             completerList[newLineEdit]->setModel(model);
             connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(textChanged(QString)), this, SLOT(checkLineDataSet(QString)));
+            connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(clearButtonClicked()), this, SLOT(removeFromDataSet()));
             //((ScLineEdit*)widgetList[newLineEdit])->setButtonVisible(true);
+            hasMaster = false;
 
         }
-        completerList[newLineEdit]->setName(newLineEdit,dataSetName);
+        completerList[newLineEdit]->setName(newLineEdit,dataSetName,dataField,hasMaster);
         completerList[newLineEdit]->setCaseSensitivity(Qt::CaseInsensitive);
         completerList[newLineEdit]->setCompletionMode(QCompleter::PopupCompletion);
 
@@ -739,6 +742,55 @@ void MainWindow::completerActivate(QString item) {
         QString id = dataMaster[scSender][i];
         int newField = dataAssoc[id];
         ((ScLineEdit*)widgetList[id])->setText(dataSets[scSetName][newField][index]);
+    }
+}
+
+void MainWindow::removeFromDataSet() {
+    QString scSender = ((ScLineEdit*)sender())->getName();
+    QString scSetName = ((ScLineEdit*)sender())->getSetName();
+
+    QString item = ((ScLineEdit*)sender())->text();
+
+    int field = dataAssoc[scSender];
+    int index = dataSets[scSetName][field].indexOf(item);
+
+    int numSets = dataSets[scSetName].length();
+
+    for (int i = 0; i < numSets; i++) {
+        dataSets[scSetName][i].removeAt(index);
+    }
+
+    condensedDataSets[scSetName] = condenseDataSet(dataSets[scSetName]);
+
+    int numSlave = dataMaster[scSender].length();
+    for (int i = 0; i < numSlave; i++) {
+        QString widget = dataMaster[scSender][i];
+        ((ScLineEdit*)widgetList[widget])->clear();
+    }
+
+
+    updateCompleters();
+
+    ((ScLineEdit*)sender())->clear();
+
+
+}
+
+void MainWindow::updateCompleters() {
+    QMapIterator<QString, ScCompleter *> i(completerList);
+    while (i.hasNext()) {
+        i.next();
+        QString name = i.key();
+        QString setName = completerList[name]->getSetName();
+        int dataField = completerList[name]->getDataField();
+
+        if (completerList[name]->hasMaster()) {
+            QStringListModel *model = new QStringListModel(condensedDataSets[setName][dataField]);
+            completerList[name]->setModel(model);
+        } else {
+            QStringListModel *model = new QStringListModel(dataSets[setName][dataField]);
+            completerList[name]->setModel(model);
+        }
     }
 }
 

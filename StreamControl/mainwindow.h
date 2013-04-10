@@ -76,7 +76,10 @@ public slots:
     void delGame();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
+    void removeFromDataSet();
     void checkLineDataSet(QString);
+
+    void updateCompleters();
 
     QStringList checkLayout(QDomDocument);
     QStringList checkElements(QDomElement);
