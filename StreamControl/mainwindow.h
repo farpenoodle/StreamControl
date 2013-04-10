@@ -36,6 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QSignalMapper>
 #include "config.h"
 #include <QtXml/QDomDocument>
+#include <QModelIndex>
+#include <ScCompleter.h>
 
 class MainWindow : public QMainWindow
 {
@@ -73,6 +75,7 @@ public slots:
     void addGame();
     void delGame();
     void toggleAlwaysOnTop(bool);
+    void completerActivate(QString);
 
     QStringList checkLayout(QDomDocument);
     QStringList checkElements(QDomElement);
@@ -83,23 +86,26 @@ public slots:
     QStringList checkSpinBox(QDomElement);
     QStringList checkTabLayout(QDomElement);
     QList<QStringList> processDataSet(QList<QStringList>);
+    QList<QStringList> condenseDataSet(QList<QStringList>);
 
 private:
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
+    QSignalMapper *completerMapper;
     int layoutIterator;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
     QMap<QString, QWidget*> widgetList;
     QMap<QString, QWidget*> visualList;
-    QMap<QString, QCompleter*> completerList;
+    QMap<QString, farp::ScCompleter*> completerList;
     QMap<QString, QString> widgetType;
     QMap<QString, QList<QString> > resetList;
     QMap<QString, QList<QString> > swapSets;
     QMap<QString, QList<QString> > swapList;
     QMap<QString, QList<QStringList> > dataSets;
-    QMap<QString, QList<QString> > dataAssoc;
-    QMap<QString, QList<QString> > dataFollows;
+    QMap<QString, QList<QStringList> > condensedDataSets;
+    QMap<QString, int> dataAssoc;
+    QMap<QString, QList<QString> > dataMaster;
 
     bool useCDATA;
 };

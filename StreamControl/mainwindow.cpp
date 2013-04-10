@@ -49,6 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "csv.h"
 #include <QCompleter>
 #include <QFileInfo>
+#include <scCompleter.h>
+#include <QStringListModel>
 
 MainWindow::MainWindow()
 {
@@ -59,6 +61,7 @@ MainWindow::MainWindow()
     //Set up signalmappers
     resetMapper = new QSignalMapper (this) ;
     swapMapper = new QSignalMapper (this) ;
+    completerMapper = new QSignalMapper (this) ;
 
     //some defaults
     resize(50, 50);
@@ -690,14 +693,49 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
             QString setPath = QFileInfo(settings["layoutPath"]).path() +"/"+ dataSetName;
             QList<QStringList> newDataSet = CSV::parseFromFile(setPath,"UTF-8");
             dataSets[dataSetName] = processDataSet(newDataSet);
+            condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
         }
-        completerList[newLineEdit] = new QCompleter(dataSets[dataSetName][0], parent);
+        int dataField = 0;
+        if (element.hasAttribute("dataField")) {
+            dataField = element.attribute("dataField").toInt() - 1;
+            if (dataField > dataSets[dataSetName].length() - 1) {
+                dataField = 0;
+            }
+        }
+        dataAssoc[newLineEdit] = dataField;
+        completerList[newLineEdit] = new farp::ScCompleter(parent);
+        if (element.hasAttribute("master")) {
+            QStringListModel *model = new QStringListModel(condensedDataSets[dataSetName][dataField]);
+            completerList[newLineEdit]->setModel(model);
+            dataMaster[element.attribute("master")].append(newLineEdit);
+        } else {
+            QStringListModel *model = new QStringListModel(dataSets[dataSetName][dataField]);
+            completerList[newLineEdit]->setModel(model);
+
+        }
+        completerList[newLineEdit]->setName(newLineEdit,dataSetName);
         completerList[newLineEdit]->setCaseSensitivity(Qt::CaseInsensitive);
+        completerList[newLineEdit]->setCompletionMode(QCompleter::PopupCompletion);
 
         ((QLineEdit*)widgetList[newLineEdit])->setCompleter(completerList[newLineEdit]);
 
-    }
+        connect(completerList[newLineEdit], SIGNAL(activated(QString)), this, SLOT(completerActivate(QString)));
 
+    }
+}
+
+void MainWindow::completerActivate(QString item) {
+    QString scSender = ((farp::ScCompleter*)sender())->getName();
+    QString scSetName = ((farp::ScCompleter*)sender())->getSetName();
+    int field = dataAssoc[scSender];
+    int index = dataSets[scSetName][field].indexOf(item);
+
+    for (int i = 0; i < dataMaster[scSender].length();i++) {
+        QString id = dataMaster[scSender][i];
+        int newField = dataAssoc[id];
+        ((QLineEdit*)widgetList[id])->setText(dataSets[scSetName][newField][index]);
+    }
+    qDebug() << index;
 }
 
 QList<QStringList> MainWindow::processDataSet(QList<QStringList> oldSet) {
@@ -711,6 +749,18 @@ QList<QStringList> MainWindow::processDataSet(QList<QStringList> oldSet) {
         }
         newSet.append(newList);
     }
+    return newSet;
+}
+
+QList<QStringList> MainWindow::condenseDataSet(QList<QStringList> oldSet) {
+    QList<QStringList> newSet;
+
+    int sets = oldSet.length() - 1;
+    for (int i = 0; i <= sets; i++){
+        QStringList newList = oldSet[i].toSet().toList();
+        newSet.append(newList);
+    }
+
     return newSet;
 }
 
@@ -761,7 +811,7 @@ void MainWindow::clearMaps() {
     swapList.clear();
     dataSets.clear();
     dataAssoc.clear();
-    dataFollows.clear();
+    dataMaster.clear();
 }
 
 QStringList MainWindow::checkLayout(QDomDocument doc) {

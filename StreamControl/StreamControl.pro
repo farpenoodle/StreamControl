@@ -12,12 +12,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     configwindow.cpp \
-    csv.cpp
+    csv.cpp \
+    ScCompleter.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
     config.h \
-    csv.h
+    csv.h \
+    ScCompleter.h
 
 FORMS    += \
     configwindow.ui
