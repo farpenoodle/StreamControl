@@ -14,7 +14,8 @@ SOURCES += main.cpp\
     configwindow.cpp \
     csv.cpp \
     ScCompleter.cpp \
-    ScLineEdit.cpp
+    ScLineEdit.cpp \
+    errorchecking.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
