@@ -69,6 +69,8 @@ public slots:
     QString addTabWidget(QDomElement, QWidget*);
     QDomDocument getDefaultLayout();
 
+    void saveDataSets();
+
     void resetFields(QString);
     void swapFields(QString);
     void openConfig();
@@ -110,6 +112,8 @@ private:
     QMap<QString, QList<QStringList> > condensedDataSets;
     QMap<QString, int> dataAssoc;
     QMap<QString, QList<QString> > dataMaster;
+
+    QStringList removedSetQueue;
 
     bool useCDATA;
 };

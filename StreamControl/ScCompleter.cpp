@@ -11,7 +11,7 @@ void ScCompleter::setName(QString name,QString setName,int field, bool mast) {
     lineEditName = name;
     dataSetName = setName;
     dataSetField = field;
-    master = mast;
+    hMaster = mast;
 }
 
 QString ScCompleter::getName() {
@@ -28,5 +28,5 @@ int ScCompleter::getDataField() {
 }
 
 bool ScCompleter::hasMaster() {
-    return master;
+    return hMaster;
 }

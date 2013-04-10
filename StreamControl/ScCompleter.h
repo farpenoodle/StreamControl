@@ -16,7 +16,7 @@
         QString lineEditName;
         QString dataSetName;
         int dataSetField;
-        bool master;
+        bool hMaster;
 
     signals:
 

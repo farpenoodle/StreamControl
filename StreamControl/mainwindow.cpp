@@ -374,6 +374,10 @@ void MainWindow::saveData()
     out << doc.toString();
     file.close();
 
+    //datasets
+
+    saveDataSets();
+
 }
 
 void MainWindow::resetFields(QString widget)
@@ -692,16 +696,30 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
         if (dataSets[dataSetName].isEmpty()) {
             QString setPath = QFileInfo(settings["layoutPath"]).path() +"/"+ dataSetName;
             QList<QStringList> newDataSet = CSV::parseFromFile(setPath,"UTF-8");
+
+            //qDebug() <<  newDataSet.isEmpty();
             dataSets[dataSetName] = processDataSet(newDataSet);
             condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
         }
         int dataField = 0;
         if (element.hasAttribute("dataField")) {
             dataField = element.attribute("dataField").toInt() - 1;
-            if (dataField > dataSets[dataSetName].length() - 1) {
-                dataField = 0;
+
+            for (int i = dataSets[dataSetName].length(); i <= dataField; i++) {
+                QStringList newList;
+
+                for (int i2 = 0; i2 < dataSets[dataSetName][0].length();i2++){
+                    newList.insert(i2,"");
+                }
+                dataSets[dataSetName].insert(i,newList);
+                condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
             }
+
+            //if (dataField > dataSets[dataSetName].length() - 1) {
+            //    dataField = 0;
+            //}
         }
+
         dataAssoc[newLineEdit] = dataField;
         completerList[newLineEdit] = new ScCompleter(parent);
         bool hasMaster;
@@ -768,6 +786,7 @@ void MainWindow::removeFromDataSet() {
         ((ScLineEdit*)widgetList[widget])->clear();
     }
 
+    removedSetQueue.append(scSetName);
 
     updateCompleters();
 
@@ -784,7 +803,7 @@ void MainWindow::updateCompleters() {
         QString setName = completerList[name]->getSetName();
         int dataField = completerList[name]->getDataField();
 
-        if (completerList[name]->hasMaster()) {
+        if (completerList[name]->hasMaster() == true) {
             QStringListModel *model = new QStringListModel(condensedDataSets[setName][dataField]);
             completerList[name]->setModel(model);
         } else {
@@ -795,7 +814,6 @@ void MainWindow::updateCompleters() {
 }
 
 void MainWindow::checkLineDataSet(QString line) {
-    qDebug() << "test";
     QString scSender = ((ScLineEdit*)sender())->getName();
     QString scSetName = ((ScLineEdit*)sender())->getSetName();
     int field = dataAssoc[scSender];
@@ -832,6 +850,93 @@ QList<QStringList> MainWindow::condenseDataSet(QList<QStringList> oldSet) {
     }
 
     return newSet;
+}
+
+void MainWindow::saveDataSets() {
+    QMapIterator<QString, ScCompleter *> i(completerList);
+    QStringList updatedSets;
+    while (i.hasNext()) {
+        i.next();
+        QString name = i.key();
+        QString setName = completerList[name]->getSetName();
+        int dataField = completerList[name]->getDataField();
+
+        if (completerList[name]->hasMaster() == false) { //if it's a master
+            //check if current value in in dataSet
+            QString currentVal = ((ScLineEdit*)widgetList[name])->text();
+            int currIndex =  dataSets[setName][dataField].indexOf(currentVal);
+            if (currIndex == -1 && currentVal != "") {
+                //set all to blank first
+                int numFields = dataSets[setName].length();
+                for (int i = 0; i < numFields; i++) {
+                    dataSets[setName][i].append("");
+                }
+
+                int newIndex = dataSets[setName][dataField].length() - 1;
+
+                QString newValue = ((ScLineEdit*)widgetList[name])->text();
+                dataSets[setName][dataField][newIndex] = newValue;
+
+                //find each field that has name as master
+                int slaveNum = dataMaster[name].length();
+                for (int i = 0; i < slaveNum; i++) {
+                    QString slaveName = dataMaster[name][i];
+                    int field = dataAssoc[slaveName];
+                    if (field != dataField) {
+                        QString newValue = ((ScLineEdit*)widgetList[slaveName])->text();
+                        dataSets[setName][field][newIndex] = newValue;
+                    }
+                }
+                if (updatedSets.indexOf(setName) == -1)
+                    updatedSets.append(setName);
+
+                ((ScLineEdit*)widgetList[name])->setButtonVisible(true);
+
+                qDebug() << updatedSets;
+            } else if (currentVal != "") { //if has in set
+                //find each field that has name as master
+                int slaveNum = dataMaster[name].length();
+                for (int i = 0; i < slaveNum; i++) {
+                    QString slaveName = dataMaster[name][i];
+                    int field = dataAssoc[slaveName];
+                    if (field != dataField) {
+                        QString newValue = ((ScLineEdit*)widgetList[slaveName])->text();
+                        if (dataSets[setName][field][currIndex] != newValue){ // if not new value update
+                            dataSets[setName][field][currIndex] = newValue;
+                            if (updatedSets.indexOf(setName) == -1)
+                                updatedSets.append(setName);
+                        }//end update
+                    }
+                }
+
+
+            }// end if has in set
+
+
+        }// end if has master
+
+
+    }
+
+    if (!removedSetQueue.isEmpty()) {
+        updatedSets.append(removedSetQueue);
+        removedSetQueue.clear();
+    }
+
+    int numUpdate = updatedSets.length();
+
+    for (int i = 0; i < numUpdate; i++) {
+        condensedDataSets[updatedSets[i]] = condenseDataSet(dataSets[updatedSets[i]]);
+
+        QList<QStringList> newList = processDataSet(dataSets[updatedSets[i]]);
+
+        QString outputFile = QFileInfo(settings["layoutPath"]).path() +"/"+ updatedSets[i];
+        qDebug() << outputFile;
+        CSV::write(newList,outputFile,"UTF-8");
+
+    }
+
+    updateCompleters();
 }
 
 void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
