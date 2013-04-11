@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ScLineEdit.h>
 #include "scradiogroup.h"
 #include <QRadioButton>
+#include "windows.h"
 
 MainWindow::MainWindow()
 {
@@ -65,7 +66,6 @@ MainWindow::MainWindow()
     //Set up signalmappers
     resetMapper = new QSignalMapper (this) ;
     swapMapper = new QSignalMapper (this) ;
-    completerMapper = new QSignalMapper (this) ;
 
     //some defaults
     resize(50, 50);
@@ -415,6 +415,8 @@ void MainWindow::resetFields(QString widget)
             ((QSpinBox*)widgetList[key])->setValue(0);
         } else if (widgetType[key] == "lineEdit") {
             ((ScLineEdit*)widgetList[key])->setText("");
+        } else if (widgetType[key] == "checkBox") {
+            ((QCheckBox*)widgetList[key])->setChecked(false);
         }
     }
 }
@@ -495,7 +497,7 @@ void MainWindow::delGame() {
 
 void MainWindow::toggleAlwaysOnTop(bool on_top) {
 
-    Qt::WindowFlags oldflags = windowFlags(), newflags;
+    /*Qt::WindowFlags oldflags = windowFlags(), newflags;
 
         if( on_top )
             newflags = oldflags | Qt::WindowStaysOnTopHint;
@@ -503,7 +505,14 @@ void MainWindow::toggleAlwaysOnTop(bool on_top) {
             newflags = oldflags & ~Qt::WindowStaysOnTopHint;
 
         setWindowFlags( newflags );
-        show();
+        show();*/
+
+    HWND hWnd = (HWND)this->winId();
+
+    if (on_top)
+        SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    else
+        SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 
 void MainWindow::loadLayout() {
@@ -1062,7 +1071,6 @@ QDomDocument MainWindow::getDefaultLayout() {
 }
 
 void MainWindow::clearMaps() {
-    qDebug() << "cleared";
     widgetList.clear();
     visualList.clear();
     widgetType.clear();
@@ -1072,8 +1080,8 @@ void MainWindow::clearMaps() {
     dataSets.clear();
     dataAssoc.clear();
     dataMaster.clear();
-    swapMapper = new QSignalMapper;
-    resetMapper = new QSignalMapper;
+    resetMapper = new QSignalMapper (this) ;
+    swapMapper = new QSignalMapper (this) ;
 }
 
 bool MainWindow::checkDataSet1Blank(QString setName) {

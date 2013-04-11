@@ -103,7 +103,6 @@ public slots:
 private:
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
-    QSignalMapper *completerMapper;
     int layoutIterator;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
