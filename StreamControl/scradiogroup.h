@@ -14,7 +14,7 @@ public:
 public slots:
     QString getCurrentRadio();
     void setValue(int, QString);
-    int getIndexFromValue(QString);
+    void checkFromValue(QString);
 private:
     QStringList buttonValues;
 };

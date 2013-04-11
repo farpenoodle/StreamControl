@@ -310,8 +310,9 @@ void MainWindow::loadData()
                 ((QCheckBox*)widgetList[i.key()])->setChecked(false);
             }
         } else if (wType == "radioGroup") {
-            int groupIndex = ((ScRadioGroup*)widgetList[i.key()])->getIndexFromValue(currElement.text());
-            ((ScRadioGroup*)widgetList[i.key()])->button(groupIndex)->setChecked(true);
+            //int groupIndex = ((ScRadioGroup*)widgetList[i.key()])->getIndexFromValue(currElement.text());
+            //((ScRadioGroup*)widgetList[i.key()])->button(groupIndex)->setChecked(true);
+            ((ScRadioGroup*)widgetList[i.key()])->checkFromValue(currElement.text());
         }
     }
 

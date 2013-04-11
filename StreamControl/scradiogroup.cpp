@@ -15,6 +15,8 @@ void ScRadioGroup::setValue(int index,QString value) {
     buttonValues.insert(index,value);
 }
 
-int ScRadioGroup::getIndexFromValue(QString value) {
-    return buttonValues.indexOf(value);
+void ScRadioGroup::checkFromValue(QString value) {
+    int index = buttonValues.indexOf(value);
+    if (index != -1)
+        button(index)->setChecked(true);
 }

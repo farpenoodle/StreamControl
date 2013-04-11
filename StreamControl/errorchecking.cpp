@@ -47,6 +47,10 @@ QStringList MainWindow::checkElements(QDomElement element){
             errors << checkLineEdit(child.toElement());
         } else if (tagName == "spinBox") {
             errors << checkSpinBox(child.toElement());
+        } else if (tagName == "checkBox") {
+            errors << checkCheckBox(child.toElement());
+        } else if (tagName == "radioGroup") {
+            errors << checkRadioGroup(child.toElement());
         } else if (tagName == "tabSet") {
             errors << checkTabLayout(child.toElement());
         }
@@ -213,6 +217,81 @@ QStringList MainWindow::checkTabLayout(QDomElement element) {
                 errors << "Tab has no name";
 
             errors << checkElements(child.toElement());
+
+        } else {
+            errors << "Invalid item " + tagName + " in tabSet";
+        }
+
+        child = child.nextSibling();
+    }
+    return errors;
+}
+
+QStringList MainWindow::checkCheckBox(QDomElement element){
+    bool intHandler;
+    QStringList errors;
+    QString id = element.attribute("id");
+    QString idstr;
+    if (id.length() > 1) {
+        idstr = "\""+id+"\" ";
+    }
+    if (id.length() < 1)
+        errors << "CheckBox must have an id";
+    if (!element.hasAttribute("width"))
+        errors << "CheckBox " + idstr + "has no width value";
+    if (!element.hasAttribute("height"))
+        errors << "CheckBox " + idstr + "has no height value";
+    if (!element.hasAttribute("x"))
+        errors << "CheckBox " + idstr + "has no x value";
+    if (!element.hasAttribute("y"))
+        errors << "CheckBox " + idstr + "has no y value";
+    if (element.hasAttribute("width") && (element.attribute("width").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "CheckBox " + idstr + "width is not a positive integer";
+    if (element.hasAttribute("height") && (element.attribute("height").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "CheckBox " + idstr + "height is not a positive integer";
+    if (element.hasAttribute("x") && (element.attribute("x").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "CheckBox " + idstr + "x is not a positive integer";
+    if (element.hasAttribute("y") && (element.attribute("y").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "CheckBox " + idstr + "y is not a positive integer";
+
+    return errors;
+}
+
+QStringList MainWindow::checkRadioGroup(QDomElement element) {
+    bool intHandler;
+    QStringList errors;
+    QString id = element.attribute("id");
+    QString idstr;
+    if (id.length() > 1) {
+        idstr = "\""+id+"\" ";
+    }
+    if (id.length() < 1)
+        errors << "RadioGroup must have an id";
+    QDomNode child = element.firstChild();
+    int buttonNumber = 1;
+    while (!child.isNull()) {
+        QString tagName = child.toElement().tagName();
+        if(tagName == "radioButton") {
+            QDomElement newElement = child.toElement();
+
+            if (!newElement.hasAttribute("width"))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " has no width value";
+            if (!newElement.hasAttribute("height"))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " has no height value";
+            if (!newElement.hasAttribute("x"))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " has no x value";
+            if (!newElement.hasAttribute("y"))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " has no y value";
+            if (newElement.hasAttribute("width") && (newElement.attribute("width").toInt(&intHandler,10) < 0 || intHandler == false))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " width is not a positive integer";
+            if (newElement.hasAttribute("height") && (newElement.attribute("height").toInt(&intHandler,10) < 0 || intHandler == false))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " height is not a positive integer";
+            if (newElement.hasAttribute("x") && (newElement.attribute("x").toInt(&intHandler,10) < 0 || intHandler == false))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " x is not a positive integer";
+            if (newElement.hasAttribute("y") && (newElement.attribute("y").toInt(&intHandler,10) < 0 || intHandler == false))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " y is not a positive integer";
+            if (!newElement.hasAttribute("value"))
+                errors << "RadioGroup " + idstr + "RadioButton " + QString::number(buttonNumber) + " has no value";
 
         } else {
             errors << "Invalid item " + tagName + " in tabSet";
