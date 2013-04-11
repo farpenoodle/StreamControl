@@ -15,14 +15,16 @@ SOURCES += main.cpp\
     csv.cpp \
     ScCompleter.cpp \
     ScLineEdit.cpp \
-    errorchecking.cpp
+    errorchecking.cpp \
+    scradiogroup.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
     config.h \
     csv.h \
     ScCompleter.h \
-    ScLineEdit.h
+    ScLineEdit.h \
+    scradiogroup.h
 
 FORMS    += \
     configwindow.ui

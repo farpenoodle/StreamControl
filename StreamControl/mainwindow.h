@@ -67,6 +67,7 @@ public slots:
     void addLineEdit(QDomElement, QWidget*);
     void addSpinBox(QDomElement, QWidget*);
     void addCheckBox(QDomElement, QWidget*);
+    void addRadioGroup(QDomElement, QWidget*);
     QString addTabWidget(QDomElement, QWidget*);
     QDomDocument getDefaultLayout();
 
@@ -102,7 +103,7 @@ private:
     int layoutIterator;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
-    QMap<QString, QWidget*> widgetList;
+    QMap<QString, QObject*> widgetList;
     QMap<QString, QWidget*> visualList;
     QMap<QString, ScCompleter*> completerList;
     QMap<QString, QString> widgetType;

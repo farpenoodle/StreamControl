@@ -53,6 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <scCompleter.h>
 #include <QStringListModel>
 #include <ScLineEdit.h>
+#include "scradiogroup.h"
+#include <QRadioButton>
 
 MainWindow::MainWindow()
 {
@@ -291,7 +293,7 @@ void MainWindow::loadData()
 
     QDomElement game = items.namedItem("game").toElement();
 
-    QMapIterator<QString, QWidget *> i(widgetList);
+    QMapIterator<QString, QObject *> i(widgetList);
     while (i.hasNext()) {
         i.next();
         QString wType = widgetType[i.key()];
@@ -301,8 +303,15 @@ void MainWindow::loadData()
             ((ScLineEdit*)widgetList[i.key()])->setText(currElement.text());
         } else if (wType == "spinBox") {
             ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
-        } else if (wType == "spinBox") {
-            ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
+        } else if (wType == "checkBox") {
+            if (currElement.text() == "1") {
+                ((QCheckBox*)widgetList[i.key()])->setChecked(true);
+            } else {
+                ((QCheckBox*)widgetList[i.key()])->setChecked(false);
+            }
+        } else if (wType == "radioGroup") {
+            int groupIndex = ((ScRadioGroup*)widgetList[i.key()])->getIndexFromValue(currElement.text());
+            ((ScRadioGroup*)widgetList[i.key()])->button(groupIndex)->setChecked(true);
         }
     }
 
@@ -338,7 +347,7 @@ void MainWindow::saveData()
     QDomText timestampt = doc.createTextNode(QString::number(timestamp_t));;
     timestamp.appendChild(timestampt);
 
-    QMapIterator<QString, QWidget *> i(widgetList);
+    QMapIterator<QString, QObject *> i(widgetList);
     while (i.hasNext()) {
         i.next();
         QString wType = widgetType[i.key()];
@@ -362,6 +371,11 @@ void MainWindow::saveData()
                 checked = "1";
             }
             QDomText newItemt = doc.createTextNode(checked);
+            newItem.appendChild(newItemt);
+        } else if (wType == "radioGroup") {
+            QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
+
+            QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
         }
 
@@ -575,6 +589,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addSpinBox(child.toElement(), parent);
         } else if (tagName == "checkBox") {
             addCheckBox(child.toElement(), parent);
+        } else if (tagName == "radioGroup") {
+            addRadioGroup(child.toElement(), parent);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -638,11 +654,49 @@ void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
     widgetType[newCheckBox] = "checkBox";
     widgetList[newCheckBox] = new QCheckBox(parent);
     widgetList[newCheckBox]->setObjectName(newCheckBox);
-    widgetList[newCheckBox]->setGeometry(QRect(element.attribute("x").toInt(),
+    ((QCheckBox*)widgetList[newCheckBox])->setGeometry(QRect(element.attribute("x").toInt(),
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
     ((QCheckBox*)widgetList[newCheckBox])->setText(element.text());
+
+}
+
+void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
+
+    QString newRadioGroup = element.attribute("id");
+    widgetType[newRadioGroup] = "radioGroup";
+    widgetList[newRadioGroup] = new ScRadioGroup(parent);
+    widgetList[newRadioGroup]->setObjectName(newRadioGroup);
+
+    QDomNode child = element.firstChild();
+    int radioIterator = 0;
+    while (!child.isNull()) {
+        if (child.toElement().tagName() == "radioButton"){
+
+            QDomElement radioButton = child.toElement();
+            int x = radioButton.attribute("x").toInt();
+            int y = radioButton.attribute("y").toInt();
+            int width = radioButton.attribute("width").toInt();
+            int height = radioButton.attribute("height").toInt();
+            QString text = radioButton.text();
+            QString value = radioButton.attribute("value");
+            QString radioName = "radio" + value;
+
+            QRadioButton *newRadioButton = new QRadioButton(text,parent);
+            newRadioButton->setGeometry(QRect(x,y,width,height));
+            newRadioButton->setObjectName(radioName);
+            if(radioIterator == 0)
+                newRadioButton->setChecked(true);
+            \
+            ((ScRadioGroup*)widgetList[newRadioGroup])->addButton(newRadioButton,radioIterator);
+            ((ScRadioGroup*)widgetList[newRadioGroup])->setValue(radioIterator,value);
+            radioIterator++;
+
+        }
+
+        child = child.nextSibling();
+    }
 
 }
 
@@ -712,7 +766,7 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
 
     widgetList[newLineEdit] = new ScLineEdit(parent);
     widgetList[newLineEdit]->setObjectName(newLineEdit);
-    widgetList[newLineEdit]->setGeometry(QRect(element.attribute("x").toInt(),
+    ((ScLineEdit*)widgetList[newLineEdit])->setGeometry(QRect(element.attribute("x").toInt(),
                                              element.attribute("y").toInt(),
                                              element.attribute("width").toInt(),
                                              element.attribute("height").toInt()));
@@ -965,7 +1019,7 @@ void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
 
     widgetList[newSpinBox] = new QSpinBox(parent);
     widgetList[newSpinBox]->setObjectName(newSpinBox);
-    widgetList[newSpinBox]->setGeometry(QRect(element.attribute("x").toInt(),
+    ((QSpinBox*)widgetList[newSpinBox])->setGeometry(QRect(element.attribute("x").toInt(),
                                               element.attribute("y").toInt(),
                                               element.attribute("width").toInt(),
                                               element.attribute("height").toInt()));
