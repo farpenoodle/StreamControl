@@ -421,6 +421,7 @@ void MainWindow::resetFields(QString widget)
 
 void MainWindow::swapFields(QString widget)
 {
+
     QString swSet1 = swapSets[widget][0];
     QString swSet2 = swapSets[widget][1];
 
@@ -441,6 +442,10 @@ void MainWindow::swapFields(QString widget)
             tempData = ((QSpinBox*)widgetList[currField])->text();
             ((QSpinBox*)widgetList[currField])->setValue(((QSpinBox*)widgetList[newField])->text().toInt());
             ((QSpinBox*)widgetList[newField])->setValue(tempData.toInt());
+        } else if (widgetType[currField] == "checkBox") {
+            bool tempCheck = ((QCheckBox*)widgetList[currField])->isChecked();
+            ((QCheckBox*)widgetList[currField])->setChecked(((QCheckBox*)widgetList[newField])->isChecked());
+            ((QCheckBox*)widgetList[newField])->setChecked(tempCheck);
         }
      }
 
@@ -1057,6 +1062,7 @@ QDomDocument MainWindow::getDefaultLayout() {
 }
 
 void MainWindow::clearMaps() {
+    qDebug() << "cleared";
     widgetList.clear();
     visualList.clear();
     widgetType.clear();
@@ -1066,6 +1072,8 @@ void MainWindow::clearMaps() {
     dataSets.clear();
     dataAssoc.clear();
     dataMaster.clear();
+    swapMapper = new QSignalMapper;
+    resetMapper = new QSignalMapper;
 }
 
 bool MainWindow::checkDataSet1Blank(QString setName) {
