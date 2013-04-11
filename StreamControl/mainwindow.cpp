@@ -403,7 +403,6 @@ void MainWindow::saveData()
     //datasets
 
     saveDataSets();
-
 }
 
 void MainWindow::resetFields(QString widget)
@@ -489,14 +488,17 @@ void MainWindow::delGame() {
     saveSettings();
 }
 
-void MainWindow::toggleAlwaysOnTop(bool checked) {
-    if (checked)
-    {
-        setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-    } else {
-        setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
-    }
-    show();
+void MainWindow::toggleAlwaysOnTop(bool on_top) {
+
+    Qt::WindowFlags oldflags = windowFlags(), newflags;
+
+        if( on_top )
+            newflags = oldflags | Qt::WindowStaysOnTopHint;
+        else
+            newflags = oldflags & ~Qt::WindowStaysOnTopHint;
+
+        setWindowFlags( newflags );
+        show();
 }
 
 void MainWindow::loadLayout() {
@@ -942,11 +944,13 @@ void MainWindow::saveDataSets() {
             //check if current value in in dataSet
             QString currentVal = ((ScLineEdit*)widgetList[name])->text();
             int currIndex =  dataSets[setName][dataField].indexOf(currentVal);
+
             if (currIndex == -1 && currentVal != "") {
                 //set all to blank first
                 int numFields = dataSets[setName].length();
                 for (int i = 0; i < numFields; i++) {
-                    dataSets[setName][i].append("");
+                    if (!checkDataSet1Blank(setName))
+                        dataSets[setName][i].append("");
                 }
 
                 int newIndex = dataSets[setName][dataField].length() - 1;
@@ -1064,3 +1068,15 @@ void MainWindow::clearMaps() {
     dataMaster.clear();
 }
 
+bool MainWindow::checkDataSet1Blank(QString setName) {
+    bool empty = true;
+    int numFields = dataSets[setName].length();
+    for (int i = 0; i < numFields; i++) {
+        if (dataSets[setName][i].length() > 1 || dataSets[setName][i].length() == 0)
+            empty = false;
+        if (dataSets[setName][i].length() == 1 && dataSets[setName][i][0] != "")
+            empty = false;
+
+    }
+    return empty;
+}

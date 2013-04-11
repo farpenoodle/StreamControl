@@ -98,6 +98,8 @@ public slots:
     QList<QStringList> processDataSet(QList<QStringList>);
     QList<QStringList> condenseDataSet(QList<QStringList>);
 
+    bool checkDataSet1Blank(QString);
+
 private:
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
