@@ -497,22 +497,24 @@ void MainWindow::delGame() {
 
 void MainWindow::toggleAlwaysOnTop(bool on_top) {
 
-    /*Qt::WindowFlags oldflags = windowFlags(), newflags;
-
-        if( on_top )
-            newflags = oldflags | Qt::WindowStaysOnTopHint;
-        else
-            newflags = oldflags & ~Qt::WindowStaysOnTopHint;
-
-        setWindowFlags( newflags );
-        show();*/
-
+    #ifdef Q_OS_WIN
     HWND hWnd = (HWND)this->winId();
 
     if (on_top)
         SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     else
         SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    #else
+    Qt::WindowFlags oldflags = windowFlags(), newflags;
+
+    if( on_top )
+        newflags = oldflags | Qt::WindowStaysOnTopHint;
+    else
+        newflags = oldflags & ~Qt::WindowStaysOnTopHint;
+
+    setWindowFlags( newflags );
+    show();
+    #endif
 }
 
 void MainWindow::loadLayout() {
@@ -922,11 +924,22 @@ void MainWindow::checkLineDataSet(QString line) {
 QList<QStringList> MainWindow::processDataSet(QList<QStringList> oldSet) {
     int items = oldSet.length() - 1;
     int sets = oldSet[0].length() - 1;
+
+    //this bit is confusing should probably fix it
+    bool empty = true;
+    for (int i = 0; i <= items; i++) {
+        if (items > 0 || items == -1)
+            empty = false;
+        if (items == 0 && oldSet[0][i] != "")
+            empty = false;
+    }
+
     QList<QStringList> newSet;
     for (int i = 0; i <= sets; i++){
         QStringList newList;
         for (int i2 = 0; i2 <= items; i2++){
-            newList.append(oldSet[i2][i]);
+            if (!empty)
+                newList.append(oldSet[i2][i]);
         }
         newSet.append(newList);
     }
