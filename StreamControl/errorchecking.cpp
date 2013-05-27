@@ -53,6 +53,8 @@ QStringList MainWindow::checkElements(QDomElement element){
             errors << checkRadioGroup(child.toElement());
         } else if (tagName == "tabSet") {
             errors << checkTabLayout(child.toElement());
+        } else if (tagName == "cli") {
+            //errors << checkCLI(child.toElement());
         }
         child = child.nextSibling();
     }
@@ -218,6 +220,8 @@ QStringList MainWindow::checkTabLayout(QDomElement element) {
 
             errors << checkElements(child.toElement());
 
+        } else if (tagName == "cli") {
+            //parse cli
         } else {
             errors << "Invalid item " + tagName + " in tabSet";
         }
