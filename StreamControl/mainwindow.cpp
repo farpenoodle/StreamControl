@@ -636,6 +636,7 @@ void MainWindow::parseTabLayout(QDomElement element, QWidget *parent) {
                 visualList[newTab+"Scroll"] = new QScrollArea(parent);
                 visualList[newTab]->adjustSize();
                 ((QScrollArea*)visualList[newTab+"Scroll"])->setWidget(((QWidget*)visualList[newTab]));
+                ((QScrollArea*)visualList[newTab+"Scroll"])->setFrameShape(QFrame::NoFrame);
                 ((QTabWidget*)parent)->addTab(visualList[newTab+"Scroll"],newTabName);
             } else {
                 ((QTabWidget*)parent)->addTab(visualList[newTab],newTabName);
