@@ -1,3 +1,13 @@
+0.3
+-----------------------------------------
+Added rudimentary error checking
+Datasets
+Radio buttons
+Checkboxes
+Fix always on top
+Add scrollable tabs
+
+
 0.2 - April 8 2013
 -----------------------------------------
 Updated to Qt 5.01
