@@ -802,6 +802,10 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
                                              element.attribute("height").toInt()));
     widgetType[newLineEdit] = "lineEdit";
 
+    if (element.text() != "") {
+        ((ScLineEdit*)widgetList[newLineEdit])->setPlaceholderText(element.text());
+    }
+
     if(element.hasAttribute("dataSet")) {
         QString dataSetName = element.attribute("dataSet");
         if (dataSets[dataSetName].isEmpty()) {
