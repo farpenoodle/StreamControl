@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QToolbar>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QScrollArea>
 #include "csv.h"
 #include <QCompleter>
 #include <QFileInfo>
@@ -626,10 +627,19 @@ void MainWindow::parseTabLayout(QDomElement element, QWidget *parent) {
         if(tagName == "tab") {
             QString newTabName = child.toElement().attribute("name");
             QString newTab = "tab"+QString::number(layoutIterator);
-            visualList[newTab] =  new QWidget(parent);
+
+            visualList[newTab] = new QWidget(parent);
+
             parseLayout(child.toElement(),visualList[newTab]);
 
-            ((QTabWidget*)parent)->addTab(visualList[newTab],newTabName);
+            if (child.toElement().attribute("scrollable") == "1") {
+                visualList[newTab+"Scroll"] = new QScrollArea(parent);
+                visualList[newTab]->adjustSize();
+                ((QScrollArea*)visualList[newTab+"Scroll"])->setWidget(((QWidget*)visualList[newTab]));
+                ((QTabWidget*)parent)->addTab(visualList[newTab+"Scroll"],newTabName);
+            } else {
+                ((QTabWidget*)parent)->addTab(visualList[newTab],newTabName);
+            }
 
             layoutIterator++;
         }
