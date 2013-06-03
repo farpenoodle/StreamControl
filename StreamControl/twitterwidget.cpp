@@ -7,10 +7,14 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QUrl>
+#include <QFileInfo>
+#include <QFile>
 
 twitterWidget::twitterWidget(QWidget *parent) :
     QWidget(parent)
 {
+    profilePicPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\Twitter\\";
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -20,7 +24,6 @@ twitterWidget::twitterWidget(QWidget *parent) :
     layout->addWidget(urlBox,0,0);
     layout->addWidget(fetchButton,0,1);
     layout->addWidget(label,1,0,1,2);
-    urlBox->setText("https://twitter.com/Kageshibari/status/341544211755196417");
 
     connect(fetchButton, SIGNAL(clicked()), this, SLOT(fetchTweet()));
 
@@ -41,7 +44,7 @@ void twitterWidget::fetchTweet()
 
         QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName;
         qDebug() << searchUrl;
-        manager = new QNetworkAccessManager(this);
+        manager = new QNetworkAccessManager;
         connect(manager, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(replyFinished(QNetworkReply*)));
 
@@ -78,12 +81,49 @@ void twitterWidget::replyFinished(QNetworkReply *reply) {
         twitterName = tweetObject.find("from_user_name").value().toString();
         tweetText = tweetObject.find("text").value().toString();
         tweetCreated = tweetObject.find("created_at").value().toString();
-        profilePicUrl = tweetObject.find("profile_image_url").value().toString();
-        qDebug() << userName + twitterName + tweetText + tweetCreated + profilePicUrl;
+        profilePicUrl = tweetObject.find("profile_image_url").value().toString().replace("_normal","");
+        //qDebug() << userName + twitterName + tweetText + tweetCreated + profilePicUrl;
 
-        label->setText("<font color=green>OK</font>");
+
+        QUrl picUrl(profilePicUrl);
+        QFileInfo fileInfo(picUrl.path());
+
+        profilePicFilename = fileInfo.fileName();
+        QString outFile = profilePicPath + profilePicFilename;
+        QFile file(outFile);
+
+        //label->setText("<font color=green>OK</font>");
+        if (!file.exists()) {
+            picManager = new QNetworkAccessManager;
+            connect(picManager, SIGNAL(finished(QNetworkReply*)),
+                    this, SLOT(picFinished(QNetworkReply*)));
+
+            picManager->get(QNetworkRequest(QUrl(profilePicUrl)));
+        } else {
+            label->setText("<font color=green>Ok</font>");
+        }
     } else {
         label->setText("<font color=red>Tweet Not Found</font>");
     }
     reply->deleteLater();
+}
+
+void twitterWidget::picFinished(QNetworkReply *reply) {
+
+    QUrl picUrl(profilePicUrl);
+    QFileInfo fileInfo(picUrl.path());
+
+    QString profilePicFilename = fileInfo.fileName();
+    QString outFile = profilePicPath + profilePicFilename;
+
+    QFile* file = new QFile;
+    file->setFileName(outFile);
+    file->open(QIODevice::WriteOnly);
+    file->write(reply->readAll());
+    file->close();
+
+    label->setText("<font color=green>Ok</font>");
+
+    reply->deleteLater();
+
 }

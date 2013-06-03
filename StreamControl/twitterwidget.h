@@ -27,6 +27,7 @@ private:
     QString         tweetId;
     QString         tweetCreated;
     QString         profilePicPath;
+    QString         profilePicFilename;
     QString         profilePicUrl;
 
     QNetworkAccessManager   *manager;
@@ -38,6 +39,7 @@ signals:
 public slots:
     void fetchTweet();
     void replyFinished(QNetworkReply *reply);
+    void picFinished(QNetworkReply *reply);
 
 };
 
