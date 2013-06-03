@@ -14,7 +14,7 @@
 twitterWidget::twitterWidget(QWidget *parent) :
     QWidget(parent)
 {
-    profilePicPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\Twitter\\";
+    //profilePicPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\Twitter\\";
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -125,5 +125,11 @@ void twitterWidget::picFinished(QNetworkReply *reply) {
     label->setText("<font color=green>Ok</font>");
 
     reply->deleteLater();
+
+}
+
+void twitterWidget::setPath(QString path) {
+
+    profilePicPath = path;
 
 }

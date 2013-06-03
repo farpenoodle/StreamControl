@@ -40,6 +40,7 @@ public slots:
     void fetchTweet();
     void replyFinished(QNetworkReply *reply);
     void picFinished(QNetworkReply *reply);
+    void setPath(QString);
 
 };
 

@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "csv.h"
 #include <QCompleter>
 #include <QFileInfo>
+#include <QDir>
 #include <scCompleter.h>
 #include <QStringListModel>
 #include <ScLineEdit.h>
@@ -669,13 +670,26 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
 void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     QString newTweet = "tweet"+QString::number(layoutIterator);
-    visualList[newTweet] = new twitterWidget(parent);
-    visualList[newTweet]->setObjectName(newTweet);
-    visualList[newTweet]->setGeometry(QRect(element.attribute("x").toInt(),
+    widgetList[newTweet] = new twitterWidget(parent);
+    widgetType[newTweet] = "tweet";
+    widgetList[newTweet]->setObjectName(newTweet);
+    ((twitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
-    //((QLabel*)visualList[newLabel])->setText(element.text());
+
+    QDir newPath(element.attribute("picPath"));
+
+    if (!newPath.isAbsolute()) {
+        QString path = settings["xsplitPath"] + element.attribute("picPath");
+        newPath.setPath(path);
+    }
+
+    if(!newPath.exists()) {
+        newPath.mkpath(newPath.path());
+    }
+
+    ((twitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
 
     layoutIterator++;
 }
