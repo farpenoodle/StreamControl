@@ -46,6 +46,7 @@ public slots:
     QString getTwitterName();
     QString getTweetText();
     QString getProfilePicFilename();
+    QString getProfilePicPath();
     QString getDate();
 
 };

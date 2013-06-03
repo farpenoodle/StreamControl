@@ -395,7 +395,7 @@ void MainWindow::saveData()
             twittername.appendChild(twittername_t);
             newItem.appendChild(twittername);
 
-            QDomElement tweetText = doc.createElement("tweetText");
+            QDomElement tweetText = doc.createElement("text");
             QDomText tweetText_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTweetText());
 
             tweetText.appendChild(tweetText_t);

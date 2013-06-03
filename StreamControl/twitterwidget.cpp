@@ -14,7 +14,6 @@
 twitterWidget::twitterWidget(QWidget *parent) :
     QWidget(parent)
 {
-    //profilePicPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\Twitter\\";
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -43,7 +42,7 @@ void twitterWidget::fetchTweet()
         tweetId = rx.cap(2);
 
         QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName;
-        qDebug() << searchUrl;
+
         manager = new QNetworkAccessManager;
         connect(manager, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(replyFinished(QNetworkReply*)));
@@ -82,8 +81,6 @@ void twitterWidget::replyFinished(QNetworkReply *reply) {
         tweetText = tweetObject.find("text").value().toString();
         tweetCreated = tweetObject.find("created_at").value().toString();
         profilePicUrl = tweetObject.find("profile_image_url").value().toString().replace("_normal","");
-        //qDebug() << userName + twitterName + tweetText + tweetCreated + profilePicUrl;
-
 
         QUrl picUrl(profilePicUrl);
         QFileInfo fileInfo(picUrl.path());
@@ -92,7 +89,6 @@ void twitterWidget::replyFinished(QNetworkReply *reply) {
         QString outFile = profilePicPath + profilePicFilename;
         QFile file(outFile);
 
-        //label->setText("<font color=green>OK</font>");
         if (!file.exists()) {
             picManager = new QNetworkAccessManager;
             connect(picManager, SIGNAL(finished(QNetworkReply*)),
@@ -143,6 +139,12 @@ QString twitterWidget::getDate() {
 QString twitterWidget::getProfilePicFilename() {
 
     return profilePicFilename;
+
+}
+
+QString twitterWidget::getProfilePicPath() {
+
+    return profilePicPath + profilePicFilename;
 
 }
 
