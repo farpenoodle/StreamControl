@@ -68,6 +68,7 @@ public slots:
     void addSpinBox(QDomElement, QWidget*);
     void addCheckBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
+    void addTweetWidget(QDomElement, QWidget*);
     QString addTabWidget(QDomElement, QWidget*);
     QDomDocument getDefaultLayout();
 

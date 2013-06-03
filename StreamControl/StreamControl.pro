@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml widgets
+QT       += core gui xml widgets network
 
 TARGET = StreamControl
 TEMPLATE = app
@@ -16,7 +16,8 @@ SOURCES += main.cpp\
     ScCompleter.cpp \
     ScLineEdit.cpp \
     errorchecking.cpp \
-    scradiogroup.cpp
+    scradiogroup.cpp \
+    twitterwidget.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
@@ -24,7 +25,8 @@ HEADERS  += mainwindow.h \
     csv.h \
     ScCompleter.h \
     ScLineEdit.h \
-    scradiogroup.h
+    scradiogroup.h \
+    twitterwidget.h
 
 FORMS    += \
     configwindow.ui

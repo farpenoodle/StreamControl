@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scradiogroup.h"
 #include <QRadioButton>
 #include "windows.h"
+#include <twitterwidget.h>
 
 MainWindow::MainWindow()
 {
@@ -611,6 +612,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addCheckBox(child.toElement(), parent);
         } else if (tagName == "radioGroup") {
             addRadioGroup(child.toElement(), parent);
+        } else if (tagName == "tweet") {
+            addTweetWidget(child.toElement(), parent);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -659,6 +662,20 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
     ((QLabel*)visualList[newLabel])->setText(element.text());
+
+    layoutIterator++;
+}
+
+void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
+
+    QString newTweet = "tweet"+QString::number(layoutIterator);
+    visualList[newTweet] = new twitterWidget(parent);
+    visualList[newTweet]->setObjectName(newTweet);
+    visualList[newTweet]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                          element.attribute("y").toInt(),
+                                                          element.attribute("width").toInt(),
+                                                          element.attribute("height").toInt()));
+    //((QLabel*)visualList[newLabel])->setText(element.text());
 
     layoutIterator++;
 }
