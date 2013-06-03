@@ -133,3 +133,33 @@ void twitterWidget::setPath(QString path) {
     profilePicPath = path;
 
 }
+
+QString twitterWidget::getDate() {
+
+    return tweetCreated;
+
+}
+
+QString twitterWidget::getProfilePicFilename() {
+
+    return profilePicFilename;
+
+}
+
+QString twitterWidget::getTweetText() {
+
+    return tweetText;
+
+}
+
+QString twitterWidget::getTwitterName() {
+
+    return twitterName;
+
+}
+
+QString twitterWidget::getUsername() {
+
+    return userName;
+
+}

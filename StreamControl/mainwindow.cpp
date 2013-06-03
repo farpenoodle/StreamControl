@@ -381,6 +381,38 @@ void MainWindow::saveData()
 
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
+        } else if (wType == "tweet") {
+
+            QDomElement username = doc.createElement("username");
+            QDomText username_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getUsername());
+
+            username.appendChild(username_t);
+            newItem.appendChild(username);
+
+            QDomElement twittername = doc.createElement("twittername");
+            QDomText twittername_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+
+            twittername.appendChild(twittername_t);
+            newItem.appendChild(twittername);
+
+            QDomElement tweetText = doc.createElement("tweetText");
+            QDomText tweetText_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTweetText());
+
+            tweetText.appendChild(tweetText_t);
+            newItem.appendChild(tweetText);
+
+            QDomElement created = doc.createElement("created");
+            QDomText created_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getDate());
+
+            created.appendChild(created_t);
+            newItem.appendChild(created);
+
+            QDomElement picFileName = doc.createElement("picFileName");
+            QDomText picFileName_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+
+            picFileName.appendChild(picFileName_t);
+            newItem.appendChild(picFileName);
+
         }
 
     }
@@ -669,7 +701,7 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
 
 void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
-    QString newTweet = "tweet"+QString::number(layoutIterator);
+    QString newTweet = element.attribute("id");
     widgetList[newTweet] = new twitterWidget(parent);
     widgetType[newTweet] = "tweet";
     widgetList[newTweet]->setObjectName(newTweet);

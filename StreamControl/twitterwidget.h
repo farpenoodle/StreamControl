@@ -42,6 +42,12 @@ public slots:
     void picFinished(QNetworkReply *reply);
     void setPath(QString);
 
+    QString getUsername();
+    QString getTwitterName();
+    QString getTweetText();
+    QString getProfilePicFilename();
+    QString getDate();
+
 };
 
 #endif // TWITTER_H
