@@ -6,6 +6,7 @@ Radio buttons
 Checkboxes
 Fix always on top
 Add scrollable tabs
+Add placeholder text to lineEdit
 
 
 0.2 - April 8 2013
