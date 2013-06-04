@@ -11,11 +11,14 @@
 #include <QFileInfo>
 #include <QFile>
 #include "twitterOauth.h"
+#include "o2twitter.h"
+#include "o2/o2requestor.h"
+#include "o2/o2globals.h"
+#include <QScriptEngine>
 
 twitterWidget::twitterWidget(QWidget *parent) :
     QWidget(parent)
 {
-    oAuthLinked = false;
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -25,26 +28,29 @@ twitterWidget::twitterWidget(QWidget *parent) :
     layout->addWidget(urlBox,0,0);
     layout->addWidget(fetchButton,0,1);
     layout->addWidget(label,1,0,1,2);
+    manager = new QNetworkAccessManager;
+    picManager = new QNetworkAccessManager;
 
     connect(fetchButton, SIGNAL(clicked()), this, SLOT(fetchTweet()));
 
     this->setLayout(layout);
 
-    o1 = new O1Twitter(this);
-    o1->setClientId(OAUTH_KEY);
-    o1->setClientSecret(OAUTH_SECRET);
+    o2 = new O2Twitter(this);
+    o2->setClientId(OAUTH_KEY);
+    o2->setClientSecret(OAUTH_SECRET);
 
-    connect(o1, SIGNAL(linkedChanged()), this, SLOT(onLinkedChanged()));
-    connect(o1, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
-    connect(o1, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
-    connect(o1, SIGNAL(openBrowser(QUrl)), this, SLOT(onOpenBrowser(QUrl)));
-    connect(o1, SIGNAL(closeBrowser()), this, SLOT(onCloseBrowser()));
+    connect(o2, SIGNAL(linkedChanged()), this, SLOT(onLinkedChanged()));
+    connect(o2, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
+    connect(o2, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
+    connect(o2, SIGNAL(openBrowser(QUrl)), this, SLOT(onOpenBrowser(QUrl)));
+    connect(o2, SIGNAL(closeBrowser()), this, SLOT(onCloseBrowser()));
 }
 
 void twitterWidget::fetchTweet()
 {
 
-    if (oAuthLinked){
+    qDebug() << o2->linked();
+    if (o2->linked()){
 
         QRegExp rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
         QString tweetURL = urlBox->text();
@@ -56,69 +62,63 @@ void twitterWidget::fetchTweet()
             userName = rx.cap(1);
             tweetId = rx.cap(2);
 
-            QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName + "&since_id=" + QString::number(tweetId.toULongLong() - 1) + "&max_id=" + tweetId;
+            QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId;
 
-            manager = new QNetworkAccessManager;
-            connect(manager, SIGNAL(finished(QNetworkReply*)),
-                    this, SLOT(replyFinished(QNetworkReply*)));
+            QNetworkRequest request;
 
-            manager->get(QNetworkRequest(QUrl(searchUrl)));
+            request.setUrl(QUrl(tweetUrl));
+
+            QString authString = "Bearer " + o2->token();
+            request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER,authString.toUtf8());
+
+            QNetworkReply *reply = manager->get(request);
+
+            connect(reply, SIGNAL(finished()), this, SLOT(replyFinished()));
 
 
         } else {
             label->setText("<font color=red>Invalid Tweet URL</font>");
         }
     } else {
-        label->setText("<font color=red>Log in to Twitter</font>");
-        o1->link();
+        label->setText("<font color=red>Getting Auth Token</font>");
+        o2->link();
     }
 
 
 }
 
-void twitterWidget::replyFinished(QNetworkReply *reply) {
-    QJsonDocument tweetsJson = QJsonDocument::fromJson(reply->readAll());
-    QJsonArray tweetArray = tweetsJson.object().find("results").value().toArray();
+void twitterWidget::replyFinished() {
 
-    bool found = false;
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
-    QJsonObject tweetObject;
+    QByteArray replyData = reply->readAll();
 
-    int tweetNum = tweetArray.count();
+    QScriptValue value;
+    QScriptEngine engine;
+    value = engine.evaluate("(" + QString(replyData) + ")");
 
-    for (int i = 0; i < tweetNum;i++) {
-        tweetObject = tweetArray.at(i).toObject();
-        if (tweetObject.find("id_str").value().toString() == tweetId) {
-            found = true;
-            break;
-        }
-    }
+    tweetText = value.property("text").toString();
+    twitterName = value.property("user").property("name").toString();
+    tweetCreated = value.property("created_at").toString();
+    profilePicUrl = value.property("user").property("profile_image_url").toString().replace("_normal","");
 
-    if (found == true) {
-        twitterName = tweetObject.find("from_user_name").value().toString();
-        tweetText = tweetObject.find("text").value().toString();
-        tweetCreated = tweetObject.find("created_at").value().toString();
-        profilePicUrl = tweetObject.find("profile_image_url").value().toString().replace("_normal","");
 
-        QUrl picUrl(profilePicUrl);
-        QFileInfo fileInfo(picUrl.path());
+    QUrl picUrl(profilePicUrl);
+    QFileInfo fileInfo(picUrl.path());
 
-        profilePicFilename = fileInfo.fileName();
-        QString outFile = profilePicPath + profilePicFilename;
-        QFile file(outFile);
+    profilePicFilename = fileInfo.fileName();
+    QString outFile = profilePicPath + profilePicFilename;
+    QFile file(outFile);
 
-        if (!file.exists()) {
-            picManager = new QNetworkAccessManager;
-            connect(picManager, SIGNAL(finished(QNetworkReply*)),
-                    this, SLOT(picFinished(QNetworkReply*)));
+    if (!file.exists()) {
+        connect(picManager, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(picFinished(QNetworkReply*)));
 
-            picManager->get(QNetworkRequest(QUrl(profilePicUrl)));
-        } else {
-            label->setText("<font color=green>Ok</font>");
-        }
+        picManager->get(QNetworkRequest(QUrl(profilePicUrl)));
     } else {
-        label->setText("<font color=red>Tweet Not Found</font>");
+        label->setText("<font color=green>Ok</font>");
     }
+
     reply->deleteLater();
 }
 
@@ -183,3 +183,35 @@ QString twitterWidget::getUsername() {
     return userName;
 
 }
+
+
+//OAuth Stuff
+void twitterWidget::onLinkedChanged() {
+    // Linking (login) state has changed.
+    // Use o1->linked() to get the actual state
+    //qDebug() << o2->linked();
+}
+
+void twitterWidget::onLinkingFailed() {
+    // Login has failed
+    //qDebug() << o2->linked();
+    label->setText("<font color=red>Failed to get Auth Token</font>");
+}
+
+void twitterWidget::onLinkingSucceeded() {
+    //qDebug() << o2->linked();
+    label->setText("<font color=green>Auth Token granted!</font>");
+
+}
+
+void twitterWidget::onOpenBrowser(QUrl url) {
+    // Open a web browser or a web view with the given URL.
+    // The user will interact with this browser window to
+    // enter login name, password, and authorize your application
+    // to access the Twitter account
+}
+
+void twitterWidget::onCloseBrowser() {
+    // Close the browser window opened in openBrowser()
+}
+

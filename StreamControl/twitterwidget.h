@@ -10,8 +10,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 
-#include "o2/o1twitter.h"
-#include "o2/o1requestor.h"
+#include "o2twitter.h"
+#include "o2/o2requestor.h"
 
 
 class twitterWidget : public QWidget
@@ -34,21 +34,25 @@ private:
     QString         profilePicFilename;
     QString         profilePicUrl;
 
-    bool            oAuthLinked;
-
     QNetworkAccessManager   *manager;
     QNetworkAccessManager   *picManager;
 
-    O1Twitter *o1;
+    O2Twitter *o2;
 
     
 signals:
     
 public slots:
     void fetchTweet();
-    void replyFinished(QNetworkReply *reply);
+    void replyFinished();
     void picFinished(QNetworkReply *reply);
     void setPath(QString);
+
+    void onLinkedChanged();
+    void onLinkingFailed();
+    void onLinkingSucceeded();
+    void onOpenBrowser(QUrl url);
+    void onCloseBrowser();
 
     QString getUsername();
     QString getTwitterName();
