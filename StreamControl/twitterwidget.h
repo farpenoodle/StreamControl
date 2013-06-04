@@ -10,6 +10,10 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 
+#include "o2/o1twitter.h"
+#include "o2/o1requestor.h"
+
+
 class twitterWidget : public QWidget
 {
     Q_OBJECT
@@ -32,6 +36,8 @@ private:
 
     QNetworkAccessManager   *manager;
     QNetworkAccessManager   *picManager;
+
+    O1Twitter *o1;
 
     
 signals:

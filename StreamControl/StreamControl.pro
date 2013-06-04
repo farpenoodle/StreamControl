@@ -26,7 +26,8 @@ HEADERS  += mainwindow.h \
     ScCompleter.h \
     ScLineEdit.h \
     scradiogroup.h \
-    twitterwidget.h
+    twitterwidget.h \
+    twitterOauth.h
 
 FORMS    += \
     configwindow.ui

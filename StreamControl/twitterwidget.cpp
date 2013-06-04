@@ -41,7 +41,7 @@ void twitterWidget::fetchTweet()
         userName = rx.cap(1);
         tweetId = rx.cap(2);
 
-        QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName;
+        QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName + "&since_id=" + QString::number(tweetId.toULongLong() - 1) + "&max_id=" + tweetId;
 
         manager = new QNetworkAccessManager;
         connect(manager, SIGNAL(finished(QNetworkReply*)),
