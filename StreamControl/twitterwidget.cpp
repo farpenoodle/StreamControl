@@ -18,7 +18,7 @@ twitterWidget::twitterWidget(QWidget *parent) :
     urlBox = new QLineEdit();
     label = new QLabel();
     fetchButton = new QPushButton();
-    fetchButton->setText("Fetch");
+    fetchButton->setText("Fetch Tweet");
     label->setText("Input tweet URL");
     layout->addWidget(urlBox,0,0);
     layout->addWidget(fetchButton,0,1);

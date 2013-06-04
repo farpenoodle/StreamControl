@@ -382,37 +382,67 @@ void MainWindow::saveData()
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
         } else if (wType == "tweet") {
+            if (useCDATA) {
+                QDomElement username = doc.createElement("username");
+                QDomCDATASection username_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getUsername());
 
-            QDomElement username = doc.createElement("username");
-            QDomText username_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getUsername());
+                username.appendChild(username_t);
+                newItem.appendChild(username);
 
-            username.appendChild(username_t);
-            newItem.appendChild(username);
+                QDomElement twittername = doc.createElement("twittername");
+                QDomCDATASection twittername_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getTwitterName());
 
-            QDomElement twittername = doc.createElement("twittername");
-            QDomText twittername_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+                twittername.appendChild(twittername_t);
+                newItem.appendChild(twittername);
 
-            twittername.appendChild(twittername_t);
-            newItem.appendChild(twittername);
+                QDomElement tweetText = doc.createElement("text");
+                QDomCDATASection tweetText_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getTweetText());
 
-            QDomElement tweetText = doc.createElement("text");
-            QDomText tweetText_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTweetText());
+                tweetText.appendChild(tweetText_t);
+                newItem.appendChild(tweetText);
 
-            tweetText.appendChild(tweetText_t);
-            newItem.appendChild(tweetText);
+                QDomElement created = doc.createElement("created");
+                QDomCDATASection created_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getDate());
 
-            QDomElement created = doc.createElement("created");
-            QDomText created_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getDate());
+                created.appendChild(created_t);
+                newItem.appendChild(created);
 
-            created.appendChild(created_t);
-            newItem.appendChild(created);
+                QDomElement picFileName = doc.createElement("picFileName");
+                QDomCDATASection picFileName_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
 
-            QDomElement picFileName = doc.createElement("picFileName");
-            QDomText picFileName_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+                picFileName.appendChild(picFileName_t);
+                newItem.appendChild(picFileName);
+            } else {
+                QDomElement username = doc.createElement("username");
+                QDomText username_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getUsername());
 
-            picFileName.appendChild(picFileName_t);
-            newItem.appendChild(picFileName);
+                username.appendChild(username_t);
+                newItem.appendChild(username);
 
+                QDomElement twittername = doc.createElement("twittername");
+                QDomText twittername_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+
+                twittername.appendChild(twittername_t);
+                newItem.appendChild(twittername);
+
+                QDomElement tweetText = doc.createElement("text");
+                QDomText tweetText_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTweetText());
+
+                tweetText.appendChild(tweetText_t);
+                newItem.appendChild(tweetText);
+
+                QDomElement created = doc.createElement("created");
+                QDomText created_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getDate());
+
+                created.appendChild(created_t);
+                newItem.appendChild(created);
+
+                QDomElement picFileName = doc.createElement("picFileName");
+                QDomText picFileName_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+
+                picFileName.appendChild(picFileName_t);
+                newItem.appendChild(picFileName);
+            }
         }
 
     }
@@ -710,7 +740,13 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
 
-    QDir newPath(element.attribute("picPath"));
+    QString picPath = "twitter"; // default path to twitter so the xsplit directory isn't filled with pictures
+
+    if(element.attribute("picPath") != "") {
+        picPath = element.attribute("picPath");
+    }
+
+    QDir newPath(element.attribute(picPath));
 
     if (!newPath.isAbsolute()) {
         QString path = settings["xsplitPath"] + element.attribute("picPath");
