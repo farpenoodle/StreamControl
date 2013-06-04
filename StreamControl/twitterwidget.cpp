@@ -10,10 +10,12 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QFile>
+#include "twitterOauth.h"
 
 twitterWidget::twitterWidget(QWidget *parent) :
     QWidget(parent)
 {
+    oAuthLinked = false;
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -27,33 +29,49 @@ twitterWidget::twitterWidget(QWidget *parent) :
     connect(fetchButton, SIGNAL(clicked()), this, SLOT(fetchTweet()));
 
     this->setLayout(layout);
+
+    o1 = new O1Twitter(this);
+    o1->setClientId(OAUTH_KEY);
+    o1->setClientSecret(OAUTH_SECRET);
+
+    connect(o1, SIGNAL(linkedChanged()), this, SLOT(onLinkedChanged()));
+    connect(o1, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
+    connect(o1, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
+    connect(o1, SIGNAL(openBrowser(QUrl)), this, SLOT(onOpenBrowser(QUrl)));
+    connect(o1, SIGNAL(closeBrowser()), this, SLOT(onCloseBrowser()));
 }
 
 void twitterWidget::fetchTweet()
 {
-    QRegExp rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
-    QString tweetURL = urlBox->text();
-    int pos = rx.indexIn(tweetURL);
 
-    if (pos != -1) {
-        label->setText("Fetching tweet");
+    if (oAuthLinked){
 
-        userName = rx.cap(1);
-        tweetId = rx.cap(2);
+        QRegExp rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
+        QString tweetURL = urlBox->text();
+        int pos = rx.indexIn(tweetURL);
 
-        QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName + "&since_id=" + QString::number(tweetId.toULongLong() - 1) + "&max_id=" + tweetId;
+        if (pos != -1) {
+            label->setText("Fetching tweet");
 
-        manager = new QNetworkAccessManager;
-        connect(manager, SIGNAL(finished(QNetworkReply*)),
-                this, SLOT(replyFinished(QNetworkReply*)));
+            userName = rx.cap(1);
+            tweetId = rx.cap(2);
 
-        manager->get(QNetworkRequest(QUrl(searchUrl)));
+            QString searchUrl = "http://search.twitter.com/search.json?q=from:" + userName + "&since_id=" + QString::number(tweetId.toULongLong() - 1) + "&max_id=" + tweetId;
+
+            manager = new QNetworkAccessManager;
+            connect(manager, SIGNAL(finished(QNetworkReply*)),
+                    this, SLOT(replyFinished(QNetworkReply*)));
+
+            manager->get(QNetworkRequest(QUrl(searchUrl)));
 
 
+        } else {
+            label->setText("<font color=red>Invalid Tweet URL</font>");
+        }
     } else {
-        label->setText("<font color=red>Invalid Tweet URL</font>");
+        label->setText("<font color=red>Log in to Twitter</font>");
+        o1->link();
     }
-
 
 
 }

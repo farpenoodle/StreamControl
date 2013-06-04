@@ -163,3 +163,7 @@ pip-log.txt
 .DS_Store
 
 .pro.user
+
+.autosave
+
+twitterOauth.h

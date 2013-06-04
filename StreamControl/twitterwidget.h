@@ -34,6 +34,8 @@ private:
     QString         profilePicFilename;
     QString         profilePicUrl;
 
+    bool            oAuthLinked;
+
     QNetworkAccessManager   *manager;
     QNetworkAccessManager   *picManager;
 
