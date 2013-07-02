@@ -51,6 +51,8 @@ QStringList MainWindow::checkElements(QDomElement element){
             errors << checkCheckBox(child.toElement());
         } else if (tagName == "radioGroup") {
             errors << checkRadioGroup(child.toElement());
+        } else if (tagName == "tweet") {
+            errors << checkTweetWidget(child.toElement());
         } else if (tagName == "tabSet") {
             errors << checkTabLayout(child.toElement());
         } else if (tagName == "cli") {
@@ -303,5 +305,35 @@ QStringList MainWindow::checkRadioGroup(QDomElement element) {
 
         child = child.nextSibling();
     }
+    return errors;
+}
+
+QStringList MainWindow::checkTweetWidget(QDomElement element){
+    bool intHandler;
+    QStringList errors;
+    QString id = element.attribute("id");
+    QString idstr;
+    if (id.length() > 1) {
+        idstr = "\""+id+"\" ";
+    }
+    if (id.length() < 1)
+        errors << "Tweet Widget must have an id";
+    if (!element.hasAttribute("width"))
+        errors << "Tweet Widget " + idstr + "has no width value";
+    if (!element.hasAttribute("height"))
+        errors << "Tweet Widget " + idstr + "has no height value";
+    if (!element.hasAttribute("x"))
+        errors << "Tweet Widget " + idstr + "has no x value";
+    if (!element.hasAttribute("y"))
+        errors << "Tweet Widget " + idstr + "has no y value";
+    if (element.hasAttribute("width") && (element.attribute("width").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Tweet Widget " + idstr + "width is not a positive integer";
+    if (element.hasAttribute("height") && (element.attribute("height").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Tweet Widget " + idstr + "height is not a positive integer";
+    if (element.hasAttribute("x") && (element.attribute("x").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Tweet Widget " + idstr + "x is not a positive integer";
+    if (element.hasAttribute("y") && (element.attribute("y").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Tweet Widget " + idstr + "y is not a positive integer";
+
     return errors;
 }

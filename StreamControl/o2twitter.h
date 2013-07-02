@@ -3,16 +3,6 @@
 
 #include "o2/o2.h"
 
-struct O2RequestParameter {
-    O2RequestParameter(const QByteArray &n, const QByteArray &v): name(n), value(v) {
-    }
-    bool operator <(const O2RequestParameter &other) const {
-        return (name == other.name)? (value < other.value): (name < other.name);
-    }
-    QByteArray name;
-    QByteArray value;
-};
-
 class O2Twitter: public O2 {
     Q_OBJECT
 

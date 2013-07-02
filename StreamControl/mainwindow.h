@@ -96,6 +96,7 @@ public slots:
     QStringList checkCheckBox(QDomElement);
     QStringList checkTabLayout(QDomElement);
     QStringList checkRadioGroup(QDomElement);
+    QStringList checkTweetWidget(QDomElement);
     QList<QStringList> processDataSet(QList<QStringList>);
     QList<QStringList> condenseDataSet(QList<QStringList>);
 

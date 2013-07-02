@@ -26,7 +26,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********************************************************************************/
 
 #include <QFile>
-#include <QtXml/QDomDocument>
 #include <QTextStream>
 #include <QDateTime>
 #include "mainwindow.h"
@@ -42,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMenu>
 #include <QSpinBox>
 #include <QLineEdit>
-#include <QSignalMapper>
 #include <QPainter>
 #include <QToolbar>
 #include <QPushButton>

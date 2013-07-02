@@ -11,7 +11,6 @@
 #include <QNetworkRequest>
 
 #include "o2twitter.h"
-#include "o2/o2requestor.h"
 
 
 class twitterWidget : public QWidget
@@ -45,14 +44,12 @@ signals:
 public slots:
     void fetchTweet();
     void replyFinished();
-    void picFinished(QNetworkReply *reply);
+    void picFinished();
     void setPath(QString);
 
     void onLinkedChanged();
     void onLinkingFailed();
     void onLinkingSucceeded();
-    void onOpenBrowser(QUrl url);
-    void onCloseBrowser();
 
     QString getUsername();
     QString getTwitterName();

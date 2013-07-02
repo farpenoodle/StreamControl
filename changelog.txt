@@ -7,6 +7,7 @@ Checkboxes
 Fix always on top
 Add scrollable tabs
 Add placeholder text to lineEdit
+New tweet widget
 
 
 0.2 - April 8 2013

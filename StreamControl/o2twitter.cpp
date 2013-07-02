@@ -38,10 +38,6 @@ void O2Twitter::link() {
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()));
 
-    //QList<O2RequestParameter> headers;
-    //headers.append(O2RequestParameter(O2_HTTP_AUTHORIZATION_HEADER, base64String.toUtf8()));
-    //headers.append(O2RequestParameter(O2_CONTENT_TYPE,QString("application/x-www-form-urlencoded;charset=UTF-8").toUtf8()));
-
     // FIXME: Delete relevant cookies, too
 }
 

@@ -4,15 +4,11 @@
 #include <QNetworkReply>
 #include <QtDebug>
 #include <QRegExp>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QUrl>
 #include <QFileInfo>
 #include <QFile>
 #include "twitterOauth.h"
 #include "o2twitter.h"
-#include "o2/o2requestor.h"
 #include "o2/o2globals.h"
 #include <QScriptEngine>
 
@@ -42,14 +38,11 @@ twitterWidget::twitterWidget(QWidget *parent) :
     connect(o2, SIGNAL(linkedChanged()), this, SLOT(onLinkedChanged()));
     connect(o2, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
     connect(o2, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
-    connect(o2, SIGNAL(openBrowser(QUrl)), this, SLOT(onOpenBrowser(QUrl)));
-    connect(o2, SIGNAL(closeBrowser()), this, SLOT(onCloseBrowser()));
 }
 
 void twitterWidget::fetchTweet()
 {
 
-    qDebug() << o2->linked();
     if (o2->linked()){
 
         QRegExp rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
@@ -111,10 +104,12 @@ void twitterWidget::replyFinished() {
     QFile file(outFile);
 
     if (!file.exists()) {
-        connect(picManager, SIGNAL(finished(QNetworkReply*)),
-                this, SLOT(picFinished(QNetworkReply*)));
 
-        picManager->get(QNetworkRequest(QUrl(profilePicUrl)));
+        QNetworkReply *picReply = picManager->get(QNetworkRequest(QUrl(profilePicUrl)));
+
+        connect(picReply, SIGNAL(finished()), this, SLOT(picFinished()));
+
+
     } else {
         label->setText("<font color=green>Ok</font>");
     }
@@ -122,7 +117,11 @@ void twitterWidget::replyFinished() {
     reply->deleteLater();
 }
 
-void twitterWidget::picFinished(QNetworkReply *reply) {
+void twitterWidget::picFinished() {
+
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+
+    QByteArray replyData = reply->readAll();
 
     QUrl picUrl(profilePicUrl);
     QFileInfo fileInfo(picUrl.path());
@@ -133,7 +132,7 @@ void twitterWidget::picFinished(QNetworkReply *reply) {
     QFile* file = new QFile;
     file->setFileName(outFile);
     file->open(QIODevice::WriteOnly);
-    file->write(reply->readAll());
+    file->write(replyData);
     file->close();
 
     label->setText("<font color=green>Ok</font>");
@@ -189,29 +188,15 @@ QString twitterWidget::getUsername() {
 void twitterWidget::onLinkedChanged() {
     // Linking (login) state has changed.
     // Use o1->linked() to get the actual state
-    //qDebug() << o2->linked();
 }
 
 void twitterWidget::onLinkingFailed() {
     // Login has failed
-    //qDebug() << o2->linked();
     label->setText("<font color=red>Failed to get Auth Token</font>");
 }
 
 void twitterWidget::onLinkingSucceeded() {
-    //qDebug() << o2->linked();
     label->setText("<font color=green>Auth Token granted!</font>");
 
-}
-
-void twitterWidget::onOpenBrowser(QUrl url) {
-    // Open a web browser or a web view with the given URL.
-    // The user will interact with this browser window to
-    // enter login name, password, and authorize your application
-    // to access the Twitter account
-}
-
-void twitterWidget::onCloseBrowser() {
-    // Close the browser window opened in openBrowser()
 }
 

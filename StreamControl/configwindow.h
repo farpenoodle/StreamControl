@@ -50,6 +50,7 @@ public:
 public slots:
     void findXSplit();
     void findLayout();
+    void abtQt();
     void CDATAToggle( int state );
     
 private:
