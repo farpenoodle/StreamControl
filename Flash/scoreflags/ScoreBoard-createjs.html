@@ -1,0 +1,226 @@
+<html>
+<head>
+	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" charset="utf-8">
+	<script src="js/createjs-2013.05.14.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/countries.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+			
+			var timestampOld;
+			var timestamp;
+			var pName1;
+			var pScore1;
+			var pName2;
+			var pScore2;
+			var pCountry1;
+			var pCountry2;
+			var oldCountry1 = "";
+			var oldCountry2 = "";
+			var mText3;
+			
+			var xmlDoc;
+		
+			var xhr = new XMLHttpRequest();
+		
+			var animating = false;
+			var doUpdate = false;
+			
+			var stage,board,pName1t,pName2t,pScore1t,pScore2t,pCountry1b,pCountry2b,mText3t,pFlag1,pFlag2;
+			
+			function init() {
+
+				xhr.overrideMimeType('text/xml');
+				
+				var timeout = this.window.setInterval(function() {
+					pollHandler();
+				}, 250);
+				
+				stage = new createjs.Stage("myCanvas");
+				
+				board = new createjs.Container();
+				
+				
+				scoreboard = new createjs.Bitmap("images/game.png");
+				scoreboard.regX = 0;
+				scoreboard.regY = 0;
+				
+				board.addChild(scoreboard);
+				
+				pFlag1 = new createjs.Container();
+				pFlag1.x = 126;
+				pFlag1.alpha=0;
+				
+				board.addChild(pFlag1);
+				
+				pFlag2 = new createjs.Container()
+				pFlag2.x = 1112;
+				pFlag2.alpha=0;
+				
+				board.addChild(pFlag2);
+				
+				pName1t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pName1t.x = 175;
+				pName1t.y = 3;
+				pName1t.textAlign = "left";
+				
+				board.addChild(pName1t);
+				
+				pName2t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pName2t.x = 1105;
+				pName2t.y = 3;
+				pName2t.textAlign = "right";
+				
+				board.addChild(pName2t);
+				
+				pScore1t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pScore1t.x = 534;
+				pScore1t.y = 3;
+				pScore1t.textAlign = "center";
+				
+				board.addChild(pScore1t);
+				
+				pScore2t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pScore2t.x = 744;
+				pScore2t.y = 3;
+				pScore2t.textAlign = "center";
+				
+				board.addChild(pScore2t);
+				
+				mText3t = new createjs.Text("", "11px SansationRegular", "#333333");
+				mText3t.x = 640;
+				mText3t.y = 1;
+				mText3t.textAlign = "center";
+				
+				board.addChild(mText3t);
+				
+				stage.addChild(board);
+				
+				board.y = -100;
+				
+				createjs.Tween.get(board).to({y:0},800, createjs.Ease.quintOut);
+				
+				createjs.Ticker.addEventListener("tick", enterFrame);
+				createjs.Ticker.setFPS(60);
+
+			
+				stage.update();
+			}
+
+			
+			function enterFrame(event) {
+				stage.update(event);
+			}
+			
+			function pollHandler()
+			{
+			  loadData();
+			  if (timestamp != timestampOld) {
+				  doUpdate = true;
+			  }
+			  if (!animating && doUpdate) {
+				  updateBoard();
+			  }
+			}
+			
+			function loadData() {
+				xhr.open('GET', 'streamcontrol.xml');
+				xhr.send();
+				xhr.onreadystatechange = function(){
+						xmlDoc = xhr.responseXML;
+						pName1 = xmlDoc.getElementsByTagName('pName1')[0].childNodes[0].nodeValue;
+						pScore1 = xmlDoc.getElementsByTagName('pScore1')[0].childNodes[0].nodeValue;
+						pName2 = xmlDoc.getElementsByTagName('pName2')[0].childNodes[0].nodeValue;
+						pScore2 = xmlDoc.getElementsByTagName('pScore2')[0].childNodes[0].nodeValue;
+						pCountry1 = getCountry(xmlDoc.getElementsByTagName('pCountry1')[0].childNodes[0].nodeValue);
+						pCountry2 = getCountry(xmlDoc.getElementsByTagName('pCountry2')[0].childNodes[0].nodeValue);
+						mText3 = xmlDoc.getElementsByTagName('mText3')[0].childNodes[0].nodeValue;
+						timestampOld = timestamp;
+						timestamp = xmlDoc.getElementsByTagName('timestamp')[0].childNodes[0].nodeValue;
+				}
+			}
+			
+			function updateBoard() {
+				
+				if (pName1t.text != pName1) {
+					animating = true;
+					createjs.Tween.get(pName1t).to({x:275,alpha:0},500, createjs.Ease.quintIn).call(function() {pName1t.text = pName1;})
+					.to({x:175,alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				if (pName2t.text != pName2) {
+					animating = true;
+					createjs.Tween.get(pName2t).to({x:1005,alpha:0},500, createjs.Ease.quintIn).call(function() {pName2t.text = pName2;})
+					.to({x:1105,alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				if (pScore1t.text != pScore1) {
+					animating = true;
+					createjs.Tween.get(pScore1t).to({alpha:0},500, createjs.Ease.quintIn).call(function() {pScore1t.text = pScore1;})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				if (pScore2t.text != pScore2) {
+					animating = true;
+					createjs.Tween.get(pScore2t).to({alpha:0},500, createjs.Ease.quintIn).call(function() {pScore2t.text = pScore2;})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				if (oldCountry1 != pCountry1 || pFlag1.alpha == 0) {
+					animating = true;
+					var pFlag1n = new createjs.Bitmap("GoSquared/cropped/iso/64shiny/" + pCountry1 + ".png");
+					
+					createjs.Tween.get(pFlag1).to({alpha:0},500, createjs.Ease.quintIn).call(function() {
+						pFlag1.removeAllChildren();
+						
+						pFlag1n.scaleX = 43 / pFlag1n.image.width;
+						pFlag1n.scaleY = 28 / pFlag1n.image.height;
+						
+						pFlag1.addChild(pFlag1n);
+						oldCountry1 = pCountry1;
+					})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				if (oldCountry2 != pCountry2 || pFlag2.alpha == 0) {
+					animating = true;
+					var pFlag2n = new createjs.Bitmap("GoSquared/cropped/iso/64shiny/" + pCountry2 + ".png");
+					
+					createjs.Tween.get(pFlag2).to({alpha:0},500, createjs.Ease.quintIn).call(function() {
+						pFlag2.removeAllChildren();
+						
+						pFlag2n.scaleX = 43 / pFlag2n.image.width;
+						pFlag2n.scaleY = 28 / pFlag2n.image.height;
+						
+						pFlag2.addChild(pFlag2n);
+						oldCountry2 = pCountry2;
+					})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				if (mText3t.text != mText3) {
+					animating = true;
+					createjs.Tween.get(mText3t).to({alpha:0},500, createjs.Ease.quintIn).call(function() {mText3t.text = mText3;})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+				
+				doUpdate = false;
+			}
+			
+			function getCountry (country) {
+			
+				var count = iso.findCountryByName(country);
+				if (!count)
+				count = iso.findCountryByCode(country);
+				if (!count) {
+					var count = new Array();
+					count['value'] = "unknown";
+				}
+				
+				return count['value'];
+			}
+	</script>
+</head>
+<body onLoad="init()">
+	<canvas id="myCanvas" width="1280" height="720">
+        canvas
+    </canvas>
+</body>

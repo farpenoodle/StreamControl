@@ -40,6 +40,7 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
 
     connect(ui->xsplitButton,SIGNAL( clicked() ),this,SLOT( findXSplit() ));
     connect(ui->layoutButton,SIGNAL( clicked() ),this,SLOT( findLayout() ));
+    connect(ui->aboutQtButton,SIGNAL( clicked() ),this,SLOT( abtQt() ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
 
     ui->xsplitPathTB->setDisabled(true);
@@ -100,4 +101,8 @@ void ConfigWindow::CDATAToggle( int state ) {
     } else {
         configsettings["useCDATA"] = "0";
     }
+}
+
+void ConfigWindow::abtQt() {
+    QMessageBox::aboutQt(this);
 }
