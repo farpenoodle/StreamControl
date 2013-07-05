@@ -70,15 +70,17 @@
 				xhr.send();
 				xhr.onreadystatechange = function(){
 						xmlDoc = xhr.responseXML;
-						pName1 = xmlDoc.getElementsByTagName('pName1')[0].childNodes[0].nodeValue;
-						pScore1 = xmlDoc.getElementsByTagName('pScore1')[0].childNodes[0].nodeValue;
-						pName2 = xmlDoc.getElementsByTagName('pName2')[0].childNodes[0].nodeValue;
-						pScore2 = xmlDoc.getElementsByTagName('pScore2')[0].childNodes[0].nodeValue;
-						pCountry1 = getCountry(xmlDoc.getElementsByTagName('pCountry1')[0].childNodes[0].nodeValue);
-						pCountry2 = getCountry(xmlDoc.getElementsByTagName('pCountry2')[0].childNodes[0].nodeValue);
-						mText3 = xmlDoc.getElementsByTagName('mText3')[0].childNodes[0].nodeValue;
+						
+						pName1 = getValueFromTag(xmlDoc,'pName1');
+						pName2 = getValueFromTag(xmlDoc,'pName2');
+						pScore1 = getValueFromTag(xmlDoc,'pScore1');
+						pScore2 = getValueFromTag(xmlDoc,'pScore2');
+						pCountry1 = getCountry(getValueFromTag(xmlDoc,'pCountry1'));
+						pCountry2 = getCountry(getValueFromTag(xmlDoc,'pCountry2'));
+						mText3 = getValueFromTag(xmlDoc,'mText3');
 						timestampOld = timestamp;
-						timestamp = xmlDoc.getElementsByTagName('timestamp')[0].childNodes[0].nodeValue;
+						timestamp = getValueFromTag(xmlDoc,'timestamp');
+						
 				}
 			}
 			
@@ -327,6 +329,18 @@
 				$.play();
 				
 				doUpdate = false;
+			}
+			
+			function getValueFromTag (xmlDoc,tag) {
+				if (xmlDoc.getElementsByTagName(tag).length != 0 ) {
+					if (xmlDoc.getElementsByTagName(tag)[0].childNodes.length == 0) {
+							return '';
+						} else {
+							return xmlDoc.getElementsByTagName(tag)[0].childNodes[0].nodeValue;
+					}
+				} else {
+					return '';
+				}
 			}
 			
 			function getCountry (country) {
