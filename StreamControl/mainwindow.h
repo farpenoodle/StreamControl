@@ -67,6 +67,7 @@ public slots:
     void addLineEdit(QDomElement, QWidget*);
     void addSpinBox(QDomElement, QWidget*);
     void addCheckBox(QDomElement, QWidget*);
+    void addComboBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
     QString addTabWidget(QDomElement, QWidget*);
