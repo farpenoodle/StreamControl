@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #include <QtXml/QDomDocument>
 #include <QModelIndex>
-#include <ScCompleter.h>
+#include "ScCompleter.h"
 
 class MainWindow : public QMainWindow
 {

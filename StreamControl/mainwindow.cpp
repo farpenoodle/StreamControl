@@ -50,13 +50,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCompleter>
 #include <QFileInfo>
 #include <QDir>
-#include <scCompleter.h>
+#include "ScCompleter.h"
 #include <QStringListModel>
-#include <ScLineEdit.h>
+#include "ScLineEdit.h"
 #include "scradiogroup.h"
 #include <QRadioButton>
 #include "windows.h"
-#include <twitterwidget.h>
+#include "twitterwidget.h"
 
 MainWindow::MainWindow()
 {
