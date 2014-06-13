@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #include <QtXml/QDomDocument>
 #include <QModelIndex>
-#include <ScCompleter.h>
+#include "ScCompleter.h"
 
 class MainWindow : public QMainWindow
 {
@@ -67,6 +67,7 @@ public slots:
     void addLineEdit(QDomElement, QWidget*);
     void addSpinBox(QDomElement, QWidget*);
     void addCheckBox(QDomElement, QWidget*);
+    void addComboBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
     QString addTabWidget(QDomElement, QWidget*);

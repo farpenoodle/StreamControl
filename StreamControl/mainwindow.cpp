@@ -50,13 +50,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCompleter>
 #include <QFileInfo>
 #include <QDir>
-#include <scCompleter.h>
+#include "ScCompleter.h"
 #include <QStringListModel>
-#include <ScLineEdit.h>
+#include "ScLineEdit.h"
 #include "scradiogroup.h"
 #include <QRadioButton>
 #include "windows.h"
-#include <twitterwidget.h>
+#include "twitterwidget.h"
 
 MainWindow::MainWindow()
 {
@@ -372,6 +372,17 @@ void MainWindow::saveData()
             }
             QDomText newItemt = doc.createTextNode(checked);
             newItem.appendChild(newItemt);
+        } else if (wType == "comboBox") {
+            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            QString value;
+            QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+            if (data.isNull())
+                value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
+            else
+                value = data.toString();
+
+            QDomText newItemt = doc.createTextNode(value);
+            newItem.appendChild(newItemt);
         } else if (wType == "radioGroup") {
             QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
 
@@ -671,6 +682,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addCheckBox(child.toElement(), parent);
         } else if (tagName == "radioGroup") {
             addRadioGroup(child.toElement(), parent);
+        } else if (tagName == "comboBox") {
+            addComboBox(child.toElement(), parent);
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
         } else if (tagName == "tabSet") {
@@ -784,6 +797,47 @@ void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
     ((QCheckBox*)widgetList[newCheckBox])->setText(element.text());
+
+}
+
+void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
+
+    QString newComboBox = element.attribute("id");
+    widgetType[newComboBox] = "comboBox";
+    widgetList[newComboBox] = new QComboBox(parent);
+    widgetList[newComboBox]->setObjectName(newComboBox);
+
+    ((QComboBox*)widgetList[newComboBox])->setGeometry(QRect(element.attribute("x").toInt(),
+                                                          element.attribute("y").toInt(),
+                                                          element.attribute("width").toInt(),
+                                                          element.attribute("height").toInt()));
+
+    if (element.attribute("editable") == "true") {
+        ((QComboBox*)widgetList[newComboBox])->setEditable(true);
+
+    }
+
+    QDomNode child = element.firstChild();
+    int selectedIndex = 0;
+    for (int itemIndex = 0; !child.isNull(); itemIndex++) {
+        QDomElement itemElement = child.toElement();
+        if (itemElement.tagName() == "comboItem") {
+
+            QString text = itemElement.text();
+            QString value = itemElement.attribute("value");
+            if (value.isNull())
+                value = text;
+
+            ((QComboBox*)widgetList[newComboBox])->addItem(text, value);
+
+            if (itemElement.attribute("selected") == "true")
+                selectedIndex = itemIndex;
+        }
+
+        child = child.nextSibling();
+    }
+
+    ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
 
 }
 
