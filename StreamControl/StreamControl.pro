@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     o2/o1requestor.cpp \
     o2/o1.cpp \
     o2twitter.cpp \
-    o2/o2settingsstore.cpp
+    o2/o2settingsstore.cpp \
+    sctsbutton.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
@@ -58,7 +59,8 @@ HEADERS  += mainwindow.h \
     o2/o1.h \
     o2twitter.h \
     o2/o2abstractstore.h \
-    o2/o2settingsstore.h
+    o2/o2settingsstore.h \
+    sctsbutton.h
 
 FORMS    += \
     configwindow.ui

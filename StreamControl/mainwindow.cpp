@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QStringListModel>
 #include "ScLineEdit.h"
 #include "scradiogroup.h"
+#include "sctsbutton.h"
 #include <QRadioButton>
 #include "windows.h"
 #include "twitterwidget.h"
@@ -394,6 +395,14 @@ void MainWindow::saveData()
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
             }
+        } else if (wType == "tsButton") {
+            if (((ScTSButton*)widgetList[i.key()])->isActive()) {
+                ((ScTSButton*)widgetList[i.key()])->setTimeStamp(timestamp_t);
+                ((ScTSButton*)widgetList[i.key()])->setActive(false);
+            }
+
+            QDomText newItemt = doc.createTextNode(QString::number(((ScTSButton*)widgetList[i.key()])->getTimeStamp()));
+            newItem.appendChild(newItemt);
         }
 
     }
@@ -583,6 +592,12 @@ void MainWindow::loadLayout() {
         parseToolBar(toolBarNode);
     }
 
+    //connect signal mappers
+
+    connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
+    connect (swapMapper, SIGNAL(mapped(QString)), this, SLOT(swapFields(QString))) ;
+    connect (tsMapper, SIGNAL(mapped(QString)), this, SLOT(tsClick(QString))) ;
+
 }
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
@@ -676,7 +691,7 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
             }
             ((QComboBox*)widgetList[newComboBox])->setMinimumWidth(comboBoxWidth);
 
-            if (comboBoxElement.attribute("editable") == "true") {
+            if (comboBoxElement.attribute("editable") == "1" || comboBoxElement.attribute("editable") == "true") {
                 ((QComboBox*)widgetList[newComboBox])->setEditable(true);
 
             }
@@ -887,7 +902,6 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), resetMapper, SLOT(map()));
         resetMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
-        connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
 
 
     } else if (element.attribute("type") == "swap") {
@@ -920,10 +934,46 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), swapMapper, SLOT(map()));
         swapMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
-        connect (swapMapper, SIGNAL(mapped(QString)), this, SLOT(swapFields(QString))) ;
 
 
 
+    } else if (element.attribute("type") == "timestamp") {
+        bool nSaveOnClick = false;
+
+        if (element.attribute("saveonclick") == "true" || element.attribute("saveonclick") == "1") {
+            nSaveOnClick = true;
+        }
+        QString newButton = element.attribute("id");
+        widgetType[newButton] = "tsButton";
+
+        widgetList[newButton] = new ScTSButton(nSaveOnClick,parent);
+        widgetList[newButton]->setObjectName(newButton);
+        ((ScTSButton*)widgetList[newButton])->setGeometry(QRect(element.attribute("x").toInt(),
+                                           element.attribute("y").toInt(),
+                                           element.attribute("width").toInt(),
+                                           element.attribute("height").toInt()));
+
+        ((ScTSButton*)widgetList[newButton])->setText(element.text());
+
+        if (!element.attribute("tooltip").isEmpty()) {
+            ((ScTSButton*)widgetList[newButton])->setToolTip(element.attribute("tooltip"));
+        }
+
+        connect(((ScTSButton*)widgetList[newButton]), SIGNAL(clicked()), tsMapper, SLOT(map()));
+        tsMapper -> setMapping (((ScTSButton*)widgetList[newButton]), newButton) ;
+    }
+}
+
+void MainWindow::tsClick(QString tsButton) {
+    qDebug() << tsButton;
+    if (((ScTSButton*)widgetList[tsButton])->isActive()) {
+        ((ScTSButton*)widgetList[tsButton])->setActive(false);
+    } else {
+        ((ScTSButton*)widgetList[tsButton])->setActive(true);
+    }
+
+    if (((ScTSButton*)widgetList[tsButton])->isSaveOnClick()) {
+        saveData();
     }
 }
 
@@ -1247,6 +1297,7 @@ void MainWindow::clearMaps() {
     dataMaster.clear();
     resetMapper = new QSignalMapper (this) ;
     swapMapper = new QSignalMapper (this) ;
+    tsMapper = new QSignalMapper (this) ;
 }
 
 bool MainWindow::checkDataSet1Blank(QString setName) {

@@ -78,6 +78,7 @@ public slots:
 
     void resetFields(QString);
     void swapFields(QString);
+    void tsClick(QString);
     void openConfig();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
@@ -105,6 +106,7 @@ public slots:
 private:
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
+    QSignalMapper *tsMapper;
     int layoutIterator;
     ConfigWindow *cWindow;
     QMap<QString, QString> settings;
