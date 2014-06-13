@@ -3,11 +3,11 @@
 #include <QDebug>
 #include <QTcpServer>
 #include <QMap>
-#include <QSettings>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QScriptEngine>
+#include <QScriptValueIterator>
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QTimer>
@@ -18,15 +18,12 @@
 #include "o2.h"
 #include "o2replyserver.h"
 #include "o2globals.h"
+#include "o2settingsstore.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
 
-static quint64 getHash() {
-    return QCryptographicHash::hash(O2_ENCRYPTION_KEY, QCryptographicHash::Sha1).toULongLong();
-}
-
-O2::O2(QObject *parent): QObject(parent), crypt_(getHash()) {
+O2::O2(QObject *parent): QObject(parent) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
@@ -34,9 +31,22 @@ O2::O2(QObject *parent): QObject(parent), crypt_(getHash()) {
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
 }
 
 O2::~O2() {
+}
+
+void O2::setStore(O2AbstractStore *store) {
+    if (!store) {
+        qWarning() << "Store object is null! Using default O2SettingsStore";
+        return;
+    }
+    // Delete the previously stored object
+    store_->deleteLater();
+    store_ = store;
+    // re-parent it to this class as we take ownership of it now
+    store_->setParent(this);
 }
 
 O2::GrantFlow O2::grantFlow() {
@@ -111,10 +121,19 @@ void O2::setLocalPort(int value) {
     emit localPortChanged();
 }
 
+QVariantMap O2::extraTokens() const {
+    return extraTokens_;
+}
+
+void O2::setExtraTokens(QVariantMap extraTokens) {
+    extraTokens_ = extraTokens;
+}
+
 void O2::link() {
     trace() << "O2::link";
     if (linked()) {
         trace() << " Linked already";
+        emit linkingSucceeded();
         return;
     }
 
@@ -198,12 +217,12 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
 
 QString O2::code() {
     QString key = QString(O2_KEY_CODE).arg(clientId_);
-    return crypt_.decryptToString(QSettings().value(key).toString());
+    return store_->value(key);
 }
 
 void O2::setCode(const QString &c) {
     QString key = QString(O2_KEY_CODE).arg(clientId_);
-    QSettings().setValue(key, crypt_.encryptToString(c));
+    store_->setValue(key, c);
 }
 
 void O2::onTokenReplyFinished() {
@@ -211,20 +230,38 @@ void O2::onTokenReplyFinished() {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
-        QScriptValue value;
         QScriptEngine engine;
-        value = engine.evaluate("(" + QString(replyData) + ")");
-        setToken(value.property(O2_OAUTH2_ACCESS_TOKEN).toString());
-        int expiresIn = value.property(O2_OAUTH2_EXPIRES_IN).toInteger();
-        if (expiresIn > 0) {
-            trace() << "Token expires in" << expiresIn << "seconds";
-            setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+        QScriptValueIterator it(engine.evaluate("(" + QString(replyData) + ")"));
+        QVariantMap tokens;
+
+        while (it.hasNext()) {
+            it.next();
+            tokens.insert(it.name(), it.value().toVariant());
         }
-        setRefreshToken(value.property(O2_OAUTH2_REFRESH_TOKEN).toString());
-        timedReplies_.remove(tokenReply);
-        emit linkedChanged();
-        emit tokenChanged();
-        emit linkingSucceeded();
+        // Check for mandatory tokens
+        if (tokens.contains(O2_OAUTH2_ACCESS_TOKEN)) {
+            setToken(tokens.take(O2_OAUTH2_ACCESS_TOKEN).toString());
+            bool ok = false;
+            int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
+            if (ok) {
+                trace() << "Token expires in" << expiresIn << "seconds";
+                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+            }
+            setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
+            // Set extra tokens if any
+            if (!tokens.isEmpty()) {
+                setExtraTokens(tokens);
+            }
+            timedReplies_.remove(tokenReply);
+            emit linkedChanged();
+            emit tokenChanged();
+            emit linkingSucceeded();
+        } else {
+            qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
+            emit linkedChanged();
+            emit tokenChanged();
+            emit linkingFailed();
+        }
     }
     tokenReply->deleteLater();
 }
@@ -258,34 +295,33 @@ QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters) {
 
 QString O2::token() {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    return crypt_.decryptToString(QSettings().value(key).toString());
+    return store_->value(key);
 }
 
 void O2::setToken(const QString &v) {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    QSettings().setValue(key, crypt_.encryptToString(v));
+    store_->setValue(key, v);
 }
 
 int O2::expires() {
     QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
-    return QSettings().value(key).toInt();
+    return store_->value(key).toInt();
 }
 
 void O2::setExpires(int v) {
     QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
-    QSettings().setValue(key, v);
+    store_->setValue(key, QString::number(v));
 }
 
 QString O2::refreshToken() {
     QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
-    QString ret = crypt_.decryptToString(QSettings().value(key).toString());
-    return ret;
+    return store_->value(key);
 }
 
 void O2::setRefreshToken(const QString &v) {
     trace() << "O2::setRefreshToken" << v.left(4) << "...";
     QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
-    QSettings().setValue(key, crypt_.encryptToString(v));
+    store_->setValue(key, v);
 }
 
 void O2::refresh() {

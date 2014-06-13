@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     o2/o2.cpp \
     o2/o1requestor.cpp \
     o2/o1.cpp \
-    o2twitter.cpp
+    o2twitter.cpp \
+    o2/o2settingsstore.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
@@ -55,7 +56,9 @@ HEADERS  += mainwindow.h \
     o2/o1flickr.h \
     o2/o1dropbox.h \
     o2/o1.h \
-    o2twitter.h
+    o2twitter.h \
+    o2/o2abstractstore.h \
+    o2/o2settingsstore.h
 
 FORMS    += \
     configwindow.ui
@@ -64,3 +67,6 @@ RESOURCES += \
     resources.qrc
 	
 RC_FILE = streamcontrol.rc
+
+OTHER_FILES += \
+    o2/o2.pri

@@ -1,5 +1,4 @@
 #include <QCryptographicHash>
-#include <QSettings>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
 #include <QDateTime>
@@ -13,25 +12,35 @@
 #include "o1.h"
 #include "o2replyserver.h"
 #include "o2globals.h"
+#include "o2settingsstore.h"
 
 #define trace() if (1) qDebug()
 // #define trace() if (0) qDebug()
 
-static quint64 getHash() {
-    return QCryptographicHash::hash(O2_ENCRYPTION_KEY, QCryptographicHash::Sha1).toULongLong();
-}
-
 O1::O1(QObject *parent) :
-    QObject(parent), crypt_(getHash()) {
+    QObject(parent) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     localPort_ = 0;
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
 }
 
 O1::~O1() {
+}
+
+void O1::setStore(O2AbstractStore *store) {
+    if (!store) {
+        qWarning() << "Store object is null! Using default O2SettingsStore";
+        return;
+    }
+    // Delete the previously stored object
+    store_->deleteLater();
+    store_ = store;
+    // re-parent it to this class as we take ownership of it now
+    store_->setParent(this);
 }
 
 bool O1::linked() {
@@ -40,22 +49,22 @@ bool O1::linked() {
 
 QString O1::tokenSecret() {
     QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
-    return crypt_.decryptToString(QSettings().value(key).toString());
+    return store_->value(key);
 }
 
 void O1::setTokenSecret(const QString &v) {
     QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
-    QSettings().setValue(key, crypt_.encryptToString(v));
+    store_->setValue(key, v);
 }
 
 QString O1::token() {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    return crypt_.decryptToString(QSettings().value(key).toString());
+    return store_->value(key);
 }
 
 void O1::setToken(const QString &v) {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    QSettings().setValue(key, crypt_.encryptToString(v));
+    store_->setValue(key, v);
 }
 
 QString O1::clientId() {
@@ -110,6 +119,14 @@ QUrl O1::accessTokenUrl() {
 void O1::setAccessTokenUrl(const QUrl &value) {
     accessTokenUrl_ = value;
     emit accessTokenUrlChanged();
+}
+
+QVariantMap O1::extraTokens() const {
+    return extraTokens_;
+}
+
+void O1::setExtraTokens(QVariantMap extraTokens) {
+    extraTokens_ = extraTokens;
 }
 
 void O1::unlink() {
@@ -347,10 +364,16 @@ void O1::onTokenExchangeFinished() {
     QByteArray data = reply->readAll();
     QMap<QString, QString> response = parseResponse(data);
     if (response.contains(O2_OAUTH_TOKEN) && response.contains(O2_OAUTH_TOKEN_SECRET)) {
-        QString token = response.value(O2_OAUTH_TOKEN);
-        QString secret = response.value(O2_OAUTH_TOKEN_SECRET);
-        setToken(token);
-        setTokenSecret(secret);
+        setToken(response.take(O2_OAUTH_TOKEN));
+        setTokenSecret(response.take(O2_OAUTH_TOKEN_SECRET));
+        // Set extra tokens if any
+        if (!response.isEmpty()) {
+            QVariantMap extraTokens;
+            foreach (QString key, response.keys()) {
+               extraTokens.insert(key, response.value(key));
+            }
+            setExtraTokens(extraTokens);
+        }
         emit linkedChanged();
         emit linkingSucceeded();
     } else {

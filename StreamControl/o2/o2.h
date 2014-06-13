@@ -12,7 +12,7 @@
 #include <QPair>
 
 #include "o2reply.h"
-#include "simplecrypt.h"
+#include "o2abstractstore.h"
 
 class O2ReplyServer;
 
@@ -32,6 +32,10 @@ public:
     /// Are we authenticated?
     Q_PROPERTY(bool linked READ linked NOTIFY linkedChanged)
     bool linked();
+
+    /// Extra tokens available after a successful OAuth exchange
+    Q_PROPERTY(QMap extraTokens READ extraTokens)
+    QVariantMap extraTokens() const;
 
     /// Authentication token.
     Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
@@ -93,6 +97,9 @@ public:
 
     /// Get token expiration time (seconds from Epoch).
     int expires();
+
+    /// Sets the storage object to use for storing the OAuth tokens on a peristent medium
+    void setStore(O2AbstractStore *store);
 
 public slots:
     /// Authenticate.
@@ -161,6 +168,9 @@ protected:
     /// Set token expiration time.
     void setExpires(int v);
 
+    /// Set extra tokens found in OAuth response
+    void setExtraTokens(QVariantMap extraTokens);
+
 protected:
     QString clientId_;
     QString clientSecret_;
@@ -172,10 +182,11 @@ protected:
     QUrl refreshTokenUrl_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
-    SimpleCrypt crypt_;
     O2ReplyList timedReplies_;
     quint16 localPort_;
     GrantFlow grantFlow_;
+    O2AbstractStore *store_;
+    QVariantMap extraTokens_;
 };
 
 #endif // O2_H
