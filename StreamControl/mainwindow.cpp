@@ -80,7 +80,7 @@ MainWindow::MainWindow()
 
     cWindow = new ConfigWindow(this);
 
-    QToolBar* toolBar = new QToolBar(this);
+    toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
     toolBar->setLayoutDirection(Qt::LeftToRight);
     toolBar->setMovable(false);
@@ -115,33 +115,11 @@ MainWindow::MainWindow()
 
 
     //code to add non buttons to toolbar
-    gameComboBox = new QComboBox(this);
-    gameComboBox->setMinimumContentsLength(20);
     QLabel* spaceLabel = new QLabel("   ");
-    QLabel* gameLabel = new QLabel("Game ");
-
-    QAction* actionAddGame = new QAction(this);
-    actionAddGame->setObjectName(QString("actionAddGame"));
-    QIcon addIcon;
-    addIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/plus.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionAddGame->setIcon(addIcon);
-    connect(actionAddGame,SIGNAL( triggered() ),this,SLOT( addGame() ));
-
-    QAction* actionDelGame = new QAction(this);
-    actionDelGame->setObjectName(QString("actionDelGame"));
-    QIcon delIcon;
-    delIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/minus.png"), QSize(), QIcon::Normal, QIcon::Off);
-    actionDelGame->setIcon(delIcon);
-    connect(actionDelGame,SIGNAL( triggered() ),this,SLOT( delGame() ));
-
 
     toolBar->addAction(actionSave);
     toolBar->addWidget(configButton);
     toolBar->addWidget(spaceLabel);
-    toolBar->addWidget(gameLabel);
-    toolBar->addWidget(gameComboBox);
-    toolBar->addAction(actionAddGame);
-    toolBar->addAction(actionDelGame);
     toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
     loadSettings();
@@ -185,14 +163,6 @@ void MainWindow::loadSettings() {
             settings["useCDATA"] = "0";
         }
 
-        QDomElement gamesE = settingsXML.namedItem("games").toElement();
-
-        for(QDomNode n = gamesE.firstChild(); !n.isNull(); n = n.nextSibling())
-        {
-           QDomElement gameE = n.toElement();
-           gameComboBox->addItem(gameE.text());
-        }
-
         settings["xsplitPath"] = xsplitPath;
         settings["layoutPath"] = layoutPath;
 
@@ -219,15 +189,6 @@ void MainWindow::loadSettings() {
             msgBox.exec();
             xsplitPath = "";
         }
-
-
-        //set some default games if none already set
-        gameComboBox->addItem("Super Street Fighter IV");
-        gameComboBox->addItem("Ultimate Marvel vs Capcom 3");
-        gameComboBox->addItem("Persona 4: Arena");
-        gameComboBox->addItem("Tekken Tag Tournament 2");
-        gameComboBox->addItem("Soul Calibur V");
-        gameComboBox->addItem("King of Fighters XIII");
 
         saveSettings();
     }
@@ -264,14 +225,6 @@ void MainWindow::saveSettings() {
 
     QDomElement gamesE = doc.createElement("games");
     settingsXML.appendChild(gamesE);
-
-
-    for (int i = 0; i < gameComboBox->count(); ++i) {
-        QDomElement gameE = doc.createElement("game");
-        gamesE.appendChild(gameE);
-        QDomCDATASection gameText = doc.createCDATASection(gameComboBox->itemText(i));
-        gameE.appendChild(gameText);
-    }
 
 
     QTextStream out(&file);
@@ -313,15 +266,6 @@ void MainWindow::loadData()
         } else if (wType == "radioGroup") {
             ((ScRadioGroup*)widgetList[i.key()])->checkFromValue(currElement.text());
         }
-    }
-
-    int gameIndex = gameComboBox->findText(game.text());
-    if (gameIndex != -1) {
-        gameComboBox->setCurrentIndex(gameIndex);
-    } else if (game.text() != "") {
-        gameComboBox->addItem(game.text());
-        gameComboBox->setCurrentIndex(gameComboBox->findText(game.text()));
-        saveSettings();
     }
 
 }
@@ -454,19 +398,6 @@ void MainWindow::saveData()
 
     }
 
-
-    QDomElement gameE = doc.createElement("game");
-    items.appendChild(gameE);
-
-    if (useCDATA) {
-        QDomCDATASection gameT = doc.createCDATASection(gameComboBox->currentText());
-        gameE.appendChild(gameT);
-    } else {
-        QDomText gameT = doc.createTextNode(gameComboBox->currentText());
-        gameE.appendChild(gameT);
-    }
-
-
     QTextStream out(&file);
     out.setCodec("UTF-8");
     out << doc.toString();
@@ -548,23 +479,6 @@ void MainWindow::openConfig() {
 
         loadData();
     }
-}
-
-void MainWindow::addGame() {
-    bool ok;
-    QString game = QInputDialog::getText(this, tr("Input"),
-                                              tr("Game:"), QLineEdit::Normal,
-                                              "", &ok);
-    if (ok && !game.isEmpty()) {
-             gameComboBox->addItem(game);
-             gameComboBox->setCurrentIndex(gameComboBox->findText(game));
-             saveSettings();
-    }
-}
-
-void MainWindow::delGame() {
-    gameComboBox->removeItem(gameComboBox->currentIndex());
-    saveSettings();
 }
 
 void MainWindow::toggleAlwaysOnTop(bool on_top) {
@@ -662,13 +576,20 @@ void MainWindow::loadLayout() {
         parseLayout(layout, centralWidget);
     }
 
+    //Do ToolBar
+    QDomNode toolBarNode = layout.namedItem("toolBar");
+
+    if (!toolBarNode.isNull()) {
+        parseToolBar(toolBarNode);
+    }
+
 }
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
     QDomNode child = element.firstChild();
     while (!child.isNull()) {
         QString tagName = child.toElement().tagName();
-        if(tagName == "label") {
+        if (tagName == "label") {
             addLabel(child.toElement(), parent);
         } else if (tagName == "line") {
             addLine(child.toElement(), parent);
@@ -722,6 +643,73 @@ void MainWindow::parseTabLayout(QDomElement element, QWidget *parent) {
 
         child = child.nextSibling();
     }
+}
+
+void MainWindow::parseToolBar(QDomNode toolBarNode) {
+
+    QDomNode child = toolBarNode.firstChild();
+    while (!child.isNull()) {
+        QString tagName = child.toElement().tagName();
+
+        if (tagName == "label") {
+            //add labels
+            QString newLabel = "label"+QString::number(layoutIterator);
+            visualList[newLabel] = new QLabel();
+            visualList[newLabel]->setObjectName(newLabel);
+            ((QLabel*)visualList[newLabel])->setText(child.toElement().text());
+
+            toolBar->addWidget(((QLabel*)visualList[newLabel]));
+
+            layoutIterator++;
+            //end labels
+        } else if (tagName == "comboBox") {
+            //add comboboxes
+            QDomElement comboBoxElement = child.toElement();
+            QString newComboBox = comboBoxElement.attribute("id");
+            widgetType[newComboBox] = "comboBox";
+            widgetList[newComboBox] = new QComboBox();
+            widgetList[newComboBox]->setObjectName(newComboBox);
+
+            int comboBoxWidth = 100;
+            if (comboBoxElement.hasAttribute("width")) {
+                comboBoxWidth = comboBoxElement.attribute("width").toInt();
+            }
+            ((QComboBox*)widgetList[newComboBox])->setMinimumWidth(comboBoxWidth);
+
+            if (comboBoxElement.attribute("editable") == "true") {
+                ((QComboBox*)widgetList[newComboBox])->setEditable(true);
+
+            }
+
+            toolBar->addWidget(((QComboBox*)widgetList[newComboBox]));
+
+            QDomNode combochild = comboBoxElement.firstChild();
+            int selectedIndex = 0;
+            for (int itemIndex = 0; !combochild.isNull(); itemIndex++) {
+                QDomElement itemElement = combochild.toElement();
+                if (itemElement.tagName() == "comboItem") {
+
+                    QString text = itemElement.text();
+                    QString value = itemElement.attribute("value");
+                    if (value.isNull())
+                        value = text;
+
+                    ((QComboBox*)widgetList[newComboBox])->addItem(text, value);
+
+                    if (itemElement.attribute("selected") == "true")
+                        selectedIndex = itemIndex;
+                }
+
+                combochild = combochild.nextSibling();
+            }
+
+            ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
+            //end comboboxes
+        }
+
+        child = child.nextSibling();
+    }
+
 }
 
 void MainWindow::addLabel(QDomElement element, QWidget *parent) {
@@ -1241,7 +1229,7 @@ QString MainWindow::addTabWidget(QDomElement element, QWidget *parent) {
 }
 
 QDomDocument MainWindow::getDefaultLayout() {
-    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"140\" tabbed=\"1\">\r\n <tab name=\"Match Info\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">Player 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">Player 2</label>\r\n  <label x=\"300\" y=\"14\" width=\"46\" height=\"13\">Rounds</label>\r\n  <lineEdit id=\"pName1\" x=\"60\" y=\"10\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <lineEdit id=\"pName2\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" dataset=\"players.txt\" />\r\n  <spinBox id=\"pScore1\" x=\"250\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"pScore2\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"rounds\" x=\"340\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <button type=\"reset\" x=\"300\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n  <button type=\"swap\" x=\"340\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n </tab>\r\n <tab name=\"Commentary\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">Title 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">Title 2</label>\r\n  <lineEdit id=\"cTitle1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"cTitle2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 1\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">mText 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">mText 2</label>\r\n  <lineEdit id=\"mText1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 2\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">mText 3</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">mText 4</label>\r\n  <lineEdit id=\"mText3\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText4\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n</layout>\r\n";
+    QString xmlcontent = "<!DOCTYPE StreamControlLayout>\r\n<layout width=\"400\" height=\"140\" tabbed=\"1\">\r\n <toolBar>\r\n  <label>Game</label>\r\n  <comboBox id=\"game\" editable=\"true\">\r\n   <comboItem>Super Street Fighter IV</comboItem>\r\n   <comboItem>Ultimate Marvel vs Capcom 3</comboItem>\r\n   <comboItem>Persona 4: Arena</comboItem>\r\n   <comboItem>Tekken Tag Tournament 2</comboItem>\r\n   <comboItem>King of Fighters XIII</comboItem>\r\n  </comboBox>\r\n </toolBar>\r\n <tab name=\"Match Info\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">Player 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">Player 2</label>\r\n  <label x=\"300\" y=\"14\" width=\"46\" height=\"13\">Rounds</label>\r\n  <lineEdit id=\"pName1\" x=\"60\" y=\"10\" width=\"171\" height=\"20\" />\r\n  <lineEdit id=\"pName2\" x=\"60\" y=\"40\" width=\"171\" height=\"20\" />\r\n  <spinBox id=\"pScore1\" x=\"250\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"pScore2\" x=\"250\" y=\"40\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <spinBox id=\"rounds\" x=\"340\" y=\"10\" width=\"42\" height=\"22\" maximum=\"999\" />\r\n  <button type=\"reset\" x=\"300\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Reset the Scores\" id=\"reset\" reset=\"pScore1,pScore2\">Reset</button>\r\n  <button type=\"swap\" x=\"340\" y=\"40\" width=\"41\" height=\"23\" tooltip=\"Swap the Scores\" id=\"swap1\" swapSet1=\"pName1,pScore1\" swapSet2=\"pName2,pScore2\">Swap</button>\r\n </tab>\r\n <tab name=\"Commentary\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">Title 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">Title 2</label>\r\n  <lineEdit id=\"cTitle1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"cTitle2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 1\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">mText 1</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">mText 2</label>\r\n  <lineEdit id=\"mText1\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText2\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n <tab name=\"Misc 2\">\r\n  <label x=\"10\" y=\"14\" width=\"46\" height=\"13\">mText 3</label>\r\n  <label x=\"10\" y=\"44\" width=\"46\" height=\"13\">mText 4</label>\r\n  <lineEdit id=\"mText3\" x=\"60\" y=\"10\" width=\"321\" height=\"20\" />\r\n  <lineEdit id=\"mText4\" x=\"60\" y=\"40\" width=\"321\" height=\"20\" />\r\n </tab>\r\n</layout>\r\n";
     QDomDocument doc;
     doc.setContent(xmlcontent);
     return doc;

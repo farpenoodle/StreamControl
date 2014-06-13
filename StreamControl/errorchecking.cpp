@@ -222,8 +222,8 @@ QStringList MainWindow::checkTabLayout(QDomElement element) {
 
             errors << checkElements(child.toElement());
 
-        } else if (tagName == "cli") {
-            //parse cli
+        } else if (tagName == "cli" || tagName == "toolBar") {
+            //ignore these
         } else {
             errors << "Invalid item " + tagName + " in tabSet";
         }

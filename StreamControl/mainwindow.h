@@ -50,8 +50,8 @@ public:
     void loadData();
     void loadSettings();
 
-    QComboBox *gameComboBox;
     QWidget *centralWidget;
+    QToolBar *toolBar;
 
 public slots:
 
@@ -61,6 +61,7 @@ public slots:
     void clearMaps();
     void parseLayout(QDomElement, QWidget*);
     void parseTabLayout(QDomElement, QWidget*);
+    void parseToolBar(QDomNode);
     void addLabel(QDomElement, QWidget*);
     void addLine(QDomElement, QWidget*);
     void addButton(QDomElement, QWidget*);
@@ -78,8 +79,6 @@ public slots:
     void resetFields(QString);
     void swapFields(QString);
     void openConfig();
-    void addGame();
-    void delGame();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
     void removeFromDataSet();
