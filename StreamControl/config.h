@@ -30,4 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SC_VERSION "0.4"
 
+#define SC_XML 1
+#define SC_JSON 2
+#define SC_Both 3
+
 #endif // CONFIG_H

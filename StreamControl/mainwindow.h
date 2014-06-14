@@ -72,6 +72,10 @@ public slots:
     void addRadioGroup(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
     QString addTabWidget(QDomElement, QWidget*);
+    QString saveXML();
+    QString saveJSON();
+    void loadXML();
+    void loadJSON();
     QDomDocument getDefaultLayout();
 
     void saveDataSets();
@@ -125,6 +129,7 @@ private:
     QStringList removedSetQueue;
 
     bool useCDATA;
+    int saveFormat;
 };
 
 #endif // MAINWINDOW_H

@@ -58,6 +58,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QRadioButton>
 #include "windows.h"
 #include "twitterwidget.h"
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 MainWindow::MainWindow()
 {
@@ -164,6 +167,16 @@ void MainWindow::loadSettings() {
             settings["useCDATA"] = "0";
         }
 
+        QDomElement formatE = settingsXML.namedItem("format").toElement();
+
+        saveFormat = formatE.text().toInt();
+
+        if(saveFormat < 1 || saveFormat > 3) {
+            saveFormat = SC_XML;
+        }
+
+        settings["format"] = QString::number(saveFormat);
+
         settings["xsplitPath"] = xsplitPath;
         settings["layoutPath"] = layoutPath;
 
@@ -224,9 +237,11 @@ void MainWindow::saveSettings() {
     QDomText useCDATAT = doc.createTextNode(settings["useCDATA"]);
     useCDATAE.appendChild(useCDATAT);
 
-    QDomElement gamesE = doc.createElement("games");
-    settingsXML.appendChild(gamesE);
+    QDomElement formatE = doc.createElement("format");
+    settingsXML.appendChild(formatE);
 
+    QDomText formatT = doc.createTextNode(settings["format"]);
+    formatE.appendChild(formatT);
 
     QTextStream out(&file);
     out.setCodec("UTF-8");
@@ -236,6 +251,16 @@ void MainWindow::saveSettings() {
 
 void MainWindow::loadData()
 {
+    if (saveFormat == SC_XML || saveFormat == SC_Both) {
+        loadXML();
+    }
+    if (saveFormat == SC_JSON) {
+        loadJSON();
+    }
+
+}
+
+void MainWindow::loadXML() {
     QFile file(settings["xsplitPath"] + "streamcontrol.xml");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -245,8 +270,6 @@ void MainWindow::loadData()
     file.close();
 
     QDomElement items = doc.namedItem("items").toElement();
-
-    QDomElement game = items.namedItem("game").toElement();
 
     QMapIterator<QString, QObject *> i(widgetList);
     while (i.hasNext()) {
@@ -270,15 +293,81 @@ void MainWindow::loadData()
             ((ScRadioGroup*)widgetList[i.key()])->checkFromValue(currElement.text());
         }
     }
+}
 
+void MainWindow::loadJSON() {
+    QFile file(settings["xsplitPath"] + "streamcontrol.json");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+
+    //doc.setContent(&file);
+    QString input = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(input.toUtf8());
+    QJsonObject Obj = doc.object();
+    qDebug() << doc.isNull();
+
+    file.close();
+
+    //QDomElement items = doc.namedItem("items").toElement();
+
+    QMapIterator<QString, QObject *> i(widgetList);
+    while (i.hasNext()) {
+        i.next();
+        QString wType = widgetType[i.key()];
+
+        if (wType == "lineEdit") {
+            ((ScLineEdit*)widgetList[i.key()])->setText(Obj[i.key()].toString());
+        } else if (wType == "spinBox") {
+            ((QSpinBox*)widgetList[i.key()])->setValue(Obj[i.key()].toInt());
+        } else if (wType == "tsButton") {
+            ((ScTSButton*)widgetList[i.key()])->setTimeStamp(Obj[i.key()].toInt());
+        } else if (wType == "checkBox") {
+            if (Obj[i.key()].toString() == "1") {
+                ((QCheckBox*)widgetList[i.key()])->setChecked(true);
+            } else {
+                ((QCheckBox*)widgetList[i.key()])->setChecked(false);
+            }
+        } else if (wType == "radioGroup") {
+            ((ScRadioGroup*)widgetList[i.key()])->checkFromValue(Obj[i.key()].toString());
+        }
+    }
 }
 
 
 void MainWindow::saveData()
 {
-    QFile file(settings["xsplitPath"] + "streamcontrol.xml");
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    QString dataOutput;
 
+    if (saveFormat == SC_XML || saveFormat == SC_Both) {
+        QFile file(settings["xsplitPath"] + "streamcontrol.xml");
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        dataOutput = saveXML();
+
+        QTextStream out(&file);
+        out.setCodec("UTF-8");
+        out << dataOutput;
+        file.close();
+    }
+
+    if (saveFormat == SC_JSON || saveFormat == SC_Both) {
+        QFile file(settings["xsplitPath"] + "streamcontrol.json");
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        dataOutput = saveJSON();
+
+        QTextStream out(&file);
+        out.setCodec("UTF-8");
+        out << dataOutput;
+        file.close();
+    }
+
+    //datasets
+
+    saveDataSets();
+}
+
+QString MainWindow::saveXML() {
     QDomDocument doc ("StreamControl");
 
     QDomElement items = doc.createElement("items");
@@ -409,14 +498,69 @@ void MainWindow::saveData()
 
     }
 
-    QTextStream out(&file);
-    out.setCodec("UTF-8");
-    out << doc.toString();
-    file.close();
+    return doc.toString();
+}
 
-    //datasets
+QString MainWindow::saveJSON() {
 
-    saveDataSets();
+    QJsonObject Obj;
+
+    QDateTime current = QDateTime::currentDateTime();
+    uint timestamp_t = current.toTime_t();
+
+    Obj["timestamp"] = QString::number(timestamp_t);
+
+    QMapIterator<QString, QObject *> i(widgetList);
+    while (i.hasNext()) {
+        i.next();
+        QString wType = widgetType[i.key()];
+
+        if (wType == "lineEdit") {
+            Obj[i.key()] = ((ScLineEdit*)widgetList[i.key()])->text();
+        } else if (wType == "spinBox") {
+            Obj[i.key()] = ((QSpinBox*)widgetList[i.key()])->text();
+        } else if (wType == "checkBox") {
+            QString checked = "0";
+            if (((QCheckBox*)widgetList[i.key()])->isChecked()) {
+                checked = "1";
+            }
+            Obj[i.key()] = checked;
+        } else if (wType == "comboBox") {
+            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            QString value;
+            QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+            if (data.isNull())
+                value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
+            else
+                value = data.toString();
+
+            Obj[i.key()] = value;
+        } else if (wType == "radioGroup") {
+            QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
+            Obj[i.key()] = value;
+        } else if (wType == "tweet") {
+            QJsonObject tweet;
+
+            tweet["username"] = ((twitterWidget*)widgetList[i.key()])->getUsername();
+            tweet["twittername"] = ((twitterWidget*)widgetList[i.key()])->getTwitterName();
+            tweet["text"] = ((twitterWidget*)widgetList[i.key()])->getTweetText();
+            tweet["created"] = ((twitterWidget*)widgetList[i.key()])->getDate();
+            tweet["picFileName"] = ((twitterWidget*)widgetList[i.key()])->getProfilePicFilename();
+
+            Obj[i.key()] = tweet;
+
+        } else if (wType == "tsButton") {
+            if (((ScTSButton*)widgetList[i.key()])->isActive()) {
+                ((ScTSButton*)widgetList[i.key()])->setTimeStamp(timestamp_t);
+                ((ScTSButton*)widgetList[i.key()])->setActive(false);
+            }
+            Obj[i.key()] = QString::number(((ScTSButton*)widgetList[i.key()])->getTimeStamp());
+        }
+
+    }
+
+    return QJsonDocument(Obj).toJson(QJsonDocument::Indented);
+
 }
 
 void MainWindow::resetFields(QString widget)
@@ -477,11 +621,18 @@ void MainWindow::openConfig() {
         settings["xsplitPath"] = configSettings["xsplitPath"];
         settings["layoutPath"] = configSettings["layoutPath"];
         settings["useCDATA"] = configSettings["useCDATA"];
+        settings["format"] = configSettings["format"];
 
         if (settings["useCDATA"] == "1") {
             useCDATA = true;
         } else {
             useCDATA = false;
+        }
+
+        saveFormat = settings["format"].toInt();
+
+        if(saveFormat < 1 || saveFormat > 3) {
+            saveFormat = SC_XML;
         }
 
         saveSettings();
