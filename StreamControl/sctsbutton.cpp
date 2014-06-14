@@ -21,12 +21,10 @@ bool ScTSButton::isSaveOnClick() {
 void ScTSButton::setActive(bool nActive) {
     if (nActive == true) {
         this->setStyleSheet("background-color: red");
-        qDebug() << "Yup";
         active = true;
     } else {
         this->setStyleSheet("background-color: none");
         active = false;
-        qDebug() << "Nop";
     }
 }
 

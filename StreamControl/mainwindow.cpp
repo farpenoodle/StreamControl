@@ -258,6 +258,8 @@ void MainWindow::loadData()
             ((ScLineEdit*)widgetList[i.key()])->setText(currElement.text());
         } else if (wType == "spinBox") {
             ((QSpinBox*)widgetList[i.key()])->setValue(currElement.text().toInt());
+        } else if (wType == "tsButton") {
+            ((ScTSButton*)widgetList[i.key()])->setTimeStamp(currElement.text().toInt());
         } else if (wType == "checkBox") {
             if (currElement.text() == "1") {
                 ((QCheckBox*)widgetList[i.key()])->setChecked(true);
@@ -965,7 +967,6 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 }
 
 void MainWindow::tsClick(QString tsButton) {
-    qDebug() << tsButton;
     if (((ScTSButton*)widgetList[tsButton])->isActive()) {
         ((ScTSButton*)widgetList[tsButton])->setActive(false);
     } else {
