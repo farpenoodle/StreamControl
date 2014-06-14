@@ -1286,6 +1286,12 @@ QDomDocument MainWindow::getDefaultLayout() {
 }
 
 void MainWindow::clearMaps() {
+    QList<QAction *> tbList = toolBar->actions();
+
+    for (int tbi = 3; tbi < tbList.length();tbi++) {
+        toolBar->removeAction(tbList.at(tbi));
+    }
+
     widgetList.clear();
     visualList.clear();
     widgetType.clear();
