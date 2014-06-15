@@ -205,6 +205,3 @@ Makefile*
 # QtCreator
 
 *.autosave
-
-#Ignore Twitter Keys
-StreamControl/twitterOauth.h
