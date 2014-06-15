@@ -452,15 +452,19 @@ QString MainWindow::saveXML() {
             QDomText newItemt = doc.createTextNode(checked);
             newItem.appendChild(newItemt);
         } else if (wType == "comboBox") {
-            //int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
             QString value;
-            /*QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
-            if (data.isNull())
-                value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
-            else
-                value = data.toString();*/
 
             value = ((QComboBox*)widgetList[i.key()])->currentText();
+
+            int valueIndex = ((QComboBox*)widgetList[i.key()])->findText(value);
+            if (valueIndex != -1) {
+                QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+                if (data.isNull())
+                    value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
+                else
+                    value = data.toString();
+            }
 
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
@@ -571,15 +575,19 @@ QString MainWindow::saveJSON() {
             }
             Obj[i.key()] = checked;
         } else if (wType == "comboBox") {
-            //int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
             QString value;
-            /*QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
-            if (data.isNull())
-                value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
-            else
-                value = data.toString();*/
 
             value = ((QComboBox*)widgetList[i.key()])->currentText();
+
+            int valueIndex = ((QComboBox*)widgetList[i.key()])->findText(value);
+            if (valueIndex != -1) {
+                QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+                if (data.isNull())
+                    value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
+                else
+                    value = data.toString();
+            }
 
             Obj[i.key()] = value;
         } else if (wType == "radioGroup") {
