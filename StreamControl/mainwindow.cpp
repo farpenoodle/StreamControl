@@ -452,13 +452,15 @@ QString MainWindow::saveXML() {
             QDomText newItemt = doc.createTextNode(checked);
             newItem.appendChild(newItemt);
         } else if (wType == "comboBox") {
-            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            //int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
             QString value;
-            QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+            /*QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
             if (data.isNull())
                 value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
             else
-                value = data.toString();
+                value = data.toString();*/
+
+            value = ((QComboBox*)widgetList[i.key()])->currentText();
 
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
@@ -569,13 +571,15 @@ QString MainWindow::saveJSON() {
             }
             Obj[i.key()] = checked;
         } else if (wType == "comboBox") {
-            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            //int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
             QString value;
-            QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+            /*QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
             if (data.isNull())
                 value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
             else
-                value = data.toString();
+                value = data.toString();*/
+
+            value = ((QComboBox*)widgetList[i.key()])->currentText();
 
             Obj[i.key()] = value;
         } else if (wType == "radioGroup") {
@@ -1011,7 +1015,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
 
-    if (element.attribute("editable") == "true") {
+    if (element.attribute("editable") == "true" || element.attribute("editable") == "1") {
         ((QComboBox*)widgetList[newComboBox])->setEditable(true);
 
     }
@@ -1029,7 +1033,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
 
             ((QComboBox*)widgetList[newComboBox])->addItem(text, value);
 
-            if (itemElement.attribute("selected") == "true")
+            if (itemElement.attribute("selected") == "true" || itemElement.attribute("selected") == "1")
                 selectedIndex = itemIndex;
         }
 
