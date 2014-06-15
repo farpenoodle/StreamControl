@@ -234,6 +234,11 @@ void MainWindow::loadSettings() {
             msgBox.exec();
 
             settings["xsplitPath"] = xsplitPath;
+            settings["useCDATA"] = "0";
+            useCDATA = false;
+            settings["format"] = QString::number(SC_XML);
+            saveFormat = SC_XML;
+
 
         } else {
             QMessageBox msgBox;
