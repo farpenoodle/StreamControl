@@ -130,11 +130,49 @@ MainWindow::MainWindow()
     loadLayout();
     loadData();
 
+    if (RegisterHotKey(
+            (HWND(this->winId())),
+            1,
+            MOD_ALT | MOD_CONTROL | MOD_SHIFT | 0x4000,
+            0x53)) //ctrl+alt+shift+s
+        {
+            qDebug() << "registered hotkey";
+        }
+
 }
 
 MainWindow::~MainWindow()
 {
+    if(UnregisterHotKey(HWND(this->winId()), 1))
+    {
+        qDebug("UNREGISTED");
+    }
     //delete ui;
+}
+
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+    if(eventType=="windows_generic_MSG")
+    {
+        MSG* msg=static_cast<MSG*>(message);
+        if(msg->message==WM_HOTKEY)
+        {
+            UINT fuModifiers = (UINT) LOWORD(msg->lParam);  // key-modifier flags
+            UINT uVirtKey = (UINT) HIWORD(msg->lParam);     // virtual-key code
+
+            if(fuModifiers==MOD_SHIFT | MOD_CONTROL | MOD_ALT && uVirtKey==0x53)
+            {
+                //emit hotkeyPressed();
+                qDebug("SAVE hotkey pressed");
+                saveData();
+
+            }
+            return true;
+         }
+
+    }
+ return false;
+
 }
 
 void MainWindow::loadSettings() {

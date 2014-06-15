@@ -106,6 +106,7 @@ public slots:
     QList<QStringList> condenseDataSet(QList<QStringList>);
 
     bool checkDataSet1Blank(QString);
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 
 private:
     QSignalMapper *resetMapper;
