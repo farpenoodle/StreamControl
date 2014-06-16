@@ -88,13 +88,22 @@ void twitterWidget::replyFinished() {
 
     QScriptValue value;
     QScriptEngine engine;
+
     value = engine.evaluate("(" + QString(replyData) + ")");
+
+    QScriptValue urls = value.property("entities").property("urls");
 
     tweetText = value.property("text").toString();
     twitterName = value.property("user").property("name").toString();
     tweetCreated = value.property("created_at").toString();
     profilePicUrl = value.property("user").property("profile_image_url").toString().replace("_normal","");
 
+    int urlIterator = 0;
+
+    while (urls.property(urlIterator).isValid()) {
+        tweetText = tweetText.replace(urls.property(urlIterator).property("url").toString(),urls.property(urlIterator).property("expanded_url").toString());
+        urlIterator++;
+    }
 
     QUrl picUrl(profilePicUrl);
     QFileInfo fileInfo(picUrl.path());
