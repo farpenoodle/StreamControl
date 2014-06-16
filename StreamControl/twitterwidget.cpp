@@ -15,6 +15,8 @@
 twitterWidget::twitterWidget(QWidget *parent) :
     QWidget(parent)
 {
+    picDone = false;
+    mediaDone = false;
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -26,6 +28,7 @@ twitterWidget::twitterWidget(QWidget *parent) :
     layout->addWidget(label,1,0,1,2);
     manager = new QNetworkAccessManager;
     picManager = new QNetworkAccessManager;
+    mediaManager = new QNetworkAccessManager;
 
     connect(fetchButton, SIGNAL(clicked()), this, SLOT(fetchTweet()));
 
@@ -38,6 +41,7 @@ twitterWidget::twitterWidget(QWidget *parent) :
     connect(o2, SIGNAL(linkedChanged()), this, SLOT(onLinkedChanged()));
     connect(o2, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
     connect(o2, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
+
 }
 
 void twitterWidget::fetchTweet()
@@ -82,6 +86,12 @@ void twitterWidget::fetchTweet()
 
 void twitterWidget::replyFinished() {
 
+    picDone = false;
+    mediaDone = false;
+
+    urlArray.clear();
+    mediaArray.clear();
+
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
     QByteArray replyData = reply->readAll();
@@ -92,6 +102,7 @@ void twitterWidget::replyFinished() {
     value = engine.evaluate("(" + QString(replyData) + ")");
 
     QScriptValue urls = value.property("entities").property("urls");
+    QScriptValue media = value.property("entities").property("media");
 
     tweetText = value.property("text").toString();
     twitterName = value.property("user").property("name").toString();
@@ -101,9 +112,59 @@ void twitterWidget::replyFinished() {
     int urlIterator = 0;
 
     while (urls.property(urlIterator).isValid()) {
-        tweetText = tweetText.replace(urls.property(urlIterator).property("url").toString(),urls.property(urlIterator).property("expanded_url").toString());
+        QMap<QString,QString> urlE;
+
+        urlE["url"] = urls.property(urlIterator).property("url").toString();
+        urlE["display_url"] = urls.property(urlIterator).property("display_url").toString();
+        urlE["expanded_url"] = urls.property(urlIterator).property("expanded_url").toString();
+
+        urlArray.insert(urlIterator,urlE);
+
         urlIterator++;
     }
+
+    int mediaIterator = 0;
+    mediaDone = true;
+    while (media.property(mediaIterator).isValid()) {
+        QMap<QString,QString> mediaE;
+
+        mediaE["url"] = media.property(mediaIterator).property("url").toString();
+        mediaE["display_url"] = media.property(mediaIterator).property("display_url").toString();
+        mediaE["expanded_url"] = media.property(mediaIterator).property("expanded_url").toString();
+        mediaE["type"] = media.property(mediaIterator).property("type").toString();
+        mediaE["media_url"] = media.property(mediaIterator).property("media_url").toString();
+
+        if(mediaIterator == 0 && mediaE["type"] == "photo") {
+            mediaDone = false;
+            QUrl mediaUrl(mediaE["media_url"]);
+            QFileInfo mediaInfo(mediaUrl.path());
+            mediaE["filename"] = mediaInfo.fileName();
+
+            QString mediaOutFile = profilePicPath + "media/" +mediaE["filename"];
+            qDebug() << mediaOutFile;
+            QFile mediaFile(mediaOutFile);
+
+            if (!mediaFile.exists()) {
+
+                QNetworkReply *mediaReply = mediaManager->get(QNetworkRequest(QUrl(mediaE["media_url"])));
+
+                connect(mediaReply, SIGNAL(finished()), this, SLOT(mediaFinished()));
+
+
+            } else {
+                mediaDone = true;
+                //label->setText("<font color=green>Ok</font>");
+            }
+        } else {
+            mediaDone = true;
+        }
+
+        mediaArray.insert(mediaIterator,mediaE);
+
+        mediaIterator++;
+    }
+
+    //qDebug() << tweetText;
 
     QUrl picUrl(profilePicUrl);
     QFileInfo fileInfo(picUrl.path());
@@ -111,6 +172,7 @@ void twitterWidget::replyFinished() {
     profilePicFilename = fileInfo.fileName();
     QString outFile = profilePicPath + profilePicFilename;
     QFile file(outFile);
+
 
     if (!file.exists()) {
 
@@ -120,6 +182,12 @@ void twitterWidget::replyFinished() {
 
 
     } else {
+        picDone = true;
+        //label->setText("<font color=green>Ok</font>");
+    }
+
+
+    if (picDone && mediaDone) {
         label->setText("<font color=green>Ok</font>");
     }
 
@@ -144,7 +212,39 @@ void twitterWidget::picFinished() {
     file->write(replyData);
     file->close();
 
-    label->setText("<font color=green>Ok</font>");
+    picDone = true;
+
+    if (picDone && mediaDone) {
+        label->setText("<font color=green>Ok</font>");
+    }
+
+    reply->deleteLater();
+
+}
+
+void twitterWidget::mediaFinished() {
+
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+
+    QByteArray replyData = reply->readAll();
+
+    /*QUrl mediaUrl(profilePicUrl);
+    QFileInfo fileInfo(picUrl.path());
+
+    QString profilePicFilename = fileInfo.fileName();*/
+    QString outFile = profilePicPath + + "media/" + mediaArray[0]["filename"];
+qDebug() << outFile;
+    QFile* file = new QFile;
+    file->setFileName(outFile);
+    file->open(QIODevice::WriteOnly);
+    file->write(replyData);
+    file->close();
+
+    mediaDone = true;
+
+    if (picDone && mediaDone) {
+        label->setText("<font color=green>Ok</font>");
+    }
 
     reply->deleteLater();
 
@@ -189,6 +289,18 @@ QString twitterWidget::getTwitterName() {
 QString twitterWidget::getUsername() {
 
     return userName;
+
+}
+
+QVector<QMap<QString,QString> > twitterWidget::getURLs() {
+
+    return urlArray;
+
+}
+
+QVector<QMap<QString,QString> > twitterWidget::getMedia() {
+
+    return mediaArray;
 
 }
 

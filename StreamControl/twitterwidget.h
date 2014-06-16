@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#include <QVector>
 
 #include "o2twitter.h"
 
@@ -32,9 +33,14 @@ private:
     QString         profilePicPath;
     QString         profilePicFilename;
     QString         profilePicUrl;
+    bool            picDone;
+    bool            mediaDone;
+    QVector<QMap<QString,QString> > urlArray;
+    QVector<QMap<QString,QString> > mediaArray;
 
     QNetworkAccessManager   *manager;
     QNetworkAccessManager   *picManager;
+    QNetworkAccessManager   *mediaManager;
 
     O2Twitter *o2;
 
@@ -45,6 +51,7 @@ public slots:
     void fetchTweet();
     void replyFinished();
     void picFinished();
+    void mediaFinished();
     void setPath(QString);
 
     void onLinkedChanged();
@@ -57,6 +64,8 @@ public slots:
     QString getProfilePicFilename();
     QString getProfilePicPath();
     QString getDate();
+    QVector<QMap<QString,QString> > getURLs();
+    QVector<QMap<QString,QString> > getMedia();
 
 };
 

@@ -160,7 +160,7 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             UINT fuModifiers = (UINT) LOWORD(msg->lParam);  // key-modifier flags
             UINT uVirtKey = (UINT) HIWORD(msg->lParam);     // virtual-key code
 
-            if(fuModifiers==MOD_SHIFT | MOD_CONTROL | MOD_ALT && uVirtKey==0x53)
+            if(fuModifiers==(MOD_SHIFT | MOD_CONTROL | MOD_ALT) && uVirtKey==0x53)
             {
                 //emit hotkeyPressed();
                 qDebug("SAVE hotkey pressed");
@@ -474,6 +474,8 @@ QString MainWindow::saveXML() {
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
         } else if (wType == "tweet") {
+            QVector<QMap<QString,QString> > urlArray = ((twitterWidget*)widgetList[i.key()])->getURLs();
+            QVector<QMap<QString,QString> > mediaArray = ((twitterWidget*)widgetList[i.key()])->getMedia();
             if (useCDATA) {
                 QDomElement username = doc.createElement("username");
                 QDomCDATASection username_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getUsername());
@@ -504,6 +506,72 @@ QString MainWindow::saveXML() {
 
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
+
+                QDomElement urlContainer = doc.createElement("urls");
+
+                for(int i = 0; i < urlArray.length();i++) {
+                    QDomElement urlItem = doc.createElement("url_" + QString::number(i));
+
+                    QDomElement urlE = doc.createElement("url");
+                    QDomCDATASection urlE_t = doc.createCDATASection(urlArray[i]["url"]);
+                    urlE.appendChild(urlE_t);
+                    urlItem.appendChild(urlE);
+
+                    QDomElement displayE = doc.createElement("display_url");
+                    QDomCDATASection displayE_t = doc.createCDATASection(urlArray[i]["display_url"]);
+                    displayE.appendChild(displayE_t);
+                    urlItem.appendChild(displayE);
+
+                    QDomElement expandedE = doc.createElement("expanded_url");
+                    QDomCDATASection expandedE_t = doc.createCDATASection(urlArray[i]["expanded_url"]);
+                    expandedE.appendChild(expandedE_t);
+                    urlItem.appendChild(expandedE);
+
+                    urlContainer.appendChild(urlItem);
+                }
+                newItem.appendChild(urlContainer);
+
+                QDomElement mediaContainer = doc.createElement("media");
+
+                for(int i = 0; i < mediaArray.length();i++) {
+                    QDomElement mediaItem = doc.createElement("media_" + QString::number(i));
+
+                    QDomElement urlE = doc.createElement("url");
+                    QDomCDATASection urlE_t = doc.createCDATASection(mediaArray[i]["url"]);
+                    urlE.appendChild(urlE_t);
+                    mediaItem.appendChild(urlE);
+
+                    QDomElement displayE = doc.createElement("display_url");
+                    QDomCDATASection displayE_t = doc.createCDATASection(mediaArray[i]["display_url"]);
+                    displayE.appendChild(displayE_t);
+                    mediaItem.appendChild(displayE);
+
+                    QDomElement expandedE = doc.createElement("expanded_url");
+                    QDomCDATASection expandedE_t = doc.createCDATASection(mediaArray[i]["expanded_url"]);
+                    expandedE.appendChild(expandedE_t);
+                    mediaItem.appendChild(expandedE);
+
+                    QDomElement typeE = doc.createElement("type");
+                    QDomCDATASection typeE_t = doc.createCDATASection(mediaArray[i]["type"]);
+                    typeE.appendChild(typeE_t);
+                    mediaItem.appendChild(typeE);
+
+                    QDomElement mediaUrlE = doc.createElement("media_url");
+                    QDomCDATASection mediaUrlE_t = doc.createCDATASection(mediaArray[i]["media_url"]);
+                    mediaUrlE.appendChild(mediaUrlE_t);
+                    mediaItem.appendChild(mediaUrlE);
+
+                    if (i == 0 && mediaArray[i]["type"] == "photo"){
+
+                        QDomElement fileNameE = doc.createElement("filename");
+                        QDomCDATASection fileNameE_t = doc.createCDATASection(mediaArray[i]["filename"]);
+                        fileNameE.appendChild(fileNameE_t);
+                        mediaItem.appendChild(fileNameE);
+                    }
+
+                    mediaContainer.appendChild(mediaItem);
+                }
+                newItem.appendChild(mediaContainer);
             } else {
                 QDomElement username = doc.createElement("username");
                 QDomText username_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getUsername());
@@ -534,6 +602,72 @@ QString MainWindow::saveXML() {
 
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
+
+                QDomElement urlContainer = doc.createElement("urls");
+
+                for(int i = 0; i < urlArray.length();i++) {
+                    QDomElement urlItem = doc.createElement("url_" + QString::number(i));
+
+                    QDomElement urlE = doc.createElement("url");
+                    QDomText urlE_t = doc.createTextNode(urlArray[i]["url"]);
+                    urlE.appendChild(urlE_t);
+                    urlItem.appendChild(urlE);
+
+                    QDomElement displayE = doc.createElement("display_url");
+                    QDomText displayE_t = doc.createTextNode(urlArray[i]["display_url"]);
+                    displayE.appendChild(displayE_t);
+                    urlItem.appendChild(displayE);
+
+                    QDomElement expandedE = doc.createElement("expanded_url");
+                    QDomText expandedE_t = doc.createTextNode(urlArray[i]["expanded_url"]);
+                    expandedE.appendChild(expandedE_t);
+                    urlItem.appendChild(expandedE);
+
+                    urlContainer.appendChild(urlItem);
+                }
+                newItem.appendChild(urlContainer);
+
+                QDomElement mediaContainer = doc.createElement("media");
+
+                for(int i = 0; i < mediaArray.length();i++) {
+                    QDomElement mediaItem = doc.createElement("media_" + QString::number(i));
+
+                    QDomElement urlE = doc.createElement("url");
+                    QDomText urlE_t = doc.createTextNode(mediaArray[i]["url"]);
+                    urlE.appendChild(urlE_t);
+                    mediaItem.appendChild(urlE);
+
+                    QDomElement displayE = doc.createElement("display_url");
+                    QDomText displayE_t = doc.createTextNode(mediaArray[i]["display_url"]);
+                    displayE.appendChild(displayE_t);
+                    mediaItem.appendChild(displayE);
+
+                    QDomElement expandedE = doc.createElement("expanded_url");
+                    QDomText expandedE_t = doc.createTextNode(mediaArray[i]["expanded_url"]);
+                    expandedE.appendChild(expandedE_t);
+                    mediaItem.appendChild(expandedE);
+
+                    QDomElement typeE = doc.createElement("type");
+                    QDomText typeE_t = doc.createTextNode(mediaArray[i]["type"]);
+                    typeE.appendChild(typeE_t);
+                    mediaItem.appendChild(typeE);
+
+                    QDomElement mediaUrlE = doc.createElement("media_url");
+                    QDomText mediaUrlE_t = doc.createTextNode(mediaArray[i]["media_url"]);
+                    mediaUrlE.appendChild(mediaUrlE_t);
+                    mediaItem.appendChild(mediaUrlE);
+
+                    if (i == 0 && mediaArray[i]["type"] == "photo"){
+
+                        QDomElement fileNameE = doc.createElement("filename");
+                        QDomText fileNameE_t = doc.createTextNode(mediaArray[i]["filename"]);
+                        fileNameE.appendChild(fileNameE_t);
+                        mediaItem.appendChild(fileNameE);
+                    }
+
+                    mediaContainer.appendChild(mediaItem);
+                }
+                newItem.appendChild(mediaContainer);
             }
         } else if (wType == "tsButton") {
             if (((ScTSButton*)widgetList[i.key()])->isActive()) {
@@ -594,6 +728,8 @@ QString MainWindow::saveJSON() {
             QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
             Obj[i.key()] = value;
         } else if (wType == "tweet") {
+            QVector<QMap<QString,QString> > urlArray = ((twitterWidget*)widgetList[i.key()])->getURLs();
+            QVector<QMap<QString,QString> > mediaArray = ((twitterWidget*)widgetList[i.key()])->getMedia();
             QJsonObject tweet;
 
             tweet["username"] = ((twitterWidget*)widgetList[i.key()])->getUsername();
@@ -601,6 +737,42 @@ QString MainWindow::saveJSON() {
             tweet["text"] = ((twitterWidget*)widgetList[i.key()])->getTweetText();
             tweet["created"] = ((twitterWidget*)widgetList[i.key()])->getDate();
             tweet["picFileName"] = ((twitterWidget*)widgetList[i.key()])->getProfilePicFilename();
+
+            QJsonObject urlContainer;
+
+            for(int it = 0; it < urlArray.length();it++) {
+                QJsonObject urlItem;
+
+                urlItem["url"] = urlArray[it]["url"];
+                urlItem["display_url"] = urlArray[it]["display_url"];
+                urlItem["expanded_url"] = urlArray[it]["expanded_url"];
+
+                urlContainer["url_" + QString::number(it)] = urlItem;
+            }
+
+            tweet["urls"] = urlContainer;
+
+
+            QJsonObject mediaContainer;
+
+            for(int it = 0; it < mediaArray.length();it++) {
+                QJsonObject mediaItem;
+
+                mediaItem["url"] = mediaArray[it]["url"];
+                mediaItem["display_url"] = mediaArray[it]["display_url"];
+                mediaItem["expanded_url"] = mediaArray[it]["expanded_url"];
+                mediaItem["type"] = mediaArray[it]["type"];
+                mediaItem["media_url"] = mediaArray[it]["media_url"];
+
+                if (it == 0 && mediaArray[it]["type"] == "photo"){
+
+                    mediaItem["filename"] = mediaArray[it]["filename"];
+                }
+
+                mediaContainer["media_" + QString::number(it)] = mediaItem;
+            }
+
+            tweet["media"] = mediaContainer;
 
             Obj[i.key()] = tweet;
 
@@ -971,10 +1143,11 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
     if (!newPath.isAbsolute()) {
         QString path = settings["xsplitPath"] + element.attribute("picPath");
         newPath.setPath(path);
+
     }
 
     if(!newPath.exists()) {
-        newPath.mkpath(newPath.path());
+        newPath.mkpath(newPath.path()+"/media");
     }
 
     ((twitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
