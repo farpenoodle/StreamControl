@@ -56,11 +56,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include <QRadioButton>
-#include "windows.h"
 #include "twitterwidget.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+
+#ifdef Q_OS_WIN
+#include "windows.h"
+#endif
+#ifdef Q_OS_MAC
+    #include <Carbon/Carbon.h>
+#endif
 
 MainWindow::MainWindow()
 {
@@ -130,6 +136,7 @@ MainWindow::MainWindow()
     loadLayout();
     loadData();
 
+    #ifdef Q_OS_WIN
     if (RegisterHotKey(
             (HWND(this->winId())),
             1,
@@ -138,20 +145,25 @@ MainWindow::MainWindow()
         {
             qDebug() << "registered hotkey";
         }
+    #endif
 
 }
 
 MainWindow::~MainWindow()
 {
+    #ifdef Q_OS_WIN
     if(UnregisterHotKey(HWND(this->winId()), 1))
     {
         qDebug("UNREGISTED");
     }
+    #endif
     //delete ui;
 }
 
 bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
+    //windows
+    #ifdef Q_OS_WIN
     if(eventType=="windows_generic_MSG")
     {
         MSG* msg=static_cast<MSG*>(message);
@@ -171,6 +183,15 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
          }
 
     }
+    #endif
+    //osx
+    #ifdef Q_OS_MAC
+    if (eventType=="mac_generic_NSEvent")
+    {
+        //cast message
+        EventRef* msg=static_cast<EventRef*>(message);
+    }
+    #endif
  return false;
 
 }

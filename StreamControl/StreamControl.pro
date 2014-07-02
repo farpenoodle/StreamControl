@@ -72,3 +72,7 @@ RC_FILE = streamcontrol.rc
 
 OTHER_FILES += \
     o2/o2.pri
+
+macx {
+    LIBS += -framework Carbon
+}
