@@ -199,7 +199,7 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 void MainWindow::loadSettings() {
 
     QFile file("settings.xml");
-    QString xsplitPath;
+    QString outputPath;
     QString layoutPath;
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 
@@ -210,10 +210,14 @@ void MainWindow::loadSettings() {
 
         QDomElement settingsXML = doc.namedItem("settings").toElement();
 
-        QDomElement xsplitPathE = settingsXML.namedItem("xsplitPath").toElement();
+        QDomElement outputPathE = settingsXML.namedItem("outputPath").toElement();
+        //load old name if coming from 0.3 or lower
+        if (outputPathE.isNull()) {
+            outputPathE = settingsXML.namedItem("xsplitPath").toElement();
+        }
         QDomElement layoutPathE = settingsXML.namedItem("layoutPath").toElement();
 
-        xsplitPath = xsplitPathE.text();
+        outputPath = outputPathE.text();
         layoutPath = layoutPathE.text();
 
         QDomElement useCDATAE = settingsXML.namedItem("useCDATA").toElement();
@@ -236,7 +240,7 @@ void MainWindow::loadSettings() {
 
         settings["format"] = QString::number(saveFormat);
 
-        settings["xsplitPath"] = xsplitPath;
+        settings["outputPath"] = outputPath;
         settings["layoutPath"] = layoutPath;
 
 
@@ -245,16 +249,16 @@ void MainWindow::loadSettings() {
         QFile xsplitExe("C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
         if (xsplitExe.exists() || xsplitExe32.exists()) {
             if (xsplitExe.exists()) {
-                xsplitPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\";
+                outputPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\";
             } else {
-                xsplitPath = "C:\\Program Files\\SplitMediaLabs\\XSplit\\";
+                outputPath = "C:\\Program Files\\SplitMediaLabs\\XSplit\\";
             }
             QMessageBox msgBox;
 
             msgBox.setText("XSplit Installation detected at default location. Saving settings.");
             msgBox.exec();
 
-            settings["xsplitPath"] = xsplitPath;
+            settings["outputPath"] = outputPath;
             settings["useCDATA"] = "0";
             useCDATA = false;
             settings["format"] = QString::number(SC_XML);
@@ -265,7 +269,7 @@ void MainWindow::loadSettings() {
             QMessageBox msgBox;
             msgBox.setText("Please be sure to configure StreamControl before you start.");
             msgBox.exec();
-            xsplitPath = "";
+            outputPath = "";
         }
 
         saveSettings();
@@ -283,11 +287,11 @@ void MainWindow::saveSettings() {
     QDomElement settingsXML = doc.createElement("settings");
     doc.appendChild(settingsXML);
 
-    QDomElement xsplitPathE = doc.createElement("xsplitPath");
-    settingsXML.appendChild(xsplitPathE);
+    QDomElement outputPathE = doc.createElement("outputPath");
+    settingsXML.appendChild(outputPathE);
 
-    QDomCDATASection xsplitPathT = doc.createCDATASection(settings["xsplitPath"]);
-    xsplitPathE.appendChild(xsplitPathT);
+    QDomCDATASection outputPathT = doc.createCDATASection(settings["outputPath"]);
+    outputPathE.appendChild(outputPathT);
 
     QDomElement layoutPathE = doc.createElement("layoutPath");
     settingsXML.appendChild(layoutPathE);
@@ -325,7 +329,7 @@ void MainWindow::loadData()
 }
 
 void MainWindow::loadXML() {
-    QFile file(settings["xsplitPath"] + "streamcontrol.xml");
+    QFile file(settings["outputPath"] + "streamcontrol.xml");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
 
     QDomDocument doc;
@@ -360,7 +364,7 @@ void MainWindow::loadXML() {
 }
 
 void MainWindow::loadJSON() {
-    QFile file(settings["xsplitPath"] + "streamcontrol.json");
+    QFile file(settings["outputPath"] + "streamcontrol.json");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
 
 
@@ -403,7 +407,7 @@ void MainWindow::saveData()
     QString dataOutput;
 
     if (saveFormat == SC_XML || saveFormat == SC_Both) {
-        QFile file(settings["xsplitPath"] + "streamcontrol.xml");
+        QFile file(settings["outputPath"] + "streamcontrol.xml");
         file.open(QIODevice::WriteOnly | QIODevice::Text);
 
         dataOutput = saveXML();
@@ -415,7 +419,7 @@ void MainWindow::saveData()
     }
 
     if (saveFormat == SC_JSON || saveFormat == SC_Both) {
-        QFile file(settings["xsplitPath"] + "streamcontrol.json");
+        QFile file(settings["outputPath"] + "streamcontrol.json");
         file.open(QIODevice::WriteOnly | QIODevice::Text);
 
         dataOutput = saveJSON();
@@ -866,7 +870,7 @@ void MainWindow::openConfig() {
     if (cWindow->exec() == 1) {
         QMap<QString, QString> configSettings = cWindow->getConfig();
 
-        settings["xsplitPath"] = configSettings["xsplitPath"];
+        settings["outputPath"] = configSettings["outputPath"];
         settings["layoutPath"] = configSettings["layoutPath"];
         settings["useCDATA"] = configSettings["useCDATA"];
         settings["format"] = configSettings["format"];
@@ -1153,7 +1157,7 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
 
-    QString picPath = "twitter"; // default path to twitter so the xsplit directory isn't filled with pictures
+    QString picPath = "twitter"; // default path to twitter so the output directory isn't filled with pictures
 
     if(element.attribute("picPath") != "") {
         picPath = element.attribute("picPath");
@@ -1162,7 +1166,7 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
     QDir newPath(element.attribute(picPath));
 
     if (!newPath.isAbsolute()) {
-        QString path = settings["xsplitPath"] + element.attribute("picPath");
+        QString path = settings["outputPath"] + element.attribute("picPath");
         newPath.setPath(path);
 
     }

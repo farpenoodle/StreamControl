@@ -48,7 +48,7 @@ public:
     QMap<QString, QString> getConfig();
 
 public slots:
-    void findXSplit();
+    void findOutput();
     void findLayout();
     void abtQt();
     void CDATAToggle( int state );

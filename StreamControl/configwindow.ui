@@ -45,7 +45,7 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="xsplitPathTB">
+  <widget class="QLineEdit" name="outputPathTB">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -68,10 +68,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>XSplit Path. (Usually C:\Program Files (x86)\SplitMediaLabs\XSplit\)</string>
+    <string>XML/JSON Path. (Usually C:\Program Files (x86)\SplitMediaLabs\XSplit\)</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="xsplitButton">
+  <widget class="QPushButton" name="outputButton">
    <property name="geometry">
     <rect>
      <x>310</x>

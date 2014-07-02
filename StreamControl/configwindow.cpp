@@ -42,13 +42,13 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     ui->formatGroup->setId(ui->formatJSON,SC_JSON);
     ui->formatGroup->setId(ui->formatBoth,SC_Both);
 
-    connect(ui->xsplitButton,SIGNAL( clicked() ),this,SLOT( findXSplit() ));
+    connect(ui->outputButton,SIGNAL( clicked() ),this,SLOT( findOutput() ));
     connect(ui->layoutButton,SIGNAL( clicked() ),this,SLOT( findLayout() ));
     connect(ui->aboutQtButton,SIGNAL( clicked() ),this,SLOT( abtQt() ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
     connect(ui->formatGroup,SIGNAL( buttonClicked(int) ),this, SLOT ( formatChange( int ) ));
 
-    ui->xsplitPathTB->setDisabled(true);
+    ui->outputPathTB->setDisabled(true);
     ui->layoutPathTB->setDisabled(true);
     ui->streamControlLabel->setText(QString("StreamControl ") + QString(SC_VERSION) );
     ui->qtLabel->setText(QString("This program uses Qt version ")+ QString(qVersion() + QString(".")) );
@@ -63,7 +63,7 @@ ConfigWindow::~ConfigWindow()
 void ConfigWindow::setConfig(QMap<QString, QString> settings) {
 
     configsettings = settings;
-    ui->xsplitPathTB->setText(configsettings["xsplitPath"]);
+    ui->outputPathTB->setText(configsettings["outputPath"]);
     ui->layoutPathTB->setText(configsettings["layoutPath"]);
     if (configsettings["useCDATA"] == "1") {
         ui->CDATACheckBox->setCheckState(Qt::Checked);
@@ -85,20 +85,20 @@ QMap<QString, QString> ConfigWindow::getConfig() {
     return configsettings;
 }
 
-void ConfigWindow::findXSplit() {
+void ConfigWindow::findOutput() {
 
-    QString XSplit = QFileDialog::getExistingDirectory(this, tr("Find XSplit"), configsettings["xsplitPath"], QFileDialog::ShowDirsOnly);
-    if (XSplit != "") {
-        XSplit.replace("/","\\");
-        XSplit = XSplit + "\\";
-        ui->xsplitPathTB->setText(XSplit);
-        configsettings["xsplitPath"] = XSplit;
+    QString output = QFileDialog::getExistingDirectory(this, tr("Find Output Directory"), configsettings["outputPath"], QFileDialog::ShowDirsOnly);
+    if (output != "") {
+        output.replace("/","\\");
+        output = output + "\\";
+        ui->outputPathTB->setText(output);
+        configsettings["outputPath"] = output;
     }
 }
 
 void ConfigWindow::findLayout() {
 
-    QString layoutPath = QFileDialog::getOpenFileName(this, tr("Find XSplit"), QFileInfo(configsettings["layoutPath"]).path(), tr("XML Files (*.xml)"));
+    QString layoutPath = QFileDialog::getOpenFileName(this, tr("Find Layout File"), QFileInfo(configsettings["layoutPath"]).path(), tr("XML Files (*.xml)"));
     if (layoutPath != "") {
         layoutPath.replace("/","\\");
         ui->layoutPathTB->setText(layoutPath);
