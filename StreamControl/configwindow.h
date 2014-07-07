@@ -52,6 +52,7 @@ public slots:
     void findLayout();
     void abtQt();
     void CDATAToggle( int state );
+    void altHotkeyToggle( int state );
     void formatChange( int state );
     
 private:

@@ -46,6 +46,7 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->layoutButton,SIGNAL( clicked() ),this,SLOT( findLayout() ));
     connect(ui->aboutQtButton,SIGNAL( clicked() ),this,SLOT( abtQt() ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
+    connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
     connect(ui->formatGroup,SIGNAL( buttonClicked(int) ),this, SLOT ( formatChange( int ) ));
 
     ui->outputPathTB->setDisabled(true);
@@ -77,6 +78,12 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
         ui->formatJSON->setChecked(true);
     } else {
         ui->formatXML->setChecked(true);
+    }
+
+    if (configsettings["altHotkeyHandling"] == "1") {
+        ui->altHotkeyCheckbox->setCheckState(Qt::Checked);
+    } else {
+        ui->altHotkeyCheckbox->setCheckState(Qt::Unchecked);
     }
 
 }
@@ -114,6 +121,14 @@ void ConfigWindow::CDATAToggle( int state ) {
         configsettings["useCDATA"] = "1";
     } else {
         configsettings["useCDATA"] = "0";
+    }
+}
+
+void ConfigWindow::altHotkeyToggle( int state ) {
+    if (state == Qt::Checked) {
+        configsettings["altHotkeyHandling"] = "1";
+    } else {
+        configsettings["altHotkeyHandling"] = "0";
     }
 }
 

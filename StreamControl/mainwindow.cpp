@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "twitterhandler.h"
 
 #ifdef Q_OS_WIN
+#include <QTimer>
 #include "windows.h"
 #include "win_keyhelper.h"
 #endif
@@ -135,10 +136,16 @@ MainWindow::MainWindow()
     toolBar->addWidget(spaceLabel);
     toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
+    #ifdef Q_OS_WIN
+    keyPoller = new QTimer(this);
+    connect(keyPoller, SIGNAL(timeout()), this, SLOT(keyPoll()));
+    #endif
+
+    hotkeyDown = false;
+
     loadSettings();
     loadLayout();
     loadData();
-
 }
 
 MainWindow::~MainWindow()
@@ -147,11 +154,52 @@ MainWindow::~MainWindow()
     //delete ui;
 }
 
+void MainWindow::keyPoll() {
+    #ifdef Q_OS_WIN
+
+    bool foundHotkey = false;
+
+    int modifier = 0;
+    if(GetAsyncKeyState(VK_LWIN) & 0x8000)
+        modifier |= MOD_WIN;
+    if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+        modifier |= MOD_CONTROL;
+    if(GetAsyncKeyState(VK_MENU) & 0x8000)
+        modifier |= MOD_ALT;
+    if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+        modifier |= MOD_SHIFT;
+
+    for (int i = 0; i < hotkeys.count(); i++) {
+        QStringList hotkey = hotkeys.at(i);
+        QKeySequence qks(hotkey.at(0));
+        int ks = qks[0];
+        int hotkeyMods = win_keyhelper::getModifiers(ks);
+        int hotkeyKey = win_keyhelper::getKey(ks);
+        if (hotkeyMods == modifier) {
+            if(GetAsyncKeyState(hotkeyKey) & 0x8000) {
+                foundHotkey = true;
+                if (!hotkeyDown) {
+                    performHotkey(i);
+                    hotkeyDown = true;
+                    qDebug() << "Performing " + hotkey.at(0);
+                }
+            }
+        }
+
+
+
+    }
+    if (!foundHotkey) {
+        hotkeyDown = false;
+    }
+    #endif
+}
+
 bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
     //windows
     #ifdef Q_OS_WIN
-    if(eventType=="windows_generic_MSG")
+    if(eventType=="windows_generic_MSG" && !altHotkeyHandling)
     {
         MSG* msg=static_cast<MSG*>(message);
         if(msg->message==WM_HOTKEY)
@@ -170,7 +218,6 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             return true;
 
          }
-
     }
     #endif
     //osx
@@ -225,6 +272,16 @@ void MainWindow::loadSettings() {
 
         if(saveFormat < 1 || saveFormat > 3) {
             saveFormat = SC_XML;
+        }
+
+        QDomElement altHotKeyE = settingsXML.namedItem("altHotkeyHandling").toElement();
+
+        if (altHotKeyE.text() == "1") {
+            altHotkeyHandling = true;
+            settings["altHotkeyHandling"] = "1";
+        } else {
+            altHotkeyHandling = false;
+            settings["altHotkeyHandling"] = "0";
         }
 
         settings["format"] = QString::number(saveFormat);
@@ -299,6 +356,12 @@ void MainWindow::saveSettings() {
 
     QDomText formatT = doc.createTextNode(settings["format"]);
     formatE.appendChild(formatT);
+
+    QDomElement altHotKeyE = doc.createElement("altHotkeyHandling");
+    settingsXML.appendChild(altHotKeyE);
+
+    QDomText altHotKeyT = doc.createTextNode(settings["altHotkeyHandling"]);
+    altHotKeyE.appendChild(altHotKeyT);
 
     QTextStream out(&file);
     out.setCodec("UTF-8");
@@ -863,11 +926,18 @@ void MainWindow::openConfig() {
         settings["layoutPath"] = configSettings["layoutPath"];
         settings["useCDATA"] = configSettings["useCDATA"];
         settings["format"] = configSettings["format"];
+        settings["altHotkeyHandling"] = configSettings["altHotkeyHandling"];
 
         if (settings["useCDATA"] == "1") {
             useCDATA = true;
         } else {
             useCDATA = false;
+        }
+
+        if (settings["altHotkeyHandling"] == "1") {
+            altHotkeyHandling = true;
+        } else {
+            altHotkeyHandling = false;
         }
 
         saveFormat = settings["format"].toInt();
@@ -911,6 +981,7 @@ void MainWindow::loadLayout() {
     layoutIterator = 0;
 
     clearMaps();
+    keyPoller->stop();
     deleteHotkeys();
     //add global save hotkey first
     addHotkey("CTRL+ALT+SHIFT+S","Main","Save");
@@ -1000,6 +1071,11 @@ void MainWindow::loadLayout() {
     connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
     connect (swapMapper, SIGNAL(mapped(QString)), this, SLOT(swapFields(QString))) ;
     connect (tsMapper, SIGNAL(mapped(QString)), this, SLOT(tsClick(QString))) ;
+
+    //start the keyPoller
+    if (altHotkeyHandling) {
+        keyPoller->start(16);
+    }
 
 }
 
@@ -1747,14 +1823,16 @@ void MainWindow::addHotkey(QString hotkey,QString widget, QString action) {
     hotkeysIndex.append(hotkey);
 
     #ifdef Q_OS_WIN
-    if (RegisterHotKey(
-            (HWND(this->winId())),
-            hotkeysIndex.count(),
-            modifiers,
-            key))
-        {
-            qDebug() << "registered hotkey: \"" + hotkey + "\" at " + QString::number(hotkeysIndex.count());
-        }
+    if (!altHotkeyHandling) {
+        if (RegisterHotKey(
+                (HWND(this->winId())),
+                hotkeysIndex.count(),
+                modifiers,
+                key))
+            {
+                qDebug() << "registered hotkey: \"" + hotkey + "\" at " + QString::number(hotkeysIndex.count());
+            }
+    }
     #endif
 }
 

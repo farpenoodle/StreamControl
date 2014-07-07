@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QModelIndex>
 #include "ScCompleter.h"
 #include "twitterhandler.h"
+#include <QTimer>
 
 class MainWindow : public QMainWindow
 {
@@ -112,6 +113,7 @@ public slots:
     void addHotkey(QString,QString,QString);
     void performHotkey(int);
     void deleteHotkeys();
+    void keyPoll();
 
 private:
     QSignalMapper *resetMapper;
@@ -137,9 +139,13 @@ private:
     QStringList removedSetQueue;
 
     bool useCDATA;
+    bool altHotkeyHandling;
     int saveFormat;
     twitterHandler *th;
     bool needLink;
+
+    QTimer *keyPoller;
+    bool hotkeyDown;
 };
 
 #endif // MAINWINDOW_H
