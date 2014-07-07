@@ -109,6 +109,10 @@ public slots:
     bool checkDataSet1Blank(QString);
     bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 
+    void addHotkey(QString,QString,QString);
+    void performHotkey(int);
+    void deleteHotkeys();
+
 private:
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
@@ -127,6 +131,8 @@ private:
     QMap<QString, QList<QStringList> > condensedDataSets;
     QMap<QString, int> dataAssoc;
     QMap<QString, QList<QString> > dataMaster;
+    QList<QStringList> hotkeys;
+    QList<QString> hotkeysIndex;
 
     QStringList removedSetQueue;
 

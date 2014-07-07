@@ -64,6 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef Q_OS_WIN
 #include "windows.h"
+#include "win_keyhelper.h"
 #endif
 #ifdef Q_OS_MAC
     #include <Carbon/Carbon.h>
@@ -138,27 +139,11 @@ MainWindow::MainWindow()
     loadLayout();
     loadData();
 
-    #ifdef Q_OS_WIN
-    if (RegisterHotKey(
-            (HWND(this->winId())),
-            1,
-            MOD_ALT | MOD_CONTROL | MOD_SHIFT | 0x4000,
-            0x53)) //ctrl+alt+shift+s
-        {
-            qDebug() << "registered hotkey";
-        }
-    #endif
-
 }
 
 MainWindow::~MainWindow()
 {
-    #ifdef Q_OS_WIN
-    if(UnregisterHotKey(HWND(this->winId()), 1))
-    {
-        qDebug("UNREGISTED");
-    }
-    #endif
+    deleteHotkeys();
     //delete ui;
 }
 
@@ -174,14 +159,16 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             UINT fuModifiers = (UINT) LOWORD(msg->lParam);  // key-modifier flags
             UINT uVirtKey = (UINT) HIWORD(msg->lParam);     // virtual-key code
 
-            if(fuModifiers==(MOD_SHIFT | MOD_CONTROL | MOD_ALT) && uVirtKey==0x53)
-            {
-                //emit hotkeyPressed();
-                qDebug("SAVE hotkey pressed");
-                saveData();
+            QString hotkey = win_keyhelper::getString(fuModifiers,uVirtKey);
 
+            int hotkeyIndex = hotkeysIndex.indexOf(hotkey);
+
+            if (hotkeyIndex != -1) {
+                performHotkey(hotkeyIndex);
             }
+
             return true;
+
          }
 
     }
@@ -924,6 +911,9 @@ void MainWindow::loadLayout() {
     layoutIterator = 0;
 
     clearMaps();
+    deleteHotkeys();
+    //add global save hotkey first
+    addHotkey("CTRL+ALT+SHIFT+S","Main","Save");
     QStringList errors;
     QString parseError;
     int parseErrorLine;
@@ -1730,4 +1720,64 @@ bool MainWindow::checkDataSet1Blank(QString setName) {
 
     }
     return empty;
+}
+
+void MainWindow::addHotkey(QString hotkey,QString widget, QString action) {
+    QKeySequence qks(hotkey);
+    int ks = qks[0];
+    int modifiers = win_keyhelper::getModifiers(ks) | 0x4000;
+    int key = win_keyhelper::getKey(ks);
+
+    QStringList hotkeyItem;
+
+    hotkey = qks.toString();
+
+    hotkeyItem.append(hotkey);
+    hotkeyItem.append(widget);
+    hotkeyItem.append(action);
+
+    hotkeys.append(hotkeyItem);
+    hotkeysIndex.append(hotkey);
+
+    #ifdef Q_OS_WIN
+    if (RegisterHotKey(
+            (HWND(this->winId())),
+            hotkeysIndex.count(),
+            modifiers,
+            key))
+        {
+            qDebug() << "registered hotkey: \"" + hotkey + "\" at " + QString::number(hotkeysIndex.count());
+        }
+    #endif
+}
+
+void MainWindow::performHotkey(int hotkeyIndex) {
+    QStringList hotkeyItem = hotkeys.at(hotkeyIndex);
+    QString widget = hotkeyItem.at(1);
+    QString action = hotkeyItem.at(2);
+
+    if (widget == "Main") {
+        if (action == "Save") {
+            qDebug() << "Saving Data via Hotkey";
+            saveData();
+        }
+    } else {
+        //do widget actions and stuff
+
+    }
+}
+
+void MainWindow::deleteHotkeys() {
+    int num = hotkeysIndex.count();
+    for (int i = 1; i <= num; i++) {
+        #ifdef Q_OS_WIN
+        if(UnregisterHotKey(HWND(this->winId()), 1))
+        {
+            qDebug() << "UNREGISTED " + hotkeys.at(i-1).at(0);
+        }
+        #endif
+    }
+
+    hotkeys.clear();
+    hotkeysIndex.clear();
 }
