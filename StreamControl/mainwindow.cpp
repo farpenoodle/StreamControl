@@ -1790,7 +1790,7 @@ void MainWindow::deleteHotkeys() {
     int num = hotkeysIndex.count();
     for (int i = 1; i <= num; i++) {
         #ifdef Q_OS_WIN
-        if(UnregisterHotKey(HWND(this->winId()), 1))
+        if(UnregisterHotKey(HWND(this->winId()), i))
         {
             qDebug() << "UNREGISTED " + hotkeys.at(i-1).at(0);
         }
