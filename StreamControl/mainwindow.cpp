@@ -914,6 +914,7 @@ void MainWindow::loadLayout() {
     deleteHotkeys();
     //add global save hotkey first
     addHotkey("CTRL+ALT+SHIFT+S","Main","Save");
+
     QStringList errors;
     QString parseError;
     int parseErrorLine;
@@ -1663,6 +1664,12 @@ void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
     if(!element.attribute("maximum").isEmpty()) {
         ((QSpinBox*)widgetList[newSpinBox])->setMaximum(element.attribute("maximum").toInt());
     }
+    if(!element.attribute("increaseHotkey").isEmpty()) {
+        addHotkey(element.attribute("increaseHotkey"),newSpinBox,"Increase");
+    }
+    if(!element.attribute("decreaseHotkey").isEmpty()) {
+        addHotkey(element.attribute("decreaseHotkey"),newSpinBox,"Decrease");
+    }
     widgetType[newSpinBox] = "spinBox";
 
 }
@@ -1763,7 +1770,19 @@ void MainWindow::performHotkey(int hotkeyIndex) {
         }
     } else {
         //do widget actions and stuff
-
+        QString wType = widgetType[widget];
+        if (wType == "spinBox") {
+            int step = ((QSpinBox*)widgetList[widget])->singleStep();
+            int value = ((QSpinBox*)widgetList[widget])->value();
+            if (action == "Increase") {
+                ((QSpinBox*)widgetList[widget])->setValue(value + step);
+                qDebug() << "increasing " + widget;
+            }
+            if (action == "Decrease") {
+                ((QSpinBox*)widgetList[widget])->setValue(value - step);
+                qDebug() << "decreasing " + widget;
+            }
+        }
     }
 }
 
