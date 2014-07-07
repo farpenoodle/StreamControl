@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "twitterhandler.h"
 
 #ifdef Q_OS_WIN
 #include "windows.h"
@@ -122,7 +123,8 @@ MainWindow::MainWindow()
     connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
 
-
+    needLink = false;
+    th = new twitterHandler();
 
     //code to add non buttons to toolbar
     QLabel* spaceLabel = new QLabel("   ");
@@ -997,6 +999,11 @@ void MainWindow::loadLayout() {
         parseToolBar(toolBarNode);
     }
 
+    //link o2 if needed
+    if (needLink) {
+        th->link();
+    }
+
     //connect signal mappers
 
     connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
@@ -1027,6 +1034,7 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addComboBox(child.toElement(), parent);
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
+            needLink = true;
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -1149,7 +1157,7 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
 void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     QString newTweet = element.attribute("id");
-    widgetList[newTweet] = new twitterWidget(parent);
+    widgetList[newTweet] = new twitterWidget(th,parent);
     widgetType[newTweet] = "tweet";
     widgetList[newTweet]->setObjectName(newTweet);
     ((twitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),

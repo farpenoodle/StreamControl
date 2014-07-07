@@ -7,13 +7,12 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QFile>
-#include "twitterOauth.h"
-#include "o2twitter.h"
+#include "twitterhandler.h"
 #include "o2/o2globals.h"
 #include <QScriptEngine>
 
-twitterWidget::twitterWidget(QWidget *parent) :
-    QWidget(parent)
+twitterWidget::twitterWidget(twitterHandler * th,QWidget *parent) :
+    th(th),QWidget(parent)
 {
     picDone = false;
     mediaDone = false;
@@ -34,20 +33,11 @@ twitterWidget::twitterWidget(QWidget *parent) :
 
     this->setLayout(layout);
 
-    o2 = new O2Twitter(this);
-    o2->setClientId(OAUTH_KEY);
-    o2->setClientSecret(OAUTH_SECRET);
-
-    connect(o2, SIGNAL(linkedChanged()), this, SLOT(onLinkedChanged()));
-    connect(o2, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
-    connect(o2, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
-
 }
 
 void twitterWidget::fetchTweet()
 {
-
-    if (o2->linked()){
+    if (th->linked()){
 
         QRegExp rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
         QString tweetURL = urlBox->text();
@@ -65,7 +55,7 @@ void twitterWidget::fetchTweet()
 
             request.setUrl(QUrl(tweetUrl));
 
-            QString authString = "Bearer " + o2->token();
+            QString authString = "Bearer " + th->getToken();
             request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER,authString.toUtf8());
 
             QNetworkReply *reply = manager->get(request);
@@ -77,8 +67,8 @@ void twitterWidget::fetchTweet()
             label->setText("<font color=red>Invalid Tweet URL</font>");
         }
     } else {
-        label->setText("<font color=red>Getting Auth Token</font>");
-        o2->link();
+        th->link();
+        label->setText("<font color=red>Getting Auth Token/Failed to get Auth Token</font>");
     }
 
 
@@ -303,21 +293,3 @@ QVector<QMap<QString,QString> > twitterWidget::getMedia() {
     return mediaArray;
 
 }
-
-
-//OAuth Stuff
-void twitterWidget::onLinkedChanged() {
-    // Linking (login) state has changed.
-    // Use o1->linked() to get the actual state
-}
-
-void twitterWidget::onLinkingFailed() {
-    // Login has failed
-    label->setText("<font color=red>Failed to get Auth Token</font>");
-}
-
-void twitterWidget::onLinkingSucceeded() {
-    label->setText("<font color=green>Auth Token granted!</font>");
-
-}
-

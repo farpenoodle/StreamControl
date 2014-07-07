@@ -38,6 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtXml/QDomDocument>
 #include <QModelIndex>
 #include "ScCompleter.h"
+#include "twitterhandler.h"
 
 class MainWindow : public QMainWindow
 {
@@ -131,6 +132,8 @@ private:
 
     bool useCDATA;
     int saveFormat;
+    twitterHandler *th;
+    bool needLink;
 };
 
 #endif // MAINWINDOW_H

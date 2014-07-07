@@ -11,14 +11,14 @@
 #include <QNetworkRequest>
 #include <QVector>
 
-#include "o2twitter.h"
+#include "twitterHandler.h"
 
 
 class twitterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit twitterWidget(QWidget *parent = 0);
+    explicit twitterWidget(twitterHandler *th, QWidget *parent = 0);
 
 private:
     QGridLayout     *layout;
@@ -42,7 +42,7 @@ private:
     QNetworkAccessManager   *picManager;
     QNetworkAccessManager   *mediaManager;
 
-    O2Twitter *o2;
+    twitterHandler *th;
 
     
 signals:
@@ -53,10 +53,6 @@ public slots:
     void picFinished();
     void mediaFinished();
     void setPath(QString);
-
-    void onLinkedChanged();
-    void onLinkingFailed();
-    void onLinkingSucceeded();
 
     QString getUsername();
     QString getTwitterName();
