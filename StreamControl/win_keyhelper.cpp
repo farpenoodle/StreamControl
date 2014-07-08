@@ -66,7 +66,6 @@ QString win_keyhelper::getString(int modifiers, int key) {
 }
 
 int win_keyhelper::getQKS(int modifiers, int key) {
-    //QString keystring;
     int qks = 0;
     if ((modifiers & MOD_WIN) == MOD_WIN)
         qks |= Qt::MetaModifier;
@@ -85,6 +84,5 @@ int win_keyhelper::getQKS(int modifiers, int key) {
 
     qks |= qkey;
 
-    //return QKeySequence(qks)[0];
     return qks;
 }

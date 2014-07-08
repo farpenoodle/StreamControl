@@ -169,10 +169,8 @@ void MainWindow::keyPoll() {
     if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
         modifier |= MOD_SHIFT;
 
-    for (int i = 0; i < hotkeys.count(); i++) {
-        QStringList hotkey = hotkeys.at(i);
-        QKeySequence qks(hotkey.at(0));
-        int ks = qks[0];
+    for (int i = 0; i < hotkeysIndex.count(); i++) {
+        int ks = hotkeysIndex.at(i);
         int hotkeyMods = win_keyhelper::getModifiers(ks);
         int hotkeyKey = win_keyhelper::getKey(ks);
         if (hotkeyMods == modifier) {
@@ -181,7 +179,7 @@ void MainWindow::keyPoll() {
                 if (!hotkeyDown) {
                     performHotkey(i);
                     hotkeyDown = true;
-                    qDebug() << "Performing " + hotkey.at(0);
+                    qDebug() << "Performing " + hotkeys.at(i).at(0);
                 }
             }
         }
