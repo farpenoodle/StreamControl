@@ -118,7 +118,7 @@ namespace win_keyhelper
         Qt::Key_9 | Qt::KeypadModifier,          // 105   0x69   VK_NUMPAD9          | Numeric keypad 9 key
         Qt::Key_Asterisk | Qt::KeypadModifier,   // 106   0x6A   VK_MULTIPLY         | Multiply key
         Qt::Key_Plus | Qt::KeypadModifier,       // 107   0x6B   VK_ADD              | Add key
-        Qt::Key_Comma,      // 108   0x6C   VK_SEPARATOR        | Separator key
+        Qt::Key_Enter | Qt::KeypadModifier,      // 108   0x6C   VK_SEPARATOR        | Separator key
         Qt::Key_Minus | Qt::KeypadModifier,      // 109   0x6D   VK_SUBTRACT         | Subtract key
         Qt::Key_Period | Qt::KeypadModifier,     // 110   0x6E   VK_DECIMAL          | Decimal key
         Qt::Key_Slash | Qt::KeypadModifier,      // 111   0x6F   VK_DIVIDE           | Divide key
