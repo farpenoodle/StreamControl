@@ -64,3 +64,27 @@ QString win_keyhelper::getString(int modifiers, int key) {
 
     return keystring;
 }
+
+int win_keyhelper::getQKS(int modifiers, int key) {
+    //QString keystring;
+    int qks = 0;
+    if ((modifiers & MOD_WIN) == MOD_WIN)
+        qks |= Qt::MetaModifier;
+    if ((modifiers & MOD_CONTROL) == MOD_CONTROL)
+        qks |= Qt::ControlModifier;
+    if ((modifiers & MOD_ALT) == MOD_ALT)
+        qks |= Qt::AltModifier;
+    if ((modifiers & MOD_SHIFT) == MOD_SHIFT)
+        qks |= Qt::ShiftModifier;
+
+    int qkey = KeyTbl[key];
+
+    if (qkey == 0) {
+        qkey = key;
+    }
+
+    qks |= qkey;
+
+    //return QKeySequence(qks)[0];
+    return qks;
+}

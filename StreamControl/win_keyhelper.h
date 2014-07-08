@@ -7,6 +7,7 @@ namespace win_keyhelper
     int getModifiers(int);
     int getKey(int);
     QString getString(int,int);
+    int getQKS(int,int);
 
     static const int KeyTbl[] = { // Keyboard mapping table
                             // Dec |  Hex | Windows Virtual key

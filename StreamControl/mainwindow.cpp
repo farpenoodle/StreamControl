@@ -207,7 +207,7 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             UINT fuModifiers = (UINT) LOWORD(msg->lParam);  // key-modifier flags
             UINT uVirtKey = (UINT) HIWORD(msg->lParam);     // virtual-key code
 
-            QString hotkey = win_keyhelper::getString(fuModifiers,uVirtKey);
+            int hotkey = win_keyhelper::getQKS(fuModifiers,uVirtKey);
 
             int hotkeyIndex = hotkeysIndex.indexOf(hotkey);
 
@@ -1839,7 +1839,7 @@ void MainWindow::addHotkey(QString hotkey,QString widget, QString action) {
     hotkeyItem.append(action);
 
     hotkeys.append(hotkeyItem);
-    hotkeysIndex.append(hotkey);
+    hotkeysIndex.append(qks[0]);
 
     #ifdef Q_OS_WIN
     if (!altHotkeyHandling) {

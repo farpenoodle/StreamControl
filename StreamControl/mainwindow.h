@@ -134,7 +134,7 @@ private:
     QMap<QString, int> dataAssoc;
     QMap<QString, QList<QString> > dataMaster;
     QList<QStringList> hotkeys;
-    QList<QString> hotkeysIndex;
+    QList<int> hotkeysIndex;
 
     QStringList removedSetQueue;
 
