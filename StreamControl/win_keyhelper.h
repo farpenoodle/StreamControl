@@ -106,16 +106,16 @@ namespace win_keyhelper
         Qt::Key_Menu,       //  93   0x5D   VK_APPS             | Application key-MS Natural kbd
         Qt::Key_unknown,    //  94   0x5E   -- reserved --
         Qt::Key_Sleep,      //  95   0x5F   VK_SLEEP
-        Qt::Key_0,          //  96   0x60   VK_NUMPAD0          | Numeric keypad 0 key
-        Qt::Key_1,          //  97   0x61   VK_NUMPAD1          | Numeric keypad 1 key
-        Qt::Key_2,          //  98   0x62   VK_NUMPAD2          | Numeric keypad 2 key
-        Qt::Key_3,          //  99   0x63   VK_NUMPAD3          | Numeric keypad 3 key
-        Qt::Key_4,          // 100   0x64   VK_NUMPAD4          | Numeric keypad 4 key
-        Qt::Key_5,          // 101   0x65   VK_NUMPAD5          | Numeric keypad 5 key
-        Qt::Key_6,          // 102   0x66   VK_NUMPAD6          | Numeric keypad 6 key
-        Qt::Key_7,          // 103   0x67   VK_NUMPAD7          | Numeric keypad 7 key
-        Qt::Key_8,          // 104   0x68   VK_NUMPAD8          | Numeric keypad 8 key
-        Qt::Key_9,          // 105   0x69   VK_NUMPAD9          | Numeric keypad 9 key
+        Qt::Key_0 | Qt::KeypadModifier,          //  96   0x60   VK_NUMPAD0          | Numeric keypad 0 key
+        Qt::Key_1 | Qt::KeypadModifier,          //  97   0x61   VK_NUMPAD1          | Numeric keypad 1 key
+        Qt::Key_2 | Qt::KeypadModifier,          //  98   0x62   VK_NUMPAD2          | Numeric keypad 2 key
+        Qt::Key_3 | Qt::KeypadModifier,          //  99   0x63   VK_NUMPAD3          | Numeric keypad 3 key
+        Qt::Key_4 | Qt::KeypadModifier,          // 100   0x64   VK_NUMPAD4          | Numeric keypad 4 key
+        Qt::Key_5 | Qt::KeypadModifier,          // 101   0x65   VK_NUMPAD5          | Numeric keypad 5 key
+        Qt::Key_6 | Qt::KeypadModifier,          // 102   0x66   VK_NUMPAD6          | Numeric keypad 6 key
+        Qt::Key_7 | Qt::KeypadModifier,          // 103   0x67   VK_NUMPAD7          | Numeric keypad 7 key
+        Qt::Key_8 | Qt::KeypadModifier,          // 104   0x68   VK_NUMPAD8          | Numeric keypad 8 key
+        Qt::Key_9 | Qt::KeypadModifier,          // 105   0x69   VK_NUMPAD9          | Numeric keypad 9 key
         Qt::Key_Asterisk,   // 106   0x6A   VK_MULTIPLY         | Multiply key
         Qt::Key_Plus,       // 107   0x6B   VK_ADD              | Add key
         Qt::Key_Comma,      // 108   0x6C   VK_SEPARATOR        | Separator key

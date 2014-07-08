@@ -1359,7 +1359,6 @@ void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
             newRadioButton->setObjectName(radioName);
             if(radioIterator == 0)
                 newRadioButton->setChecked(true);
-            \
             ((ScRadioGroup*)widgetList[newRadioGroup])->addButton(newRadioButton,radioIterator);
             ((ScRadioGroup*)widgetList[newRadioGroup])->setValue(radioIterator,value);
             radioIterator++;
@@ -1375,7 +1374,7 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
     if (element.attribute("type") == "reset") {
         QString newButton = element.attribute("id");
 
-        QList<QString> resetL = CSV::parseFromString(element.attribute("reset"))[0];\
+        QList<QString> resetL = CSV::parseFromString(element.attribute("reset"))[0];
 
         widgetType[newButton] = "resetButton";
 
