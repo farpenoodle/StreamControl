@@ -116,12 +116,12 @@ namespace win_keyhelper
         Qt::Key_7 | Qt::KeypadModifier,          // 103   0x67   VK_NUMPAD7          | Numeric keypad 7 key
         Qt::Key_8 | Qt::KeypadModifier,          // 104   0x68   VK_NUMPAD8          | Numeric keypad 8 key
         Qt::Key_9 | Qt::KeypadModifier,          // 105   0x69   VK_NUMPAD9          | Numeric keypad 9 key
-        Qt::Key_Asterisk,   // 106   0x6A   VK_MULTIPLY         | Multiply key
-        Qt::Key_Plus,       // 107   0x6B   VK_ADD              | Add key
+        Qt::Key_Asterisk | Qt::KeypadModifier,   // 106   0x6A   VK_MULTIPLY         | Multiply key
+        Qt::Key_Plus | Qt::KeypadModifier,       // 107   0x6B   VK_ADD              | Add key
         Qt::Key_Comma,      // 108   0x6C   VK_SEPARATOR        | Separator key
-        Qt::Key_Minus,      // 109   0x6D   VK_SUBTRACT         | Subtract key
-        Qt::Key_Period,     // 110   0x6E   VK_DECIMAL          | Decimal key
-        Qt::Key_Slash,      // 111   0x6F   VK_DIVIDE           | Divide key
+        Qt::Key_Minus | Qt::KeypadModifier,      // 109   0x6D   VK_SUBTRACT         | Subtract key
+        Qt::Key_Period | Qt::KeypadModifier,     // 110   0x6E   VK_DECIMAL          | Decimal key
+        Qt::Key_Slash | Qt::KeypadModifier,      // 111   0x6F   VK_DIVIDE           | Divide key
         Qt::Key_F1,         // 112   0x70   VK_F1               | F1 key
         Qt::Key_F2,         // 113   0x71   VK_F2               | F2 key
         Qt::Key_F3,         // 114   0x72   VK_F3               | F3 key
@@ -198,13 +198,13 @@ namespace win_keyhelper
         Qt::Key_Launch1,    // 183   0xB7   VK_LAUNCH_APP2      | Start Application 2 key
         Qt::Key_unknown,    // 184   0xB8   -- reserved --
         Qt::Key_unknown,    // 185   0xB9   -- reserved --
-        0,                  // 186   0xBA   VK_OEM_1            | ';:' for US
-        0,                  // 187   0xBB   VK_OEM_PLUS         | '+' any country
-        0,                  // 188   0xBC   VK_OEM_COMMA        | ',' any country
-        0,                  // 189   0xBD   VK_OEM_MINUS        | '-' any country
-        0,                  // 190   0xBE   VK_OEM_PERIOD       | '.' any country
-        0,                  // 191   0xBF   VK_OEM_2            | '/?' for US
-        0,                  // 192   0xC0   VK_OEM_3            | '`~' for US
+        Qt::Key_Semicolon,                  // 186   0xBA   VK_OEM_1            | ';:' for US
+        Qt::Key_Plus,                  // 187   0xBB   VK_OEM_PLUS         | '+' any country
+        Qt::Key_Comma,                  // 188   0xBC   VK_OEM_COMMA        | ',' any country
+        Qt::Key_Minus,                  // 189   0xBD   VK_OEM_MINUS        | '-' any country
+        Qt::Key_Period,                  // 190   0xBE   VK_OEM_PERIOD       | '.' any country
+        Qt::Key_Slash,                  // 191   0xBF   VK_OEM_2            | '/?' for US
+        Qt::Key_AsciiTilde,                  // 192   0xC0   VK_OEM_3            | '`~' for US
         Qt::Key_unknown,    // 193   0xC1   -- reserved --
         Qt::Key_unknown,    // 194   0xC2   -- reserved --
         Qt::Key_unknown,    // 195   0xC3   -- reserved --
@@ -231,10 +231,10 @@ namespace win_keyhelper
         Qt::Key_unknown,    // 216   0xD8   -- unassigned --
         Qt::Key_unknown,    // 217   0xD9   -- unassigned --
         Qt::Key_unknown,    // 218   0xDA   -- unassigned --
-        0,                  // 219   0xDB   VK_OEM_4            | '[{' for US
-        0,                  // 220   0xDC   VK_OEM_5            | '\|' for US
-        0,                  // 221   0xDD   VK_OEM_6            | ']}' for US
-        0,                  // 222   0xDE   VK_OEM_7            | ''"' for US
+        Qt::Key_BracketLeft,                  // 219   0xDB   VK_OEM_4            | '[{' for US
+        Qt::Key_Backslash,                  // 220   0xDC   VK_OEM_5            | '\|' for US
+        Qt::Key_BracketRight,                  // 221   0xDD   VK_OEM_6            | ']}' for US
+        Qt::Key_Apostrophe,                  // 222   0xDE   VK_OEM_7            | ''"' for US
         0,                  // 223   0xDF   VK_OEM_8
         Qt::Key_unknown,    // 224   0xE0   -- reserved --
         Qt::Key_unknown,    // 225   0xE1   VK_OEM_AX           | 'AX' key on Japanese AX kbd
