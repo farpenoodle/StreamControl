@@ -1281,7 +1281,15 @@ void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
     ((QCheckBox*)widgetList[newCheckBox])->setText(element.text());
-
+    if(!element.attribute("toggleHotkey").isEmpty()) {
+        addHotkey(element.attribute("toggleHotkey"),newCheckBox,"Toggle");
+    }
+    if(!element.attribute("checkHotkey").isEmpty()) {
+        addHotkey(element.attribute("checkHotkey"),newCheckBox,"Check");
+    }
+    if(!element.attribute("uncheckHotkey").isEmpty()) {
+        addHotkey(element.attribute("uncheckHotkey"),newCheckBox,"Uncheck");
+    }
 }
 
 void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
@@ -1367,7 +1375,10 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
     if (element.attribute("type") == "reset") {
         QString newButton = element.attribute("id");
 
-        QList<QString> resetL = CSV::parseFromString(element.attribute("reset"))[0];
+        QList<QString> resetL = CSV::parseFromString(element.attribute("reset"))[0];\
+
+        widgetType[newButton] = "resetButton";
+
         resetList.insert(newButton,resetL);
 
         visualList[newButton] = new QPushButton(parent);
@@ -1383,7 +1394,9 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), resetMapper, SLOT(map()));
         resetMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
-
+        if(!element.attribute("hotkey").isEmpty()) {
+            addHotkey(element.attribute("hotkey"),newButton,"Reset");
+        }
 
     } else if (element.attribute("type") == "swap") {
 
@@ -1393,6 +1406,7 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
         QList<QString> swapl2 = CSV::parseFromString(element.attribute("swapSet2"))[0];
 
         QList<QString> swapset;
+
         swapset.insert(0,newButton + "1");
         swapset.insert(1,newButton + "2");
 
@@ -1401,6 +1415,8 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
         swapList.insert(newButton + "1",swapl1);
 
         swapList.insert(newButton + "2",swapl2);
+
+        widgetType[newButton] = "swapButton";
 
         visualList[newButton] = new QPushButton(parent);
         visualList[newButton]->setObjectName(newButton);
@@ -1415,8 +1431,9 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), swapMapper, SLOT(map()));
         swapMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
-
-
+        if(!element.attribute("hotkey").isEmpty()) {
+            addHotkey(element.attribute("hotkey"),newButton,"Swap");
+        }
 
     } else if (element.attribute("type") == "timestamp") {
         bool nSaveOnClick = false;
@@ -1442,6 +1459,9 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((ScTSButton*)widgetList[newButton]), SIGNAL(clicked()), tsMapper, SLOT(map()));
         tsMapper -> setMapping (((ScTSButton*)widgetList[newButton]), newButton) ;
+        if(!element.attribute("hotkey").isEmpty()) {
+            addHotkey(element.attribute("hotkey"),newButton,"Timestamp");
+        }
     }
 }
 
@@ -1855,10 +1875,28 @@ void MainWindow::performHotkey(int hotkeyIndex) {
             if (action == "Increase") {
                 ((QSpinBox*)widgetList[widget])->setValue(value + step);
                 qDebug() << "increasing " + widget;
-            }
-            if (action == "Decrease") {
+            } else if (action == "Decrease") {
                 ((QSpinBox*)widgetList[widget])->setValue(value - step);
                 qDebug() << "decreasing " + widget;
+            }
+        } else if (wType == "resetButton") {
+            resetFields(widget);
+        } else if (wType == "swapButton") {
+            swapFields(widget);
+        } else if (wType == "tsButton") {
+            tsClick(widget);
+        } else if (wType == "checkBox") {
+            if (action == "Toggle") {
+                bool checked = ((QCheckBox*)widgetList[widget])->isChecked();
+                if (checked){
+                    ((QCheckBox*)widgetList[widget])->setChecked(false);
+                } else {
+                    ((QCheckBox*)widgetList[widget])->setChecked(true);
+                }
+            } else if (action == "Check") {
+                ((QCheckBox*)widgetList[widget])->setChecked(true);
+            } else if (action == "Uncheck") {
+                ((QCheckBox*)widgetList[widget])->setChecked(false);
             }
         }
     }
