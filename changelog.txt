@@ -1,3 +1,14 @@
+0.4
+-----------------------------------------
+Added comboboxes (need to add datasets)
+Changed toolbar to something customisable (currently only supports labels and comboboxes)
+Added timestamp buttons
+Fixed signal mappers (could cause certain button combinations to not work properly)
+Added support for writing data to JSON
+Tweet widget now downloads media and expands URLs
+Tweet widget now doesn't require you to get access token for each widget
+Added support for global hotkeys
+
 0.3 - July 3 2013
 -----------------------------------------
 Added rudimentary error checking
