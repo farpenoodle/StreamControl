@@ -80,6 +80,8 @@ public slots:
     void loadXML();
     void loadJSON();
     QDomDocument getDefaultLayout();
+    QString getValueByID(QString);
+    QString parseCmd(QString);
 
     void saveDataSets();
 
@@ -91,6 +93,9 @@ public slots:
     void completerActivate(QString);
     void removeFromDataSet();
     void checkLineDataSet(QString);
+
+    void execCmdQueue(QList<int>);
+    void doCLI();
 
     void updateCompleters();
 
@@ -138,6 +143,7 @@ private:
     QList<int> hotkeysIndex;
     QStringList cmdList;
     QMap<QString, QList<int> > cmdVars;
+    QMap<QString, QString > cmdOldValues;
 
     QStringList removedSetQueue;
 

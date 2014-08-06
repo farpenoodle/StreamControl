@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QProcess>
 #include "twitterhandler.h"
 
 #ifdef Q_OS_WIN
@@ -480,6 +481,11 @@ void MainWindow::saveData()
         file.close();
     }
 
+    //CLI
+    if (cmdList.length() > 0) {
+        doCLI();
+    }
+
     //datasets
 
     saveDataSets();
@@ -865,6 +871,129 @@ QString MainWindow::saveJSON() {
 
 }
 
+void MainWindow::doCLI() {
+
+    qDebug() << "doing cli";
+
+    QList<int> cmdQueue;
+    QStringList varsChanged;
+
+    QMapIterator<QString, QString> i(cmdOldValues);
+    while (i.hasNext()) {
+        i.next();
+
+        QString var = i.key();
+        QString oldVal = i.value();
+        QString val = "";
+
+        val = getValueByID(var);
+        if (val != oldVal) {
+            qDebug() << var + " has changed! value:" + val;
+            cmdOldValues[var] = val;
+            if (!varsChanged.contains(var)) {
+                varsChanged.append(var);
+            }
+        }
+
+    }
+
+    QString var;
+    foreach (var,varsChanged) {
+        QList<int> cmds = cmdVars[var];
+        int cmd;
+
+        foreach (cmd,cmds) {
+            if (!cmdQueue.contains(cmd)) {
+                cmdQueue.append(cmd);
+            }
+        }
+    }
+
+    execCmdQueue(cmdQueue);
+
+}
+
+QString MainWindow::getValueByID(QString id) {
+    QString newValue = "";
+    QString wType = "";
+
+    QStringList idSplit = id.split(".");
+
+    if (idSplit.length() > 1) {
+        wType = widgetType[idSplit.at(0)];
+        if (wType == "tweet") {
+                    newValue = "tweet";
+
+        }
+    } else {
+        wType = widgetType[id];
+        if (wType == "lineEdit") {
+            newValue = ((ScLineEdit*)widgetList[id])->text();
+        } else if (wType == "spinBox") {
+            newValue = ((QSpinBox*)widgetList[id])->text();
+        } else if (wType == "checkBox") {
+            QString checked = "0";
+            if (((QCheckBox*)widgetList[id])->isChecked()) {
+                checked = "1";
+            }
+            newValue = checked;
+        } else if (wType == "comboBox") {
+            int currentIndex = ((QComboBox*)widgetList[id])->currentIndex();
+            QString value;
+
+            value = ((QComboBox*)widgetList[id])->currentText();
+
+            int valueIndex = ((QComboBox*)widgetList[id])->findText(value);
+            if (valueIndex != -1) {
+                QVariant data = ((QComboBox*)widgetList[id])->itemData(currentIndex);
+                if (data.isNull())
+                    value = ((QComboBox*)widgetList[id])->itemText(currentIndex);
+                else
+                    value = data.toString();
+            }
+
+            newValue = value;
+        } else if (wType == "radioGroup") {
+            QString value = ((ScRadioGroup*)widgetList[id])->getCurrentRadio();
+            newValue = value;
+        } else if (wType == "tsButton") {
+            newValue = QString::number(((ScTSButton*)widgetList[id])->getTimeStamp());
+        }
+    }
+
+    return newValue;
+}
+
+void MainWindow::execCmdQueue(QList<int> cmdQueue) {
+    int cmd;
+    //QString cmdStr;
+
+    foreach (cmd,cmdQueue) {
+        QString cmdStr = cmdList.at(cmd);
+        cmdStr = parseCmd(cmdStr);
+        qDebug() << cmdStr;
+        QProcess *process = new QProcess(this);
+        process->start(cmdStr);
+    }
+}
+
+QString MainWindow::parseCmd(QString cmdStr) {
+    QRegExp rx("(\\[\\$[\\w\\.]+\\])");
+    int pos = 0;
+    QStringList vars;
+    while ((pos = rx.indexIn(cmdStr, pos)) != -1) {
+        QString var = rx.cap(0).remove(0,2);
+        var.chop(1);
+        vars << var;
+        pos += rx.matchedLength();
+    }
+    QString var;
+    foreach(var, vars) {
+        cmdStr.replace("[$"+var+"]",cmdOldValues[var]);
+    }
+    return cmdStr;
+}
+
 void MainWindow::resetFields(QString widget)
 {
 
@@ -1215,13 +1344,11 @@ void MainWindow::parseCLI(QDomNode cliNode) {
 
     QDomNode child = cliNode.firstChild();
 
-    QRegExp rx("\\[\\$\\w+\\]");
+    QRegExp rx("(\\[\\$[\\w\\.]+\\])");
 
     while (!child.isNull()) {
         if (child.toElement().tagName() == "cmd") {
             QString cmd = child.toElement().text();
-            /*int pos = rx.indexIn(cmd);
-            QStringList vars = rx.capturedTexts();*/
             int pos = 0;
             QStringList vars;
             while ((pos = rx.indexIn(cmd, pos)) != -1) {
@@ -1230,13 +1357,37 @@ void MainWindow::parseCLI(QDomNode cliNode) {
                 vars << var;
                 pos += rx.matchedLength();
             }
-            QString text;
-            foreach( text, vars )
-                qDebug() << text;
+
+            int cmdIndex = cmdList.length();
+
             cmdList.append(cmd);
-            qDebug() << cmd;
+            qDebug() << cmd + " @ " + QString::number(cmdList.length());
+
+            QString var;
+            foreach( var, vars ) {
+                if(!cmdVars[var].contains(cmdIndex)) {
+                    cmdVars[var].append(cmdIndex);
+                }
+                cmdOldValues[var] = "";
+            }
+
+            //cmdValues[var] = "";
+
         }
         child = child.nextSibling();
+    }
+
+    QMapIterator<QString, QList<int> > i(cmdVars);
+    while (i.hasNext()) {
+        i.next();
+
+        QString list = "";
+        int cmd;
+        foreach (cmd,i.value()) {
+            list += QString::number(cmd) + "! ";
+        }
+
+        qDebug() << i.key() << ": " << list;
     }
 
 }
@@ -1843,6 +1994,10 @@ void MainWindow::clearMaps() {
     resetMapper = new QSignalMapper (this) ;
     swapMapper = new QSignalMapper (this) ;
     tsMapper = new QSignalMapper (this) ;
+
+    cmdList.clear();
+    cmdOldValues.clear();
+    cmdVars.clear();
 }
 
 bool MainWindow::checkDataSet1Blank(QString setName) {
@@ -1861,7 +2016,7 @@ bool MainWindow::checkDataSet1Blank(QString setName) {
 void MainWindow::addHotkey(QString hotkey,QString widget, QString action) {
     QKeySequence qks(hotkey);
     int ks = qks[0];
-    int modifiers = win_keyhelper::getModifiers(ks) | 0x4000;
+    int modifiers = win_keyhelper::getModifiers(ks) | 0x4000; //add no-repeat modifier
     int key = win_keyhelper::getKey(ks);
 
     QStringList hotkeyItem;
