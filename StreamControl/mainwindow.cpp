@@ -1059,6 +1059,12 @@ void MainWindow::loadLayout() {
         parseToolBar(toolBarNode);
     }
 
+    QDomNode cliNode = layout.namedItem("cli");
+
+    if (!cliNode.isNull()) {
+        parseCLI(cliNode);
+    }
+
     //link o2 if needed
     if (needLink) {
         th->link();
@@ -1200,6 +1206,36 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
             //end comboboxes
         }
 
+        child = child.nextSibling();
+    }
+
+}
+
+void MainWindow::parseCLI(QDomNode cliNode) {
+
+    QDomNode child = cliNode.firstChild();
+
+    QRegExp rx("\\[\\$\\w+\\]");
+
+    while (!child.isNull()) {
+        if (child.toElement().tagName() == "cmd") {
+            QString cmd = child.toElement().text();
+            /*int pos = rx.indexIn(cmd);
+            QStringList vars = rx.capturedTexts();*/
+            int pos = 0;
+            QStringList vars;
+            while ((pos = rx.indexIn(cmd, pos)) != -1) {
+                QString var = rx.cap(0).remove(0,2);
+                var.chop(1);
+                vars << var;
+                pos += rx.matchedLength();
+            }
+            QString text;
+            foreach( text, vars )
+                qDebug() << text;
+            cmdList.append(cmd);
+            qDebug() << cmd;
+        }
         child = child.nextSibling();
     }
 

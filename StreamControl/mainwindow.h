@@ -64,6 +64,7 @@ public slots:
     void parseLayout(QDomElement, QWidget*);
     void parseTabLayout(QDomElement, QWidget*);
     void parseToolBar(QDomNode);
+    void parseCLI(QDomNode);
     void addLabel(QDomElement, QWidget*);
     void addLine(QDomElement, QWidget*);
     void addButton(QDomElement, QWidget*);
@@ -135,6 +136,8 @@ private:
     QMap<QString, QList<QString> > dataMaster;
     QList<QStringList> hotkeys;
     QList<int> hotkeysIndex;
+    QStringList cmdList;
+    QMap<QString, QList<int> > cmdVars;
 
     QStringList removedSetQueue;
 
