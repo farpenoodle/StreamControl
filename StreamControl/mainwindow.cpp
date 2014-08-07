@@ -1335,6 +1335,138 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
 
             ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
             //end comboboxes
+        } else if (tagName == "button") {
+            QDomElement buttonElement = child.toElement();
+            /*if (element.attribute("type") == "reset") {
+                QString newButton = buttonElement.attribute("id");
+
+                QList<QString> resetL = CSV::parseFromString(buttonElement.attribute("reset"))[0];
+
+                widgetType[newButton] = "resetButton";
+
+                resetList.insert(newButton,resetL);
+
+                int buttonWidth = 100;
+                if (buttonElement.hasAttribute("width")) {
+                    buttonWidth = buttonElement.attribute("width").toInt();
+                }
+                visualList[newButton] = new QPushButton();
+                visualList[newButton]->setObjectName(newButton);
+
+                ((QPushButton*)visualList[newButton])->setMinimumWidth(buttonWidth);
+
+                toolBar->addWidget(((QPushButton*)visualList[newButton]));
+
+                ((QPushButton*)visualList[newButton])->setText(buttonElement.text());
+                if (!buttonElement.attribute("tooltip").isEmpty()) {
+                    ((QPushButton*)visualList[newButton])->setToolTip(buttonElement.attribute("tooltip"));
+                }
+
+                connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), resetMapper, SLOT(map()));
+                resetMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
+                if(!element.attribute("hotkey").isEmpty()) {
+                    addHotkey(element.attribute("hotkey"),newButton,"Reset");
+                }
+
+
+            } else if (element.attribute("type") == "swap") {
+
+                QString newButton = element.attribute("id");
+
+                QList<QString> swapl1 = CSV::parseFromString(element.attribute("swapSet1"))[0];
+                QList<QString> swapl2 = CSV::parseFromString(element.attribute("swapSet2"))[0];
+
+                QList<QString> swapset;
+
+                swapset.insert(0,newButton + "1");
+                swapset.insert(1,newButton + "2");
+
+                swapSets.insert(newButton,swapset);
+
+                swapList.insert(newButton + "1",swapl1);
+
+                swapList.insert(newButton + "2",swapl2);
+
+                widgetType[newButton] = "swapButton";
+
+                visualList[newButton] = new QPushButton(parent);
+                visualList[newButton]->setObjectName(newButton);
+                visualList[newButton]->setGeometry(QRect(element.attribute("x").toInt(),
+                                                         element.attribute("y").toInt(),
+                                                         element.attribute("width").toInt(),
+                                                         element.attribute("height").toInt()));
+                ((QPushButton*)visualList[newButton])->setText(element.text());
+                if (!element.attribute("tooltip").isEmpty()) {
+                    ((QPushButton*)visualList[newButton])->setToolTip(element.attribute("tooltip"));
+                }
+
+                connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), swapMapper, SLOT(map()));
+                swapMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
+                if(!element.attribute("hotkey").isEmpty()) {
+                    addHotkey(element.attribute("hotkey"),newButton,"Swap");
+                }
+
+            } else if (element.attribute("type") == "timestamp") {
+                bool nSaveOnClick = false;
+
+                if (element.attribute("saveonclick") == "true" || element.attribute("saveonclick") == "1") {
+                    nSaveOnClick = true;
+                }
+                QString newButton = element.attribute("id");
+                widgetType[newButton] = "tsButton";
+
+                widgetList[newButton] = new ScTSButton(nSaveOnClick,parent);
+                widgetList[newButton]->setObjectName(newButton);
+                ((ScTSButton*)widgetList[newButton])->setGeometry(QRect(element.attribute("x").toInt(),
+                                                   element.attribute("y").toInt(),
+                                                   element.attribute("width").toInt(),
+                                                   element.attribute("height").toInt()));
+
+                ((ScTSButton*)widgetList[newButton])->setText(element.text());
+
+                if (!element.attribute("tooltip").isEmpty()) {
+                    ((ScTSButton*)widgetList[newButton])->setToolTip(element.attribute("tooltip"));
+                }
+
+                connect(((ScTSButton*)widgetList[newButton]), SIGNAL(clicked()), tsMapper, SLOT(map()));
+                tsMapper -> setMapping (((ScTSButton*)widgetList[newButton]), newButton) ;
+                if(!element.attribute("hotkey").isEmpty()) {
+                    addHotkey(element.attribute("hotkey"),newButton,"Timestamp");
+                }
+            } else*/ if (buttonElement.attribute("type") == "setButton") {
+                bool nSaveOnClick = false;
+                if (buttonElement.attribute("saveonclick") == "true" || buttonElement.attribute("saveonclick") == "1") {
+                    nSaveOnClick = true;
+                }
+                QString newButton = buttonElement.attribute("id");
+                QString nWidget = buttonElement.attribute("widget");
+                QString nValue = buttonElement.attribute("value");
+                widgetType[newButton] = "setButton";
+
+                visualList[newButton] = new ScSetButton(nSaveOnClick,nWidget,nValue,0);
+                visualList[newButton]->setObjectName(newButton);
+
+                int buttonWidth = 100;
+                if (buttonElement.hasAttribute("width")) {
+                    buttonWidth = buttonElement.attribute("width").toInt();
+                }
+
+                ((ScSetButton*)visualList[newButton])->setMinimumWidth(buttonWidth);
+
+                toolBar->addWidget(((ScSetButton*)visualList[newButton]));
+
+                ((ScSetButton*)visualList[newButton])->setText(buttonElement.text());
+
+                if (!buttonElement.attribute("tooltip").isEmpty()) {
+                    ((ScSetButton*)visualList[newButton])->setToolTip(buttonElement.attribute("tooltip"));
+                }
+
+                connect(((ScSetButton*)visualList[newButton]), SIGNAL(clicked()), setButtonMapper, SLOT(map()));
+                setButtonMapper -> setMapping (((ScSetButton*)visualList[newButton]), newButton) ;
+                if(!buttonElement.attribute("hotkey").isEmpty()) {
+                    addHotkey(buttonElement.attribute("hotkey"),newButton,"setButton");
+                }
+            }
         }
 
         child = child.nextSibling();
