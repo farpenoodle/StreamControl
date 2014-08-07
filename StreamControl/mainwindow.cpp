@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScLineEdit.h"
 #include "scradiogroup.h"
 #include "sctsbutton.h"
+#include "scsetbutton.h"
 #include <QRadioButton>
 #include "twitterwidget.h"
 #include <QJsonArray>
@@ -1204,6 +1205,7 @@ void MainWindow::loadLayout() {
     connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
     connect (swapMapper, SIGNAL(mapped(QString)), this, SLOT(swapFields(QString))) ;
     connect (tsMapper, SIGNAL(mapped(QString)), this, SLOT(tsClick(QString))) ;
+    connect (setButtonMapper, SIGNAL(mapped(QString)), this, SLOT(setButtonClick(QString))) ;
 
     //start the keyPoller
     if (altHotkeyHandling) {
@@ -1646,6 +1648,35 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
         if(!element.attribute("hotkey").isEmpty()) {
             addHotkey(element.attribute("hotkey"),newButton,"Timestamp");
         }
+    } else if (element.attribute("type") == "setButton") {
+        bool nSaveOnClick = false;
+        if (element.attribute("saveonclick") == "true" || element.attribute("saveonclick") == "1") {
+            nSaveOnClick = true;
+        }
+        QString newButton = element.attribute("id");
+        QString nWidget = element.attribute("widget");
+        QString nValue = element.attribute("value");
+        widgetType[newButton] = "setButton";
+
+        visualList[newButton] = new ScSetButton(nSaveOnClick,nWidget,nValue,parent);
+        visualList[newButton]->setObjectName(newButton);
+
+        ((ScSetButton*)visualList[newButton])->setGeometry(QRect(element.attribute("x").toInt(),
+                                           element.attribute("y").toInt(),
+                                           element.attribute("width").toInt(),
+                                           element.attribute("height").toInt()));
+
+        ((ScSetButton*)visualList[newButton])->setText(element.text());
+
+        if (!element.attribute("tooltip").isEmpty()) {
+            ((ScSetButton*)visualList[newButton])->setToolTip(element.attribute("tooltip"));
+        }
+
+        connect(((ScSetButton*)visualList[newButton]), SIGNAL(clicked()), setButtonMapper, SLOT(map()));
+        setButtonMapper -> setMapping (((ScSetButton*)visualList[newButton]), newButton) ;
+        if(!element.attribute("hotkey").isEmpty()) {
+            addHotkey(element.attribute("hotkey"),newButton,"setButton");
+        }
     }
 }
 
@@ -1657,6 +1688,33 @@ void MainWindow::tsClick(QString tsButton) {
     }
 
     if (((ScTSButton*)widgetList[tsButton])->isSaveOnClick()) {
+        saveData();
+    }
+}
+
+void MainWindow::setButtonClick(QString setButton) {
+    QString wType = "";
+    QString widget = ((ScSetButton*)visualList[setButton])->getWidget();
+    QString value = ((ScSetButton*)visualList[setButton])->getValue();
+    wType = widgetType[widget];
+
+    if (wType == "comboBox") {
+        QVariant data(value);
+        bool editable = ((QComboBox*)widgetList[widget])->isEditable();
+        int valueIndex = ((QComboBox*)widgetList[widget])->findData(data);
+        if (valueIndex == -1) {
+            valueIndex = ((QComboBox*)widgetList[widget])->findText(value);
+        }
+        if (valueIndex != -1) {
+            ((QComboBox*)widgetList[widget])->setCurrentIndex(valueIndex);
+        } else if (editable) {
+            ((QComboBox*)widgetList[widget])->setCurrentText(value);
+        }
+    }
+
+    //ADD MORE WIDGETS TYPES
+
+    if (((ScSetButton*)visualList[setButton])->isSaveOnClick()) {
         saveData();
     }
 }
@@ -1994,6 +2052,7 @@ void MainWindow::clearMaps() {
     resetMapper = new QSignalMapper (this) ;
     swapMapper = new QSignalMapper (this) ;
     tsMapper = new QSignalMapper (this) ;
+    setButtonMapper = new QSignalMapper (this) ;
 
     cmdList.clear();
     cmdOldValues.clear();
@@ -2073,6 +2132,8 @@ void MainWindow::performHotkey(int hotkeyIndex) {
             swapFields(widget);
         } else if (wType == "tsButton") {
             tsClick(widget);
+        } else if (wType == "setButton") {
+            setButtonClick(widget);
         } else if (wType == "checkBox") {
             if (action == "Toggle") {
                 bool checked = ((QCheckBox*)widgetList[widget])->isChecked();

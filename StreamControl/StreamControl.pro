@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     o2/o2settingsstore.cpp \
     sctsbutton.cpp \
     twitterhandler.cpp \
-    win_keyhelper.cpp
+    win_keyhelper.cpp \
+    scsetbutton.cpp
 
 HEADERS  += mainwindow.h \
     configwindow.h \
@@ -64,7 +65,8 @@ HEADERS  += mainwindow.h \
     o2/o2settingsstore.h \
     sctsbutton.h \
     twitterhandler.h \
-    win_keyhelper.h
+    win_keyhelper.h \
+    scsetbutton.h
 
 FORMS    += \
     configwindow.ui
