@@ -144,6 +144,7 @@ private:
     QList<QStringList> hotkeys;
     QList<int> hotkeysIndex;
     QStringList cmdList;
+    QList<QStringList> cmdIgnores;
     QMap<QString, QList<int> > cmdVars;
     QMap<QString, QString > cmdOldValues;
 

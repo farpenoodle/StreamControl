@@ -905,6 +905,7 @@ void MainWindow::doCLI() {
 
         foreach (cmd,cmds) {
             if (!cmdQueue.contains(cmd)) {
+                if(!cmdIgnores.at(cmd).contains(var))
                 cmdQueue.append(cmd);
             }
         }
@@ -1483,6 +1484,9 @@ void MainWindow::parseCLI(QDomNode cliNode) {
     while (!child.isNull()) {
         if (child.toElement().tagName() == "cmd") {
             QString cmd = child.toElement().text();
+            QString ignore = "";
+            ignore = child.toElement().attribute("ignore");
+            QStringList ignoreList = CSV::parseFromString(ignore)[0];
             int pos = 0;
             QStringList vars;
             while ((pos = rx.indexIn(cmd, pos)) != -1) {
@@ -1495,6 +1499,7 @@ void MainWindow::parseCLI(QDomNode cliNode) {
             int cmdIndex = cmdList.length();
 
             cmdList.append(cmd);
+            cmdIgnores.append(ignoreList);
             qDebug() << cmd + " @ " + QString::number(cmdList.length());
 
             QString var;
@@ -2189,6 +2194,7 @@ void MainWindow::clearMaps() {
     cmdList.clear();
     cmdOldValues.clear();
     cmdVars.clear();
+    cmdIgnores.clear();
 }
 
 bool MainWindow::checkDataSet1Blank(QString setName) {
