@@ -86,13 +86,15 @@ void twitterWidget::replyFinished() {
 
     QByteArray replyData = reply->readAll();
 
+    //qDebug() << QString(replyData);
+
     QScriptValue value;
     QScriptEngine engine;
 
     value = engine.evaluate("(" + QString(replyData) + ")");
 
     QScriptValue urls = value.property("entities").property("urls");
-    QScriptValue media = value.property("entities").property("media");
+    QScriptValue media = value.property("extended_entities").property("media");
 
     tweetText = value.property("text").toString();
     twitterName = value.property("user").property("name").toString();
