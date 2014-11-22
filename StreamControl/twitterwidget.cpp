@@ -49,7 +49,7 @@ void twitterWidget::fetchTweet()
             userName = rx.cap(1);
             tweetId = rx.cap(2);
 
-            QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId;
+            QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId + "&include_entities=true";
 
             QNetworkRequest request;
 

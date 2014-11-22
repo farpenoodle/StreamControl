@@ -1216,7 +1216,7 @@ void MainWindow::loadLayout() {
 }
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
-    QDomNode child = element.firstChild();
+    QDomNode child = element.firstChildElement();
     while (!child.isNull()) {
         QString tagName = child.toElement().tagName();
         if (tagName == "label") {
@@ -1243,12 +1243,12 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             parseTabLayout(child.toElement(), visualList[newTabSet]);
         }
 
-        child = child.nextSibling();
+        child = child.nextSiblingElement();
     }
 }
 
 void MainWindow::parseTabLayout(QDomElement element, QWidget *parent) {
-    QDomNode child = element.firstChild();
+    QDomNode child = element.firstChildElement();
     while (!child.isNull()) {
         QString tagName = child.toElement().tagName();
         if(tagName == "tab") {
@@ -1272,13 +1272,13 @@ void MainWindow::parseTabLayout(QDomElement element, QWidget *parent) {
             layoutIterator++;
         }
 
-        child = child.nextSibling();
+        child = child.nextSiblingElement();
     }
 }
 
 void MainWindow::parseToolBar(QDomNode toolBarNode) {
 
-    QDomNode child = toolBarNode.firstChild();
+    QDomNode child = toolBarNode.firstChildElement();
     while (!child.isNull()) {
         QString tagName = child.toElement().tagName();
 
@@ -1314,7 +1314,7 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
 
             toolBar->addWidget(((QComboBox*)widgetList[newComboBox]));
 
-            QDomNode combochild = comboBoxElement.firstChild();
+            QDomNode combochild = comboBoxElement.firstChildElement();
             int selectedIndex = 0;
             for (int itemIndex = 0; !combochild.isNull(); itemIndex++) {
                 QDomElement itemElement = combochild.toElement();
@@ -1331,7 +1331,7 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
                         selectedIndex = itemIndex;
                 }
 
-                combochild = combochild.nextSibling();
+                combochild = combochild.nextSiblingElement();
             }
 
             ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
@@ -1470,14 +1470,14 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
             }
         }
 
-        child = child.nextSibling();
+        child = child.nextSiblingElement();
     }
 
 }
 
 void MainWindow::parseCLI(QDomNode cliNode) {
 
-    QDomNode child = cliNode.firstChild();
+    QDomNode child = cliNode.firstChildElement();
 
     QRegExp rx("(\\[\\$[\\w\\.]+\\])");
 
@@ -1513,7 +1513,7 @@ void MainWindow::parseCLI(QDomNode cliNode) {
             //cmdValues[var] = "";
 
         }
-        child = child.nextSibling();
+        child = child.nextSiblingElement();
     }
 
     QMapIterator<QString, QList<int> > i(cmdVars);
@@ -1633,7 +1633,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
 
     }
 
-    QDomNode child = element.firstChild();
+    QDomNode child = element.firstChildElement();
     int selectedIndex = 0;
     for (int itemIndex = 0; !child.isNull(); itemIndex++) {
         QDomElement itemElement = child.toElement();
@@ -1650,7 +1650,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
                 selectedIndex = itemIndex;
         }
 
-        child = child.nextSibling();
+        child = child.nextSiblingElement();
     }
 
     ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
@@ -1664,7 +1664,7 @@ void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
     widgetList[newRadioGroup] = new ScRadioGroup(parent);
     widgetList[newRadioGroup]->setObjectName(newRadioGroup);
 
-    QDomNode child = element.firstChild();
+    QDomNode child = element.firstChildElement();
     int radioIterator = 0;
     while (!child.isNull()) {
         if (child.toElement().tagName() == "radioButton"){
@@ -1689,7 +1689,7 @@ void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
 
         }
 
-        child = child.nextSibling();
+        child = child.nextSiblingElement();
     }
 
 }
