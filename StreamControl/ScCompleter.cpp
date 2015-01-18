@@ -8,17 +8,17 @@ ScCompleter::ScCompleter(QObject* parent) :
 }
 
 void ScCompleter::setName(QString name,QString setName,int field, bool mast) {
-    lineEditName = name;
+    widgetName = name;
     dataSetName = setName;
     dataSetField = field;
     hMaster = mast;
 }
 
 QString ScCompleter::getName() {
-    return lineEditName;
+    return widgetName;
 }
 
-QString ScCompleter::getSetName() {
+QString ScCompleter::getDataSetName() {
     return dataSetName;
 }
 

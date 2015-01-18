@@ -1,11 +1,12 @@
-#include "ScLineEdit.h"
+#include "ScComboBox.h"
 #include <QToolButton>
 #include <QStyle>
 #include <QDebug>
+#include <QStringListModel>
 
 
-ScLineEdit::ScLineEdit(QWidget *parent)
-    : QLineEdit(parent)
+ScComboBox::ScComboBox(QWidget *parent)
+    : QComboBox(parent)
 {
     clearButton = new QToolButton(this);
     clearButton->setIcon(QIcon(QStringLiteral(":/StreamControl/icons/fugue/icons/cross-small-white.png")));
@@ -19,30 +20,30 @@ ScLineEdit::ScLineEdit(QWidget *parent)
                    qMax(msz.height(), clearButton->sizeHint().height() + frameWidth * 2 + 2));
 }
 
-void ScLineEdit::resizeEvent(QResizeEvent *)
+void ScComboBox::resizeEvent(QResizeEvent *)
 {
     QSize sz = clearButton->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-    clearButton->move(rect().right() - frameWidth - sz.width(),
+    clearButton->move(rect().right() - frameWidth - sz.width() - 20,
                       (rect().bottom() + 1 - sz.height())/2);
 }
 
-void ScLineEdit::setName(QString name,QString setName) {
-    lineEditName = name;
+void ScComboBox::setName(QString name,QString setName) {
+    comboBoxName = name;
     dataSetName = setName;
 }
 
-QString ScLineEdit::getName() {
-    return lineEditName;
+QString ScComboBox::getName() {
+    return comboBoxName;
 }
 
-QString ScLineEdit::getDataSetName() {
+QString ScComboBox::getDataSetName() {
     return dataSetName;
 }
-void ScLineEdit::setButtonVisible(bool visible) {
+void ScComboBox::setButtonVisible(bool visible) {
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
     if(visible) {
-        setStyleSheet(QString("QLineEdit { padding-right: %1px; } ").arg(clearButton->sizeHint().width() + frameWidth + 1));
+        setStyleSheet(QString("QComboBox { padding-right: %1px; } ").arg(clearButton->sizeHint().width() + frameWidth + 1));
         clearButton->setVisible(true);
     } else {
         setStyleSheet("");
@@ -50,6 +51,17 @@ void ScLineEdit::setButtonVisible(bool visible) {
     }
 }
 
-void ScLineEdit::clearButtonSlot(){
+void ScComboBox::clearButtonSlot(){
     emit clearButtonClicked();
+}
+
+void ScComboBox::addModel(QStringListModel *model){
+    QStringList list = model->stringList();
+    for (int i = 0; i < list.size(); ++i) {
+        QString currStr = list.at(i);
+        int index = findText(currStr);
+        if (index == -1) {
+            addItem(currStr);
+        }
+    }
 }

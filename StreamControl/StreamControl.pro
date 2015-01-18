@@ -15,6 +15,7 @@ SOURCES += main.cpp\
     csv.cpp \
     ScCompleter.cpp \
     ScLineEdit.cpp \
+    ScComboBox.cpp \
     errorchecking.cpp \
     scradiogroup.cpp \
     twitterwidget.cpp \
@@ -42,6 +43,7 @@ HEADERS  += mainwindow.h \
     csv.h \
     ScCompleter.h \
     ScLineEdit.h \
+    ScComboBox.h \
     scradiogroup.h \
     twitterwidget.h \
     twitterOauth.h \

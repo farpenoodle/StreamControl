@@ -32,7 +32,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "configwindow.h"
 #include <QMap>
 #include <QList>
-#include <QComboBox>
 #include <QSignalMapper>
 #include "config.h"
 #include <QtXml/QDomDocument>
@@ -92,8 +91,10 @@ public slots:
     void openConfig();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
-    void removeFromDataSet();
+    void removeLineFromDataSet();
+    void removeComboFromDataSet();
     void checkLineDataSet(QString);
+    void checkComboDataSet(QString);
 
     void execCmdQueue(QList<int>);
     void doCLI();

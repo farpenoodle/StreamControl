@@ -13,7 +13,7 @@
         ScCompleter(QObject* parent = 0);
 
     private:
-        QString lineEditName;
+        QString widgetName;
         QString dataSetName;
         int dataSetField;
         bool hMaster;
@@ -23,7 +23,7 @@
     public slots:
         void setName(QString,QString,int,bool);
         QString getName();
-        QString getSetName();
+        QString getDataSetName();
         int getDataField();
         bool hasMaster();
 

@@ -20,7 +20,7 @@
     public slots:
         void setName(QString,QString);
         QString getName();
-        QString getSetName();
+        QString getDataSetName();
         void setButtonVisible(bool);
         void clearButtonSlot();
 

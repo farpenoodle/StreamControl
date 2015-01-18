@@ -33,14 +33,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtDebug>
 #include <QShortcut>
 #include <QMessageBox>
-#include <QComboBox>
 #include <QAction>
 #include <QLabel>
 #include <QInputDialog>
 #include <QToolButton>
 #include <QMenu>
 #include <QSpinBox>
-#include <QLineEdit>
 #include <QPainter>
 #include <QToolbar>
 #include <QPushButton>
@@ -52,7 +50,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QDir>
 #include "ScCompleter.h"
 #include <QStringListModel>
+#include <QLineEdit>
 #include "ScLineEdit.h"
+#include "ScComboBox.h"
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
@@ -534,16 +534,16 @@ QString MainWindow::saveXML() {
             QDomText newItemt = doc.createTextNode(checked);
             newItem.appendChild(newItemt);
         } else if (wType == "comboBox") {
-            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            int currentIndex = ((ScComboBox*)widgetList[i.key()])->currentIndex();
             QString value;
 
-            value = ((QComboBox*)widgetList[i.key()])->currentText();
+            value = ((ScComboBox*)widgetList[i.key()])->currentText();
 
-            int valueIndex = ((QComboBox*)widgetList[i.key()])->findText(value);
+            int valueIndex = ((ScComboBox*)widgetList[i.key()])->findText(value);
             if (valueIndex != -1) {
-                QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+                QVariant data = ((ScComboBox*)widgetList[i.key()])->itemData(currentIndex);
                 if (data.isNull())
-                    value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
+                    value = ((ScComboBox*)widgetList[i.key()])->itemText(currentIndex);
                 else
                     value = data.toString();
             }
@@ -791,16 +791,16 @@ QString MainWindow::saveJSON() {
             }
             Obj[i.key()] = checked;
         } else if (wType == "comboBox") {
-            int currentIndex = ((QComboBox*)widgetList[i.key()])->currentIndex();
+            int currentIndex = ((ScComboBox*)widgetList[i.key()])->currentIndex();
             QString value;
 
-            value = ((QComboBox*)widgetList[i.key()])->currentText();
+            value = ((ScComboBox*)widgetList[i.key()])->currentText();
 
-            int valueIndex = ((QComboBox*)widgetList[i.key()])->findText(value);
+            int valueIndex = ((ScComboBox*)widgetList[i.key()])->findText(value);
             if (valueIndex != -1) {
-                QVariant data = ((QComboBox*)widgetList[i.key()])->itemData(currentIndex);
+                QVariant data = ((ScComboBox*)widgetList[i.key()])->itemData(currentIndex);
                 if (data.isNull())
-                    value = ((QComboBox*)widgetList[i.key()])->itemText(currentIndex);
+                    value = ((ScComboBox*)widgetList[i.key()])->itemText(currentIndex);
                 else
                     value = data.toString();
             }
@@ -940,16 +940,16 @@ QString MainWindow::getValueByID(QString id) {
             }
             newValue = checked;
         } else if (wType == "comboBox") {
-            int currentIndex = ((QComboBox*)widgetList[id])->currentIndex();
+            int currentIndex = ((ScComboBox*)widgetList[id])->currentIndex();
             QString value;
 
-            value = ((QComboBox*)widgetList[id])->currentText();
+            value = ((ScComboBox*)widgetList[id])->currentText();
 
-            int valueIndex = ((QComboBox*)widgetList[id])->findText(value);
+            int valueIndex = ((ScComboBox*)widgetList[id])->findText(value);
             if (valueIndex != -1) {
-                QVariant data = ((QComboBox*)widgetList[id])->itemData(currentIndex);
+                QVariant data = ((ScComboBox*)widgetList[id])->itemData(currentIndex);
                 if (data.isNull())
-                    value = ((QComboBox*)widgetList[id])->itemText(currentIndex);
+                    value = ((ScComboBox*)widgetList[id])->itemText(currentIndex);
                 else
                     value = data.toString();
             }
@@ -1298,21 +1298,21 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
             QDomElement comboBoxElement = child.toElement();
             QString newComboBox = comboBoxElement.attribute("id");
             widgetType[newComboBox] = "comboBox";
-            widgetList[newComboBox] = new QComboBox();
+            widgetList[newComboBox] = new ScComboBox();
             widgetList[newComboBox]->setObjectName(newComboBox);
 
             int comboBoxWidth = 100;
             if (comboBoxElement.hasAttribute("width")) {
                 comboBoxWidth = comboBoxElement.attribute("width").toInt();
             }
-            ((QComboBox*)widgetList[newComboBox])->setMinimumWidth(comboBoxWidth);
+            ((ScComboBox*)widgetList[newComboBox])->setMinimumWidth(comboBoxWidth);
 
             if (comboBoxElement.attribute("editable") == "1" || comboBoxElement.attribute("editable") == "true") {
-                ((QComboBox*)widgetList[newComboBox])->setEditable(true);
+                ((ScComboBox*)widgetList[newComboBox])->setEditable(true);
 
             }
 
-            toolBar->addWidget(((QComboBox*)widgetList[newComboBox]));
+            toolBar->addWidget(((ScComboBox*)widgetList[newComboBox]));
 
             QDomNode combochild = comboBoxElement.firstChildElement();
             int selectedIndex = 0;
@@ -1325,7 +1325,7 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
                     if (value.isNull())
                         value = text;
 
-                    ((QComboBox*)widgetList[newComboBox])->addItem(text, value);
+                    ((ScComboBox*)widgetList[newComboBox])->addItem(text, value);
 
                     if (itemElement.attribute("selected") == "true")
                         selectedIndex = itemIndex;
@@ -1334,7 +1334,7 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
                 combochild = combochild.nextSiblingElement();
             }
 
-            ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
+            ((ScComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
             //end comboboxes
         } else if (tagName == "button") {
             QDomElement buttonElement = child.toElement();
@@ -1620,16 +1620,16 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
 
     QString newComboBox = element.attribute("id");
     widgetType[newComboBox] = "comboBox";
-    widgetList[newComboBox] = new QComboBox(parent);
+    widgetList[newComboBox] = new ScComboBox(parent);
     widgetList[newComboBox]->setObjectName(newComboBox);
 
-    ((QComboBox*)widgetList[newComboBox])->setGeometry(QRect(element.attribute("x").toInt(),
+    ((ScComboBox*)widgetList[newComboBox])->setGeometry(QRect(element.attribute("x").toInt(),
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
 
     if (element.attribute("editable") == "true" || element.attribute("editable") == "1") {
-        ((QComboBox*)widgetList[newComboBox])->setEditable(true);
+        ((ScComboBox*)widgetList[newComboBox])->setEditable(true);
 
     }
 
@@ -1644,7 +1644,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
             if (value.isNull())
                 value = text;
 
-            ((QComboBox*)widgetList[newComboBox])->addItem(text, value);
+            ((ScComboBox*)widgetList[newComboBox])->addItem(text, value);
 
             if (itemElement.attribute("selected") == "true" || itemElement.attribute("selected") == "1")
                 selectedIndex = itemIndex;
@@ -1653,8 +1653,62 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
         child = child.nextSiblingElement();
     }
 
-    ((QComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
+    ((ScComboBox*)widgetList[newComboBox])->setCurrentIndex(selectedIndex);
 
+    if(element.hasAttribute("dataSet")) {
+        QString dataSetName = element.attribute("dataSet");
+        if (dataSets[dataSetName].isEmpty()) {
+            QString setPath = QFileInfo(settings["layoutPath"]).path() +"/"+ dataSetName;
+            QList<QStringList> newDataSet = CSV::parseFromFile(setPath,"UTF-8");
+
+            dataSets[dataSetName] = processDataSet(newDataSet);
+            condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
+        }
+        int dataField = 0;
+        if (element.hasAttribute("dataField")) {
+            dataField = element.attribute("dataField").toInt() - 1;
+
+            for (int i = dataSets[dataSetName].length(); i <= dataField; i++) {
+                QStringList newList;
+
+                for (int i2 = 0; i2 < dataSets[dataSetName][0].length();i2++){
+                    newList.insert(i2,"");
+                }
+                dataSets[dataSetName].insert(i,newList);
+                condensedDataSets[dataSetName] = condenseDataSet(dataSets[dataSetName]);
+            }
+
+        }
+
+        dataAssoc[newComboBox] = dataField;
+        completerList[newComboBox] = new ScCompleter(parent);
+        bool hasMaster;
+        ((ScLineEdit*)widgetList[newComboBox])->setName(newComboBox,dataSetName);
+        if (element.hasAttribute("master")) {
+            QStringListModel *model = new QStringListModel(condensedDataSets[dataSetName][dataField]);
+            completerList[newComboBox]->setModel(model);
+            dataMaster[element.attribute("master")].append(newComboBox);
+            ((ScComboBox*)widgetList[newComboBox])->setButtonVisible(false);
+            ((ScComboBox*)widgetList[newComboBox])->addModel(model);
+            hasMaster = true;
+        } else {
+            QStringListModel *model = new QStringListModel(dataSets[dataSetName][dataField]);
+            completerList[newComboBox]->setModel(model);
+            connect(((ScLineEdit*)widgetList[newComboBox]),SIGNAL(editTextChanged(QString)), this, SLOT(checkComboDataSet(QString)));
+            connect(((ScLineEdit*)widgetList[newComboBox]),SIGNAL(clearButtonClicked()), this, SLOT(removeComboFromDataSet()));
+            ((ScComboBox*)widgetList[newComboBox])->addModel(model);
+            hasMaster = false;
+
+        }
+        completerList[newComboBox]->setName(newComboBox,dataSetName,dataField,hasMaster);
+        completerList[newComboBox]->setCaseSensitivity(Qt::CaseInsensitive);
+        completerList[newComboBox]->setCompletionMode(QCompleter::PopupCompletion);
+
+        ((ScComboBox*)widgetList[newComboBox])->setCompleter(completerList[newComboBox]);
+
+        connect(completerList[newComboBox], SIGNAL(activated(QString)), this, SLOT(completerActivate(QString)));
+
+    }
 }
 
 void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
@@ -1837,15 +1891,15 @@ void MainWindow::setButtonClick(QString setButton) {
 
     if (wType == "comboBox") {
         QVariant data(value);
-        bool editable = ((QComboBox*)widgetList[widget])->isEditable();
-        int valueIndex = ((QComboBox*)widgetList[widget])->findData(data);
+        bool editable = ((ScComboBox*)widgetList[widget])->isEditable();
+        int valueIndex = ((ScComboBox*)widgetList[widget])->findData(data);
         if (valueIndex == -1) {
-            valueIndex = ((QComboBox*)widgetList[widget])->findText(value);
+            valueIndex = ((ScComboBox*)widgetList[widget])->findText(value);
         }
         if (valueIndex != -1) {
-            ((QComboBox*)widgetList[widget])->setCurrentIndex(valueIndex);
+            ((ScComboBox*)widgetList[widget])->setCurrentIndex(valueIndex);
         } else if (editable) {
-            ((QComboBox*)widgetList[widget])->setCurrentText(value);
+            ((ScComboBox*)widgetList[widget])->setCurrentText(value);
         }
     }
 
@@ -1911,7 +1965,7 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
             QStringListModel *model = new QStringListModel(dataSets[dataSetName][dataField]);
             completerList[newLineEdit]->setModel(model);
             connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(textChanged(QString)), this, SLOT(checkLineDataSet(QString)));
-            connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(clearButtonClicked()), this, SLOT(removeFromDataSet()));
+            connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(clearButtonClicked()), this, SLOT(removeLineFromDataSet()));
             hasMaster = false;
 
         }
@@ -1928,20 +1982,25 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
 
 void MainWindow::completerActivate(QString item) {
     QString scSender = ((ScCompleter*)sender())->getName();
-    QString scSetName = ((ScCompleter*)sender())->getSetName();
+    QString scSetName = ((ScCompleter*)sender())->getDataSetName();
     int field = dataAssoc[scSender];
     int index = dataSets[scSetName][field].indexOf(item);
 
     for (int i = 0; i < dataMaster[scSender].length();i++) {
         QString id = dataMaster[scSender][i];
         int newField = dataAssoc[id];
-        ((ScLineEdit*)widgetList[id])->setText(dataSets[scSetName][newField][index]);
+        if (widgetType[id] == "lineEdit"){
+            ((ScLineEdit*)widgetList[id])->setText(dataSets[scSetName][newField][index]);
+        }
+        if (widgetType[id] == "comboBox"){
+            ((ScComboBox*)widgetList[id])->setEditText(dataSets[scSetName][newField][index]);
+        }
     }
 }
 
-void MainWindow::removeFromDataSet() {
+void MainWindow::removeLineFromDataSet() {
     QString scSender = ((ScLineEdit*)sender())->getName();
-    QString scSetName = ((ScLineEdit*)sender())->getSetName();
+    QString scSetName = ((ScLineEdit*)sender())->getDataSetName();
 
     QString item = ((ScLineEdit*)sender())->text();
 
@@ -1959,7 +2018,11 @@ void MainWindow::removeFromDataSet() {
     int numSlave = dataMaster[scSender].length();
     for (int i = 0; i < numSlave; i++) {
         QString widget = dataMaster[scSender][i];
-        ((ScLineEdit*)widgetList[widget])->clear();
+        if (widget == "lineEdit") {
+            ((ScLineEdit*)widgetList[widget])->clear();
+        } else if (widget == "comboBox") {
+            ((ScComboBox*)widgetList[widget])->clearEditText();
+        }
     }
 
     removedSetQueue.append(scSetName);
@@ -1971,12 +2034,64 @@ void MainWindow::removeFromDataSet() {
 
 }
 
+void MainWindow::removeComboFromDataSet() {
+    QString scSender = ((ScComboBox*)sender())->getName();
+    QString scSetName = ((ScComboBox*)sender())->getDataSetName();
+
+    QString item;
+
+        int currentIndex = ((ScComboBox*)widgetList[scSender])->currentIndex();
+        //QString value;
+
+        item = ((ScComboBox*)widgetList[scSender])->currentText();
+
+        int valueIndex = ((ScComboBox*)widgetList[scSender])->findText(item);
+        if (valueIndex != -1) {
+            QVariant data = ((ScComboBox*)widgetList[scSender])->itemData(currentIndex);
+            if (data.isNull())
+                item = ((ScComboBox*)widgetList[scSender])->itemText(currentIndex);
+            else
+                item = data.toString();
+        }
+
+    //QString item = ((ScComboBox*)sender())->editTextChanged();
+
+    int field = dataAssoc[scSender];
+    int index = dataSets[scSetName][field].indexOf(item);
+
+    int numSets = dataSets[scSetName].length();
+
+    for (int i = 0; i < numSets; i++) {
+        dataSets[scSetName][i].removeAt(index);
+    }
+
+    condensedDataSets[scSetName] = condenseDataSet(dataSets[scSetName]);
+
+    int numSlave = dataMaster[scSender].length();
+    for (int i = 0; i < numSlave; i++) {
+        QString widget = dataMaster[scSender][i];
+        if (widget == "lineEdit") {
+            ((ScLineEdit*)widgetList[widget])->clear();
+        } else if (widget == "comboBox") {
+            ((ScComboBox*)widgetList[widget])->clearEditText();
+        }
+    }
+
+    removedSetQueue.append(scSetName);
+
+    updateCompleters();
+
+    ((ScComboBox*)sender())->clearEditText();
+
+
+}
+
 void MainWindow::updateCompleters() {
     QMapIterator<QString, ScCompleter *> i(completerList);
     while (i.hasNext()) {
         i.next();
         QString name = i.key();
-        QString setName = completerList[name]->getSetName();
+        QString setName = completerList[name]->getDataSetName();
         int dataField = completerList[name]->getDataField();
 
         if (completerList[name]->hasMaster() == true) {
@@ -1991,7 +2106,7 @@ void MainWindow::updateCompleters() {
 
 void MainWindow::checkLineDataSet(QString line) {
     QString scSender = ((ScLineEdit*)sender())->getName();
-    QString scSetName = ((ScLineEdit*)sender())->getSetName();
+    QString scSetName = ((ScLineEdit*)sender())->getDataSetName();
     int field = dataAssoc[scSender];
     int index = dataSets[scSetName][field].indexOf(line);
 
@@ -1999,6 +2114,19 @@ void MainWindow::checkLineDataSet(QString line) {
         ((ScLineEdit*)widgetList[scSender])->setButtonVisible(true);
     } else {
         ((ScLineEdit*)widgetList[scSender])->setButtonVisible(false);
+    }
+}
+
+void MainWindow::checkComboDataSet(QString line) {
+    QString scSender = ((ScComboBox*)sender())->getName();
+    QString scSetName = ((ScComboBox*)sender())->getDataSetName();
+    int field = dataAssoc[scSender];
+    int index = dataSets[scSetName][field].indexOf(line);
+
+    if(index != -1) {
+        ((ScComboBox*)widgetList[scSender])->setButtonVisible(true);
+    } else {
+        ((ScComboBox*)widgetList[scSender])->setButtonVisible(false);
     }
 }
 
@@ -2045,12 +2173,29 @@ void MainWindow::saveDataSets() {
     while (i.hasNext()) {
         i.next();
         QString name = i.key();
-        QString setName = completerList[name]->getSetName();
+        QString setName = completerList[name]->getDataSetName();
         int dataField = completerList[name]->getDataField();
 
         if (completerList[name]->hasMaster() == false) { //if it's a master
             //check if current value in in dataSet
-            QString currentVal = ((ScLineEdit*)widgetList[name])->text();
+            QString currentVal;
+            if (widgetType[name] == "lineEdit") {
+                currentVal = ((ScLineEdit*)widgetList[name])->text();
+            } else if (widgetType[name] == "comboBox") {
+                int currentIndex = ((ScComboBox*)widgetList[i.key()])->currentIndex();
+                //QString value;
+
+                currentVal = ((ScComboBox*)widgetList[name])->currentText();
+
+                int valueIndex = ((ScComboBox*)widgetList[name])->findText(currentVal);
+                if (valueIndex != -1) {
+                    QVariant data = ((ScComboBox*)widgetList[name])->itemData(currentIndex);
+                    if (data.isNull())
+                        currentVal = ((ScComboBox*)widgetList[name])->itemText(currentIndex);
+                    else
+                        currentVal = data.toString();
+                }
+            }
             int currIndex =  dataSets[setName][dataField].indexOf(currentVal);
 
             if (currIndex == -1 && currentVal != "") {
@@ -2063,7 +2208,25 @@ void MainWindow::saveDataSets() {
 
                 int newIndex = dataSets[setName][dataField].length() - 1;
 
-                QString newValue = ((ScLineEdit*)widgetList[name])->text();
+                QString newValue;
+
+                if (widgetType[name] == "lineEdit") {
+                    newValue = ((ScLineEdit*)widgetList[name])->text();
+                } else if (widgetType[name] == "comboBox") {
+                    int currentIndex = ((ScComboBox*)widgetList[name])->currentIndex();
+                    //QString value;
+
+                    newValue = ((ScComboBox*)widgetList[name])->currentText();
+
+                    int valueIndex = ((ScComboBox*)widgetList[name])->findText(newValue);
+                    if (valueIndex != -1) {
+                        QVariant data = ((ScComboBox*)widgetList[name])->itemData(currentIndex);
+                        if (data.isNull())
+                            newValue = ((ScComboBox*)widgetList[name])->itemText(currentIndex);
+                        else
+                            newValue = data.toString();
+                    }
+                }
                 dataSets[setName][dataField][newIndex] = newValue;
 
                 //find each field that has name as master
@@ -2072,14 +2235,36 @@ void MainWindow::saveDataSets() {
                     QString slaveName = dataMaster[name][i];
                     int field = dataAssoc[slaveName];
                     if (field != dataField) {
-                        QString newValue = ((ScLineEdit*)widgetList[slaveName])->text();
+                        QString newValue;
+
+                        if (widgetType[slaveName] == "lineEdit") {
+                            newValue = ((ScLineEdit*)widgetList[slaveName])->text();
+                        } else if (widgetType[slaveName] == "comboBox") {
+                            int currentIndex = ((ScComboBox*)widgetList[slaveName])->currentIndex();
+                            //QString value;
+
+                            newValue = ((ScComboBox*)widgetList[slaveName])->currentText();
+
+                            int valueIndex = ((ScComboBox*)widgetList[slaveName])->findText(newValue);
+                            if (valueIndex != -1) {
+                                QVariant data = ((ScComboBox*)widgetList[slaveName])->itemData(currentIndex);
+                                if (data.isNull())
+                                    newValue = ((ScComboBox*)widgetList[slaveName])->itemText(currentIndex);
+                                else
+                                    newValue = data.toString();
+                            }
+                        }
+                        //QString newValue = ((ScLineEdit*)widgetList[slaveName])->text();
                         dataSets[setName][field][newIndex] = newValue;
                     }
                 }
                 if (updatedSets.indexOf(setName) == -1)
                     updatedSets.append(setName);
-
-                ((ScLineEdit*)widgetList[name])->setButtonVisible(true);
+                if (widgetType[name] == "lineEdit") {
+                    ((ScLineEdit*)widgetList[name])->setButtonVisible(true);
+                } else if (widgetType[name] == "comboBox") {
+                    ((ScComboBox*)widgetList[name])->setButtonVisible(true);
+                }
 
             } else if (currentVal != "") { //if has in set
                 //find each field that has name as master
@@ -2088,7 +2273,26 @@ void MainWindow::saveDataSets() {
                     QString slaveName = dataMaster[name][i];
                     int field = dataAssoc[slaveName];
                     if (field != dataField) {
-                        QString newValue = ((ScLineEdit*)widgetList[slaveName])->text();
+                        QString newValue;
+
+                        if (widgetType[slaveName] == "lineEdit") {
+                            newValue = ((ScLineEdit*)widgetList[slaveName])->text();
+                        } else if (widgetType[slaveName] == "comboBox") {
+                            int currentIndex = ((ScComboBox*)widgetList[slaveName])->currentIndex();
+                            //QString value;
+
+                            newValue = ((ScComboBox*)widgetList[slaveName])->currentText();
+
+                            int valueIndex = ((ScComboBox*)widgetList[slaveName])->findText(newValue);
+                            if (valueIndex != -1) {
+                                QVariant data = ((ScComboBox*)widgetList[slaveName])->itemData(currentIndex);
+                                if (data.isNull())
+                                    newValue = ((ScComboBox*)widgetList[slaveName])->itemText(currentIndex);
+                                else
+                                    newValue = data.toString();
+                            }
+                        }
+                        //QString newValue = ((ScLineEdit*)widgetList[slaveName])->text();
                         if (dataSets[setName][field][currIndex] != newValue){ // if not new value update
                             dataSets[setName][field][currIndex] = newValue;
                             if (updatedSets.indexOf(setName) == -1)
