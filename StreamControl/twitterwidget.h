@@ -11,7 +11,7 @@
 #include <QNetworkRequest>
 #include <QVector>
 
-#include "twitterHandler.h"
+#include "twitterhandler.h"
 
 
 class twitterWidget : public QWidget

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMenu>
 #include <QSpinBox>
 #include <QPainter>
-#include <QToolbar>
+#include <QToolBar>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QScrollArea>
