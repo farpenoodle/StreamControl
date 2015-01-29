@@ -11,14 +11,13 @@
 #include <QNetworkRequest>
 #include <QVector>
 
-#include "twitterhandler.h"
+class TwitterHandler;
 
-
-class twitterWidget : public QWidget
+class TwitterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit twitterWidget(twitterHandler *th, QWidget *parent = 0);
+    explicit TwitterWidget(TwitterHandler *th, QWidget *parent = 0);
 
 private:
     QGridLayout     *layout;
@@ -42,11 +41,11 @@ private:
     QNetworkAccessManager   *picManager;
     QNetworkAccessManager   *mediaManager;
 
-    twitterHandler *th;
+    TwitterHandler *th;
 
-    
+
 signals:
-    
+
 public slots:
     void fetchTweet();
     void replyFinished();
@@ -65,4 +64,5 @@ public slots:
 
 };
 
-#endif // TWITTER_H
+
+#endif // TWITTERWIDGET_H

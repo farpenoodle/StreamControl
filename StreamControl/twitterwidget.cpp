@@ -11,7 +11,7 @@
 #include "o2/o2globals.h"
 #include <QScriptEngine>
 
-twitterWidget::twitterWidget(twitterHandler * th,QWidget *parent) :
+TwitterWidget::TwitterWidget(TwitterHandler * th,QWidget *parent) :
     th(th),QWidget(parent)
 {
     picDone = false;
@@ -35,7 +35,7 @@ twitterWidget::twitterWidget(twitterHandler * th,QWidget *parent) :
 
 }
 
-void twitterWidget::fetchTweet()
+void TwitterWidget::fetchTweet()
 {
     if (th->linked()){
 
@@ -74,7 +74,7 @@ void twitterWidget::fetchTweet()
 
 }
 
-void twitterWidget::replyFinished() {
+void TwitterWidget::replyFinished() {
 
     picDone = false;
     mediaDone = false;
@@ -186,7 +186,7 @@ void twitterWidget::replyFinished() {
     reply->deleteLater();
 }
 
-void twitterWidget::picFinished() {
+void TwitterWidget::picFinished() {
 
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -214,7 +214,7 @@ void twitterWidget::picFinished() {
 
 }
 
-void twitterWidget::mediaFinished() {
+void TwitterWidget::mediaFinished() {
 
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -242,55 +242,55 @@ qDebug() << outFile;
 
 }
 
-void twitterWidget::setPath(QString path) {
+void TwitterWidget::setPath(QString path) {
 
     profilePicPath = path;
 
 }
 
-QString twitterWidget::getDate() {
+QString TwitterWidget::getDate() {
 
     return tweetCreated;
 
 }
 
-QString twitterWidget::getProfilePicFilename() {
+QString TwitterWidget::getProfilePicFilename() {
 
     return profilePicFilename;
 
 }
 
-QString twitterWidget::getProfilePicPath() {
+QString TwitterWidget::getProfilePicPath() {
 
     return profilePicPath + profilePicFilename;
 
 }
 
-QString twitterWidget::getTweetText() {
+QString TwitterWidget::getTweetText() {
 
     return tweetText;
 
 }
 
-QString twitterWidget::getTwitterName() {
+QString TwitterWidget::getTwitterName() {
 
     return twitterName;
 
 }
 
-QString twitterWidget::getUsername() {
+QString TwitterWidget::getUsername() {
 
     return userName;
 
 }
 
-QVector<QMap<QString,QString> > twitterWidget::getURLs() {
+QVector<QMap<QString,QString> > TwitterWidget::getURLs() {
 
     return urlArray;
 
 }
 
-QVector<QMap<QString,QString> > twitterWidget::getMedia() {
+QVector<QMap<QString,QString> > TwitterWidget::getMedia() {
 
     return mediaArray;
 

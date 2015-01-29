@@ -6,10 +6,12 @@
 #include <QString>
 
 class twitterHandler : public QObject
+
+class TwitterHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit twitterHandler(QObject *parent = 0);
+    explicit TwitterHandler(QObject *parent = 0);
 
 signals:
 

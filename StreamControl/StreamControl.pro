@@ -75,7 +75,7 @@ FORMS    += \
 
 RESOURCES += \
     resources.qrc
-	
+
 RC_FILE = streamcontrol.rc
 
 OTHER_FILES += \

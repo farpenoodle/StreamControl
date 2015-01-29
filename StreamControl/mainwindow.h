@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScCompleter.h"
 #include "twitterhandler.h"
 #include <QTimer>
+#include "config.h"
 
 class MainWindow : public QMainWindow
 {
@@ -154,7 +155,7 @@ private:
     bool useCDATA;
     bool altHotkeyHandling;
     int saveFormat;
-    twitterHandler *th;
+    TwitterHandler *th;
     bool needLink;
 
     QTimer *keyPoller;

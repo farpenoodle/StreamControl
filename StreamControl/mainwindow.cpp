@@ -136,7 +136,7 @@ MainWindow::MainWindow()
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
 
     needLink = false;
-    th = new twitterHandler();
+    th = new TwitterHandler();
 
     //code to add non buttons to toolbar
     QLabel* spaceLabel = new QLabel("   ");
@@ -565,35 +565,42 @@ QString MainWindow::saveXML() {
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
         } else if (wType == "tweet") {
-            QVector<QMap<QString,QString> > urlArray = ((twitterWidget*)widgetList[i.key()])->getURLs();
-            QVector<QMap<QString,QString> > mediaArray = ((twitterWidget*)widgetList[i.key()])->getMedia();
+            QVector<QMap<QString,QString> > urlArray = ((TwitterWidget*)widgetList[
+                i.key()])->getURLs();
+            QVector<QMap<QString,QString> > mediaArray = ((TwitterWidget*)widgetList[
+                i.key()])->getMedia();
             if (useCDATA) {
                 QDomElement username = doc.createElement("username");
-                QDomCDATASection username_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getUsername());
+                QDomCDATASection username_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getUsername());
 
                 username.appendChild(username_t);
                 newItem.appendChild(username);
 
                 QDomElement twittername = doc.createElement("twittername");
-                QDomCDATASection twittername_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+                QDomCDATASection twittername_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getTwitterName());
 
                 twittername.appendChild(twittername_t);
                 newItem.appendChild(twittername);
 
                 QDomElement tweetText = doc.createElement("text");
-                QDomCDATASection tweetText_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getTweetText());
+                QDomCDATASection tweetText_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getTweetText());
 
                 tweetText.appendChild(tweetText_t);
                 newItem.appendChild(tweetText);
 
                 QDomElement created = doc.createElement("created");
-                QDomCDATASection created_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getDate());
+                QDomCDATASection created_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getDate());
 
                 created.appendChild(created_t);
                 newItem.appendChild(created);
 
                 QDomElement picFileName = doc.createElement("picFileName");
-                QDomCDATASection picFileName_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+                QDomCDATASection picFileName_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getProfilePicFilename());
 
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
@@ -665,31 +672,36 @@ QString MainWindow::saveXML() {
                 newItem.appendChild(mediaContainer);
             } else {
                 QDomElement username = doc.createElement("username");
-                QDomText username_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getUsername());
+                QDomText username_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getUsername());
 
                 username.appendChild(username_t);
                 newItem.appendChild(username);
 
                 QDomElement twittername = doc.createElement("twittername");
-                QDomText twittername_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+                QDomText twittername_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getTwitterName());
 
                 twittername.appendChild(twittername_t);
                 newItem.appendChild(twittername);
 
                 QDomElement tweetText = doc.createElement("text");
-                QDomText tweetText_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTweetText());
+                QDomText tweetText_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getTweetText());
 
                 tweetText.appendChild(tweetText_t);
                 newItem.appendChild(tweetText);
 
                 QDomElement created = doc.createElement("created");
-                QDomText created_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getDate());
+                QDomText created_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getDate());
 
                 created.appendChild(created_t);
                 newItem.appendChild(created);
 
                 QDomElement picFileName = doc.createElement("picFileName");
-                QDomText picFileName_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+                QDomText picFileName_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getProfilePicFilename());
 
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
@@ -819,15 +831,22 @@ QString MainWindow::saveJSON() {
             QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
             Obj[i.key()] = value;
         } else if (wType == "tweet") {
-            QVector<QMap<QString,QString> > urlArray = ((twitterWidget*)widgetList[i.key()])->getURLs();
-            QVector<QMap<QString,QString> > mediaArray = ((twitterWidget*)widgetList[i.key()])->getMedia();
+            QVector<QMap<QString,QString> > urlArray = ((TwitterWidget*)widgetList[
+                i.key()])->getURLs();
+            QVector<QMap<QString,QString> > mediaArray = ((TwitterWidget*)widgetList[
+                i.key()])->getMedia();
             QJsonObject tweet;
 
-            tweet["username"] = ((twitterWidget*)widgetList[i.key()])->getUsername();
-            tweet["twittername"] = ((twitterWidget*)widgetList[i.key()])->getTwitterName();
-            tweet["text"] = ((twitterWidget*)widgetList[i.key()])->getTweetText();
-            tweet["created"] = ((twitterWidget*)widgetList[i.key()])->getDate();
-            tweet["picFileName"] = ((twitterWidget*)widgetList[i.key()])->getProfilePicFilename();
+            tweet["username"] = ((TwitterWidget*)widgetList[
+                i.key()])->getUsername();
+            tweet["twittername"] = ((TwitterWidget*)widgetList[
+                i.key()])->getTwitterName();
+            tweet["text"] = ((TwitterWidget*)widgetList[
+                i.key()])->getTweetText();
+            tweet["created"] = ((TwitterWidget*)widgetList[
+                i.key()])->getDate();
+            tweet["picFileName"] = ((TwitterWidget*)widgetList[
+                i.key()])->getProfilePicFilename();
 
             QJsonObject urlContainer;
 
@@ -1557,10 +1576,10 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
 void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     QString newTweet = element.attribute("id");
-    widgetList[newTweet] = new twitterWidget(th,parent);
+    widgetList[newTweet] = new TwitterWidget(th, parent);
     widgetType[newTweet] = "tweet";
     widgetList[newTweet]->setObjectName(newTweet);
-    ((twitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),
+    ((TwitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
@@ -1583,7 +1602,7 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
         newPath.mkpath(newPath.path()+"/media");
     }
 
-    ((twitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
+    ((TwitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
 
     layoutIterator++;
 }
