@@ -110,6 +110,14 @@ MainWindow::MainWindow()
     actionSave->setShortcuts(QKeySequence::Save);
     connect(actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
 
+    QAction* actionReloadLayout = new QAction(this);
+    actionReloadLayout->setObjectName(QStringLiteral("actionReloadLayout"));
+    QIcon reloadIcon;
+    reloadIcon.addFile(QStringLiteral(":/StreamControl/icons/fugue/bonus/icons-24/arrow-circle-double.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionReloadLayout->setIcon(reloadIcon);
+    connect(actionReloadLayout,SIGNAL( triggered() ),this,SLOT( loadLayout() ));
+
+
     QMenu *configMenu = new QMenu();
     QAction *actionConfig = new QAction("Configuration", this);
     configMenu->addAction(actionConfig);
@@ -134,6 +142,7 @@ MainWindow::MainWindow()
     QLabel* spaceLabel = new QLabel("   ");
 
     toolBar->addAction(actionSave);
+    toolBar->addAction(actionReloadLayout);
     toolBar->addWidget(configButton);
     toolBar->addWidget(spaceLabel);
     toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
