@@ -1,7 +1,5 @@
 #include "ScCompleter.h"
 
-
-
 ScCompleter::ScCompleter(QObject* parent) :
     QCompleter(parent)
 {

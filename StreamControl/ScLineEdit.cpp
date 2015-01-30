@@ -1,8 +1,7 @@
-#include "ScLineEdit.h"
 #include <QToolButton>
 #include <QStyle>
 #include <QDebug>
-
+#include "ScLineEdit.h"
 
 ScLineEdit::ScLineEdit(QWidget *parent)
     : QLineEdit(parent)

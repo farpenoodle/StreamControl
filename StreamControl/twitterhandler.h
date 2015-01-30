@@ -1,11 +1,10 @@
 #ifndef TWITTERHANDLER_H
 #define TWITTERHANDLER_H
-#include "o2twitter.h"
 
 #include <QObject>
 #include <QString>
 
-class twitterHandler : public QObject
+class O2Twitter;
 
 class TwitterHandler : public QObject
 {

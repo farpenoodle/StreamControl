@@ -25,8 +25,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include <QFile>
-#include <QTextStream>
 #include <QApplication>
 #include "mainwindow.h"
 

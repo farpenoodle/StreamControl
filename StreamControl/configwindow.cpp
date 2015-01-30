@@ -25,12 +25,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include "configwindow.h"
-#include "ui_configwindow.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
 #include <QtDebug>
+#include "configwindow.h"
+#include "ui_configwindow.h"
 
 ConfigWindow::ConfigWindow(QWidget *parent) :
     QDialog(parent),

@@ -29,22 +29,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "configwindow.h"
-#include <QMap>
-#include <QList>
-#include <QSignalMapper>
-#include "config.h"
 #include <QtXml/QDomDocument>
-#include <QModelIndex>
-#include "ScCompleter.h"
-#include "twitterhandler.h"
-#include <QTimer>
+
+#include "configwindow.h"
 #include "config.h"
+#include "ScCompleter.h"
+
+class TwitterHandler;
+
+class QWidget;
+class QSignalMapper;
+class QToolBar;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
 public:
     MainWindow();
     ~MainWindow();

@@ -1,10 +1,10 @@
-#include "csv.h"
-
 #include <QFile>
 #include <QTextStream>
 #include <QTextCodec>
 #include <QRegExp>
 #include <QDebug>
+
+#include "csv.h"
 
 QList<QStringList> parse(const QString &string)
 {

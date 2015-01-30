@@ -25,44 +25,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include <QFile>
-#include <QTextStream>
-#include <QDateTime>
-#include "mainwindow.h"
-#include "configwindow.h"
-#include <QtDebug>
-#include <QShortcut>
-#include <QMessageBox>
-#include <QAction>
-#include <QLabel>
-#include <QInputDialog>
-#include <QToolButton>
-#include <QMenu>
-#include <QSpinBox>
-#include <QPainter>
+#include <QSignalMapper>
 #include <QToolBar>
-#include <QPushButton>
+#include <QAction>
+#include <QMenu>
+#include <QToolButton>
+#include <QFile>
+#include <QMessageBox>
+#include <QSpinBox>
 #include <QCheckBox>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QProcess>
 #include <QScrollArea>
-#include "csv.h"
-#include <QCompleter>
-#include <QFileInfo>
 #include <QDir>
-#include "ScCompleter.h"
+#include <QRadioButton>
 #include <QStringListModel>
-#include <QLineEdit>
+#include <QLabel>
+#include <QNoDebug>
+#include <QDateTime>
+
+
+#include "configwindow.h"
+#include "csv.h"
+#include "ScCompleter.h"
 #include "ScLineEdit.h"
 #include "ScComboBox.h"
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
-#include <QRadioButton>
-#include "twitterwidget.h"
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QProcess>
+#include "widgets/challongematchwidget.h"
 #include "twitterhandler.h"
+#include "twitterwidget.h"
+#include "mainwindow.h"
+
 
 #ifdef Q_OS_WIN
 #include <QTimer>
@@ -500,6 +496,7 @@ void MainWindow::saveData()
 
     saveDataSets();
 }
+
 
 QString MainWindow::saveXML() {
     QDomDocument doc ("StreamControl");

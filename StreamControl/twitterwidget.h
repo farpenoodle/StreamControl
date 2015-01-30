@@ -2,16 +2,14 @@
 #define TWITTERWIDGET_H
 
 #include <QWidget>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLabel>
-#include <QGridLayout>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QVector>
+#include <QMap>
 
 class TwitterHandler;
+class QNetworkAccessManager;
+class QLineEdit;
+class QLabel;
+class QGridLayout;
+class QPushButton;
 
 class TwitterWidget : public QWidget
 {
@@ -42,7 +40,6 @@ private:
     QNetworkAccessManager   *mediaManager;
 
     TwitterHandler *th;
-
 
 signals:
 

@@ -7,12 +7,16 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QFile>
-#include "twitterhandler.h"
-#include "o2/o2globals.h"
 #include <QScriptEngine>
+#include <QGridLayout>
+#include <QLineEdit>
+#include <QLabel>
+#include <QPushButton>
+#include "o2/o2globals.h"
+#include "twitterhandler.h"
 
 TwitterWidget::TwitterWidget(TwitterHandler * th,QWidget *parent) :
-    th(th),QWidget(parent)
+    QWidget(parent), th(th)
 {
     picDone = false;
     mediaDone = false;
