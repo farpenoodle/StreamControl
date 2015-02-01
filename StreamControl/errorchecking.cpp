@@ -55,6 +55,8 @@ QStringList MainWindow::checkElements(QDomElement element){
             errors << checkTweetWidget(child.toElement());
         } else if (tagName == "tabSet") {
             errors << checkTabLayout(child.toElement());
+        } else if (tagName == "challongeMatch") {
+            errors << checkChallongeWidget(child.toElement());
         } else if (tagName == "cli") {
             //errors << checkCLI(child.toElement());
         }
@@ -334,6 +336,37 @@ QStringList MainWindow::checkTweetWidget(QDomElement element){
         errors << "Tweet Widget " + idstr + "x is not a positive integer";
     if (element.hasAttribute("y") && (element.attribute("y").toInt(&intHandler,10) < 0 || intHandler == false))
         errors << "Tweet Widget " + idstr + "y is not a positive integer";
+
+    return errors;
+}
+
+QStringList MainWindow::checkChallongeWidget(QDomElement element){
+    bool intHandler;
+    QStringList errors;
+
+    QString id = element.attribute("id");
+    QString idstr;
+    if (id.length() > 1) {
+        idstr = "\""+id+"\" ";
+    }
+    if (id.length() < 1)
+        errors << "Challonge match widget must have an id";
+    if (!element.hasAttribute("width"))
+        errors << "Challonge match widget " + idstr + "has no width value";
+    if (!element.hasAttribute("height"))
+        errors << "Challonge match widget " + idstr + "has no height value";
+    if (!element.hasAttribute("x"))
+        errors << "Challonge match widget " + idstr + "has no x value";
+    if (!element.hasAttribute("y"))
+        errors << "Challonge match widget " + idstr + "has no y value";
+    if (element.hasAttribute("width") && (element.attribute("width").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Challonge match widget " + idstr + "width is not a positive integer";
+    if (element.hasAttribute("height") && (element.attribute("height").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Challonge match widget " + idstr + "height is not a positive integer";
+    if (element.hasAttribute("x") && (element.attribute("x").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Challonge match widget " + idstr + "x is not a positive integer";
+    if (element.hasAttribute("y") && (element.attribute("y").toInt(&intHandler,10) < 0 || intHandler == false))
+        errors << "Challonge match widget " + idstr + "y is not a positive integer";
 
     return errors;
 }

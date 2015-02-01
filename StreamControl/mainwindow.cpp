@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "widgets/challongematchwidget.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
+#include "widgets/challongematchwidget.h"
 #include "mainwindow.h"
 
 
@@ -1263,6 +1264,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
+        } else if (tagName == "challongeMatch") {
+            addChallongeMatchWidget(child.toElement(), parent, widgetList);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -1601,6 +1604,27 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     ((TwitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
 
+    layoutIterator++;
+}
+
+void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
+                                         QMap<QString, QObject*>)
+{
+    QString newWidgetId = element.attribute("id");
+    QString playerOneWidgetId = element.attribute("playerOneWidget");
+    QString playerTwoWidgetId = element.attribute("playerTwoWidget");
+
+    ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
+                                                               playerOneWidgetId,
+                                                               playerTwoWidgetId);
+    newWidget->setObjectName(newWidgetId);
+    newWidget->setGeometry(QRect(element.attribute("x").toInt(),
+                                 element.attribute("y").toInt(),
+                                 element.attribute("width").toInt(),
+                                 element.attribute("height").toInt()));
+
+    widgetList[newWidgetId] = newWidget;
+    widgetType[newWidgetId] = "challongeMatch";
     layoutIterator++;
 }
 
