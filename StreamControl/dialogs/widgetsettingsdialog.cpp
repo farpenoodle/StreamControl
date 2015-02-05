@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********************************************************************************/
 
 #include <QVBoxLayout>
+#include <QLineEdit>
 
 #include "dialogs/brackettab.h"
 #include "dialogs/widgetsettingsdialog.h"
@@ -56,4 +57,7 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
 
 void WidgetSettingsDialog::setConfig(QMap<QString, QString> newSettings) {
     settings = newSettings;
+    bracketTab->challongeUsernameEdit->setText(settings.value("challonge>username"));
+    bracketTab->challongeApiKeyEdit->setText(settings.value("challonge>apiKey"));
+    bracketTab->challongeOrganizationEdit->setText(settings.value("challonge>organization"));
 }

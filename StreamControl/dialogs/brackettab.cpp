@@ -35,13 +35,14 @@ BracketTab::BracketTab(QMap<QString, QString>& settings, QWidget *parent) :
     QWidget(parent), settings(settings)
 {
     QLabel *challongeUsernameLabel = new QLabel(tr("User Name:"));
-    QLineEdit *challongeUsernameEdit = new QLineEdit();
+    challongeUsernameEdit = new QLineEdit();
 
     QLabel *challongeApiKeyLabel = new QLabel(tr("API Key:"));
-    QLineEdit *challongeApiKeyEdit = new QLineEdit();
+    challongeApiKeyEdit = new QLineEdit();
+    challongeApiKeyEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 
     QLabel *challongeOrganizationLabel = new QLabel(tr("Organization:"));
-    QLineEdit *challongeOrganizationEdit = new QLineEdit();
+    challongeOrganizationEdit = new QLineEdit();
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(challongeUsernameLabel);

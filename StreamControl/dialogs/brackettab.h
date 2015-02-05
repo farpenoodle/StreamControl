@@ -30,6 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QWidget>
 
+class QLineEdit;
+
 class BracketTab : public QWidget
 {
     Q_OBJECT
@@ -37,6 +39,9 @@ class BracketTab : public QWidget
 public:
     explicit BracketTab(QMap<QString, QString>& settings, QWidget *parent = 0);
 
+    QLineEdit* challongeUsernameEdit;
+    QLineEdit* challongeApiKeyEdit;
+    QLineEdit* challongeOrganizationEdit;
 private:
     QMap<QString, QString>& settings;
 };
