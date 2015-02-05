@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtXml/QDomDocument>
 
 #include "configwindow.h"
+#include "dialogs/widgetsettingsdialog.h"
 #include "config.h"
 #include "ScCompleter.h"
 
@@ -91,6 +92,7 @@ public slots:
     void tsClick(QString);
     void setButtonClick(QString);
     void openConfig();
+    void openWidgetSettings();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
     void removeLineFromDataSet();
@@ -139,6 +141,7 @@ private:
     QSignalMapper *setButtonMapper;
     int layoutIterator;
     ConfigWindow *cWindow;
+    WidgetSettingsDialog *widgetSettingsDialog;
     QMap<QString, QString> settings;
     QMap<QString, QObject*> widgetList;
     QMap<QString, QWidget*> visualList;

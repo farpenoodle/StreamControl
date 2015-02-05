@@ -72,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MainWindow::MainWindow()
 {
-
     if (objectName().isEmpty())
                 setObjectName(QStringLiteral("MainWindow"));
 
@@ -91,6 +90,7 @@ MainWindow::MainWindow()
     setWindowFlags(windowFlags()^Qt::WindowMaximizeButtonHint);
 
     cWindow = new ConfigWindow(this);
+    widgetSettingsDialog = new WidgetSettingsDialog(this);
 
     toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
@@ -118,6 +118,8 @@ MainWindow::MainWindow()
     QMenu *configMenu = new QMenu();
     QAction *actionConfig = new QAction("Configuration", this);
     configMenu->addAction(actionConfig);
+    QAction *actionWidgetSettings = new QAction("Widget Settings", this);
+    configMenu->addAction(actionWidgetSettings);
     QAction *actionAlwaysOnTop = new QAction("Always on top", this);
     actionAlwaysOnTop->setCheckable(true);
     configMenu->addAction(actionAlwaysOnTop);
@@ -130,6 +132,7 @@ MainWindow::MainWindow()
     configIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/gear.png"), QSize(), QIcon::Normal, QIcon::Off);
     configButton->setIcon(configIcon);
     connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
+    connect(actionWidgetSettings,SIGNAL( triggered() ),this,SLOT( openWidgetSettings() ));
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
 
     needLink = false;
@@ -239,7 +242,6 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 }
 
 void MainWindow::loadSettings() {
-
     QFile file("settings.xml");
     QString outputPath;
     QString layoutPath;
@@ -358,7 +360,7 @@ void MainWindow::saveSettings() {
 }
 
 /*
-    Recursively scans the credentials node and loads any values it finds
+    Recursively scans the WidgetSettings node and loads any values it finds
     in to the settings as a way of supporting nested XML.
 */
 void MainWindow::loadSettingsFromXml(const QDomNode& element,
@@ -1099,35 +1101,13 @@ void MainWindow::openConfig() {
     }
 }
 
-        settings["outputPath"] = configSettings["outputPath"];
-        settings["layoutPath"] = configSettings["layoutPath"];
-        settings["useCDATA"] = configSettings["useCDATA"];
-        settings["format"] = configSettings["format"];
-        settings["altHotkeyHandling"] = configSettings["altHotkeyHandling"];
+void MainWindow::openWidgetSettings() {
+    widgetSettingsDialog->setConfig(settings);
+    widgetSettingsDialog->show();
 
-        if (settings["useCDATA"] == "1") {
-            useCDATA = true;
-        } else {
-            useCDATA = false;
-        }
-
-        if (settings["altHotkeyHandling"] == "1") {
-            altHotkeyHandling = true;
-        } else {
-            altHotkeyHandling = false;
-        }
-
-        saveFormat = settings["format"].toInt();
-
-        if(saveFormat < 1 || saveFormat > 3) {
-            saveFormat = SC_XML;
-        }
-
+    if (widgetSettingsDialog->exec() == 1) {
+        settings = widgetSettingsDialog->getConfig();
         saveSettings();
-
-        loadLayout();
-
-        loadData();
     }
 }
 

@@ -11,10 +11,12 @@ TEMPLATE = app
 
 SOURCES += *.cpp\
     o2/*.cpp \
-    widgets/*.cpp \
+    dialogs/*.cpp \
+    widgets/*.cpp
 
 HEADERS  += *.h \
     o2/*.h \
+    dialogs/*.h \
     widgets/*.h
 
 FORMS    += \
