@@ -310,48 +310,58 @@ void MainWindow::loadSettings() {
 
         saveSettings();
     }
-
-
 }
 
+
+/*
+    Saves the complete contents of the settings map to the settings xml file.
+*/
 void MainWindow::saveSettings() {
     QFile file("settings.xml");
     file.open(QIODevice::WriteOnly | QIODevice::Text);
 
     QDomDocument doc ("StreamControl");
+    // Allows us to wrap text in CDATA tags if the contents are invalid
+    doc.implementation().setInvalidDataPolicy(QDomImplementation::ReturnNullNode);
 
     QDomElement settingsXML = doc.createElement("settings");
     doc.appendChild(settingsXML);
 
-    QDomElement outputPathE = doc.createElement("outputPath");
-    settingsXML.appendChild(outputPathE);
+    foreach(const QString& key, settings.keys())
+    {
+        QString elementName;
 
-    QDomCDATASection outputPathT = doc.createCDATASection(settings["outputPath"]);
-    outputPathE.appendChild(outputPathT);
+        QDomNode currentElement = settingsXML;
 
-    QDomElement layoutPathE = doc.createElement("layoutPath");
-    settingsXML.appendChild(layoutPathE);
+        // Split the key in to its parts and cycle through them,
+        // attaching the later nodes to the previous node
+        QStringList keyList = key.split('>');
+        for (int i = 0; i < keyList.length(); i++)
+        {
+            QDomElement newElement;
+            // Check if a node was already created in the process of saving an
+            // earlier key - in which case it will already be a child node of
+            // the node we are processing
+            QDomNode node = currentElement.namedItem(keyList[i]);
 
-    QDomCDATASection layoutPathT = doc.createCDATASection(settings["layoutPath"]);
-    layoutPathE.appendChild(layoutPathT);
+            if (!node.isNull())
+                newElement = node.toElement();
+            else
+                // Otherwise just make a new one
+                newElement = doc.createElement(keyList[i]);
 
-    QDomElement useCDATAE = doc.createElement("useCDATA");
-    settingsXML.appendChild(useCDATAE);
+            // If this is the last node then add the value of the setting as text
+            if (i == keyList.length() - 1)
+            {
+                QDomText value = doc.createTextNode(settings[key]);
+                if (value.isNull()) value = doc.createCDATASection(settings[key]);
+                newElement.appendChild(value);
+            }
 
-    QDomText useCDATAT = doc.createTextNode(settings["useCDATA"]);
-    useCDATAE.appendChild(useCDATAT);
-
-    QDomElement formatE = doc.createElement("format");
-    settingsXML.appendChild(formatE);
-
-    QDomText formatT = doc.createTextNode(settings["format"]);
-    formatE.appendChild(formatT);
-
-    QDomElement altHotKeyE = doc.createElement("altHotkeyHandling");
-    settingsXML.appendChild(altHotKeyE);
-
-    QDomText altHotKeyT = doc.createTextNode(settings["altHotkeyHandling"]);
-    altHotKeyE.appendChild(altHotKeyT);
+            // Add the newly created node, and set it as the next node to process
+            currentElement = currentElement.appendChild(newElement);
+        }
+    }
 
     QTextStream out(&file);
     out.setCodec("UTF-8");
