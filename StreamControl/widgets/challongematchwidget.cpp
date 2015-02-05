@@ -44,10 +44,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
                                            QMap<QString, QObject*>& widgetList,
+                                           const QMap<QString, QString>& settings,
                                            QString playerOneWidgetId,
                                            QString playerTwoWidgetId) :
-    QWidget(parent), widgetList(widgetList), playerOneWidgetId(playerOneWidgetId),
-    playerTwoWidgetId(playerTwoWidgetId)
+    QWidget(parent), widgetList(widgetList), settings(settings),
+    playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId)
 {
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
@@ -86,7 +87,14 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
 
 void ChallongeMatchWidget::fetchTournaments()
 {
-    QNetworkRequest request(QUrl("https://api.challonge.com/v1/tournaments.json?state=in_progress"));
+    QString urlString =
+        QString("https://api.challonge.com/v1/tournaments.json?state=in_progress");
+
+    QString organization = settings["challonge>organization"];
+    if (!organization.isEmpty())
+        urlString.append(QString("&subdomain=%1").arg(organization));
+
+    QNetworkRequest request(urlString);
 
     request.setRawHeader("Authorization", getAuthHeader());
 
@@ -100,8 +108,8 @@ void ChallongeMatchWidget::fetchMatches()
     QString currentTournamentId =
         tournamentsBox->itemData(tournamentsBox->currentIndex()).toString();
 
-    QUrl urlString = QString("https://api.challonge.com/v1/tournaments/%1.json?include_matches=1&include_participants=1").arg(currentTournamentId);
-
+    QString urlString =
+        QString("https://api.challonge.com/v1/tournaments/%1.json?include_matches=1&include_participants=1").arg(currentTournamentId);
 
     QNetworkRequest request(urlString);
 
@@ -114,7 +122,8 @@ void ChallongeMatchWidget::fetchMatches()
 
 QByteArray ChallongeMatchWidget::getAuthHeader() const
 {
-    QString concatenated = "";
+    QString concatenated = settings["challonge>username"] + ":" +
+                           settings["challonge>apiKey"];
     QByteArray data = concatenated.toLocal8Bit().toBase64();
     QString headerData = "Basic " + data;
     return headerData.toLocal8Bit();

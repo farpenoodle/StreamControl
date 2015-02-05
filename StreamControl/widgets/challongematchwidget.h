@@ -44,6 +44,7 @@ class ChallongeMatchWidget : public QWidget
 public:
     explicit ChallongeMatchWidget(QWidget *parent,
                                   QMap<QString, QObject*>& widgets,
+                                  const QMap<QString, QString>& settings,
                                   QString playerOneWidget,
                                   QString playerTwoWidget);
 
@@ -64,7 +65,11 @@ private:
 
     QNetworkAccessManager   *manager;
 
+    // So we can set the target widgets with the bracket data
     QMap<QString, QObject*>& widgetList;
+
+    // Needed to get the challonge username/api key
+    const QMap<QString, QString>& settings;
 
     const QString playerOneWidgetId, playerTwoWidgetId;
 

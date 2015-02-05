@@ -1637,6 +1637,7 @@ void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
     QString playerTwoWidgetId = element.attribute("playerTwoWidget");
 
     ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
+                                                               settings,
                                                                playerOneWidgetId,
                                                                playerTwoWidgetId);
     newWidget->setObjectName(newWidgetId);
