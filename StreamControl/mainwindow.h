@@ -128,6 +128,11 @@ public slots:
     void keyPoll();
 
 private:
+    void loadSettingsFromXml(const QDomNode& element,
+                             QMap<QString, QString>& settings,
+                             bool appendNodeName = false,
+                             QStringList prefix = QStringList());
+
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
     QSignalMapper *tsMapper;

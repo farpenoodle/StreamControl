@@ -247,55 +247,37 @@ void MainWindow::loadSettings() {
 
         QDomDocument doc;
         doc.setContent(&file);
-
         file.close();
 
-        QDomElement settingsXML = doc.namedItem("settings").toElement();
+        loadSettingsFromXml(doc.namedItem("settings"), settings);
 
-        QDomElement outputPathE = settingsXML.namedItem("outputPath").toElement();
-        //load old name if coming from 0.3 or lower
-        if (outputPathE.isNull()) {
-            outputPathE = settingsXML.namedItem("xsplitPath").toElement();
-        }
-        QDomElement layoutPathE = settingsXML.namedItem("layoutPath").toElement();
+        //load old name (xsplitPath) if coming from 0.3 or lower
+        outputPath = settings.value("outputPath", settings.value("xsplitPath"));
+        settings["outputPath"] = outputPath;
 
-        outputPath = outputPathE.text();
-        layoutPath = layoutPathE.text();
+        layoutPath = settings["layoutPath"];
 
-        QDomElement useCDATAE = settingsXML.namedItem("useCDATA").toElement();
-
-        if (useCDATAE.text() == "1") {
+        if (settings["useCDATA"] == "1") {
             useCDATA = true;
-            settings["useCDATA"] = "1";
         } else {
             useCDATA = false;
             settings["useCDATA"] = "0";
         }
 
-        QDomElement formatE = settingsXML.namedItem("format").toElement();
-
-        saveFormat = formatE.text().toInt();
+        saveFormat = settings["format"].toInt();
 
         if(saveFormat < 1 || saveFormat > 3) {
             saveFormat = SC_XML;
         }
 
-        QDomElement altHotKeyE = settingsXML.namedItem("altHotkeyHandling").toElement();
+        settings["format"] = QString::number(saveFormat);
 
-        if (altHotKeyE.text() == "1") {
+        if (settings["altHotkeyHandling"] == "1") {
             altHotkeyHandling = true;
-            settings["altHotkeyHandling"] = "1";
         } else {
             altHotkeyHandling = false;
             settings["altHotkeyHandling"] = "0";
         }
-
-        settings["format"] = QString::number(saveFormat);
-
-        settings["outputPath"] = outputPath;
-        settings["layoutPath"] = layoutPath;
-
-
     } else {
         QFile xsplitExe32("C:\\Program Files\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
         QFile xsplitExe("C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
@@ -373,6 +355,33 @@ void MainWindow::saveSettings() {
     out.setCodec("UTF-8");
     out << doc.toString();
     file.close();
+}
+
+/*
+    Recursively scans the credentials node and loads any values it finds
+    in to the settings as a way of supporting nested XML.
+*/
+void MainWindow::loadSettingsFromXml(const QDomNode& element,
+                                         QMap<QString, QString>& settings,
+                                         bool appendNodeName,
+                                         QStringList prefix)
+{
+    QDomNodeList children = element.childNodes();
+    if (children.length() > 0)
+    {
+        // Can choose to not append the name of the root node to the setting
+        if (appendNodeName)
+            prefix.append(element.toElement().tagName());
+
+        for (int i = 0; i < children.length(); i++)
+        {
+            const QDomNode& child = children.at(i);
+            if (child.isText())
+                settings.insert(prefix.join('>'), element.toElement().text());
+            else
+                loadSettingsFromXml(child, settings, true, prefix);
+        }
+    }
 }
 
 void MainWindow::loadData()
@@ -1075,7 +1084,20 @@ void MainWindow::openConfig() {
     cWindow->show();
 
     if (cWindow->exec() == 1) {
-        QMap<QString, QString> configSettings = cWindow->getConfig();
+        settings = cWindow->getConfig();
+
+        useCDATA = (settings["useCDATA"] == "1");
+        altHotkeyHandling = (settings["altHotkeyHandling"] == "1");
+        saveFormat = settings["format"].toInt();
+
+        if(saveFormat < 1 || saveFormat > 3)
+            saveFormat = SC_XML;
+
+        saveSettings();
+        loadLayout();
+        loadData();
+    }
+}
 
         settings["outputPath"] = configSettings["outputPath"];
         settings["layoutPath"] = configSettings["layoutPath"];
