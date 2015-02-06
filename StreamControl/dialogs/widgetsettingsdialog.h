@@ -44,8 +44,13 @@ public:
     explicit WidgetSettingsDialog(QWidget *parent = 0);
 
     void setConfig(QMap<QString, QString> config);
+    QMap<QString, QString> getConfig() const;
+
+public slots:
+    void saveDetails();
 
 private:
+
     QMap<QString, QString> settings;
 
     BracketTab* bracketTab;

@@ -50,9 +50,20 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
+    connect(bracketTab->challongeUsernameEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
+    connect(bracketTab->challongeApiKeyEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
+    connect(bracketTab->challongeOrganizationEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
+
     setLayout(mainLayout);
 
     setWindowTitle(tr("Widget Settings"));
+}
+
+void WidgetSettingsDialog::saveDetails()
+{
+    settings["challonge>username"] = bracketTab->challongeUsernameEdit->text();
+    settings["challonge>apiKey"] = bracketTab->challongeApiKeyEdit->text();
+    settings["challonge>organization"] = bracketTab->challongeOrganizationEdit->text();
 }
 
 void WidgetSettingsDialog::setConfig(QMap<QString, QString> newSettings) {
@@ -60,4 +71,9 @@ void WidgetSettingsDialog::setConfig(QMap<QString, QString> newSettings) {
     bracketTab->challongeUsernameEdit->setText(settings.value("challonge>username"));
     bracketTab->challongeApiKeyEdit->setText(settings.value("challonge>apiKey"));
     bracketTab->challongeOrganizationEdit->setText(settings.value("challonge>organization"));
+}
+
+QMap<QString, QString> WidgetSettingsDialog::getConfig() const
+{
+    return settings;
 }
