@@ -1,6 +1,6 @@
 /**********************************************************************************
 
-Copyright (c) 2012, Tan Yu Sheng
+Copyright (c) 2015, Antony Clarke
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include <QApplication>
-#include "mainwindow.h"
+#ifndef DIALOG_BRACKETTAB_H
+#define DIALOG_BRACKETTAB_H
 
-int main(int argc, char *argv[])
+#include <QWidget>
+
+class QLineEdit;
+
+class BracketTab : public QWidget
 {
-    QApplication a(argc, argv);
-    a.setStyle("fusion");
-    MainWindow mainWindow;
-    mainWindow.show();
-    return a.exec();
-}
+    Q_OBJECT
+
+public:
+    explicit BracketTab(QMap<QString, QString>& settings, QWidget *parent = 0);
+
+    QLineEdit* challongeUsernameEdit;
+    QLineEdit* challongeApiKeyEdit;
+    QLineEdit* challongeOrganizationEdit;
+private:
+    QMap<QString, QString>& settings;
+};
+
+#endif //DIALOG_BRACKETTAB_H

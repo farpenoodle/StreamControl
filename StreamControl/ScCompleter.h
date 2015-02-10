@@ -3,31 +3,29 @@
 
 #include <QCompleter>
 
+class ScCompleter : public QCompleter
+{
+    Q_OBJECT
 
+public:
+    ScCompleter(QObject* parent = 0);
 
-    class ScCompleter : public QCompleter
-    {
-        Q_OBJECT
+private:
+    QString widgetName;
+    QString dataSetName;
+    int dataSetField;
+    bool hMaster;
 
-    public:
-        ScCompleter(QObject* parent = 0);
+signals:
 
-    private:
-        QString widgetName;
-        QString dataSetName;
-        int dataSetField;
-        bool hMaster;
+public slots:
+    void setName(QString,QString,int,bool);
+    QString getName();
+    QString getDataSetName();
+    int getDataField();
+    bool hasMaster();
 
-    signals:
-
-    public slots:
-        void setName(QString,QString,int,bool);
-        QString getName();
-        QString getDataSetName();
-        int getDataField();
-        bool hasMaster();
-
-    };
+};
 
 
 #endif // SCCOMPLETER_H

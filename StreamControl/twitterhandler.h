@@ -1,15 +1,16 @@
 #ifndef TWITTERHANDLER_H
 #define TWITTERHANDLER_H
-#include "o2twitter.h"
 
 #include <QObject>
 #include <QString>
 
-class twitterHandler : public QObject
+class O2Twitter;
+
+class TwitterHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit twitterHandler(QObject *parent = 0);
+    explicit TwitterHandler(QObject *parent = 0);
 
 signals:
 

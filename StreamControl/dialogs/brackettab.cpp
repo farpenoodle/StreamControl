@@ -1,6 +1,6 @@
 /**********************************************************************************
 
-Copyright (c) 2012, Tan Yu Sheng
+Copyright (c) 2015, Antony Clarke
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include <QApplication>
-#include "mainwindow.h"
+#include <QLabel>
+#include <QLineEdit>
+#include <QVBoxLayout>
 
-int main(int argc, char *argv[])
+#include "dialogs/brackettab.h"
+
+BracketTab::BracketTab(QMap<QString, QString>& settings, QWidget *parent) :
+    QWidget(parent), settings(settings)
 {
-    QApplication a(argc, argv);
-    a.setStyle("fusion");
-    MainWindow mainWindow;
-    mainWindow.show();
-    return a.exec();
+    QLabel *challongeUsernameLabel = new QLabel(tr("User Name:"));
+    challongeUsernameEdit = new QLineEdit();
+
+    QLabel *challongeApiKeyLabel = new QLabel(tr("API Key:"));
+    challongeApiKeyEdit = new QLineEdit();
+    challongeApiKeyEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+
+    QLabel *challongeOrganizationLabel = new QLabel(tr("Organization:"));
+    challongeOrganizationEdit = new QLineEdit();
+
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->addWidget(challongeUsernameLabel);
+    mainLayout->addWidget(challongeUsernameEdit);
+    mainLayout->addWidget(challongeApiKeyLabel);
+    mainLayout->addWidget(challongeApiKeyEdit);
+    mainLayout->addWidget(challongeOrganizationLabel);
+    mainLayout->addWidget(challongeOrganizationEdit);
+    mainLayout->addStretch(1);
+    setLayout(mainLayout);
 }

@@ -3,7 +3,7 @@
 #include "o2twitter.h"
 #include "o2/o2globals.h"
 
-twitterHandler::twitterHandler(QObject *parent) :
+TwitterHandler::TwitterHandler(QObject *parent) :
     QObject(parent)
 {
     o2 = new O2Twitter(this);
@@ -12,14 +12,14 @@ twitterHandler::twitterHandler(QObject *parent) :
 
 }
 
-QString twitterHandler::getToken() {
+QString TwitterHandler::getToken() {
     return o2->token();
 }
 
-bool twitterHandler::linked() {
+bool TwitterHandler::linked() {
     return o2->linked();
 }
 
-void twitterHandler::link() {
+void TwitterHandler::link() {
     o2->link();
 }

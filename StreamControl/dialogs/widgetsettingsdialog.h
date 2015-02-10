@@ -1,6 +1,6 @@
 /**********************************************************************************
 
-Copyright (c) 2012, Tan Yu Sheng
+Copyright (c) 2015, Antony Clarke
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include <QApplication>
-#include "mainwindow.h"
+#ifndef DIALOG_WIDGETSETTINGSDIALOG_H
+#define DIALOG_WIDGETSETTINGSDIALOG_H
 
-int main(int argc, char *argv[])
+#include <QDialog>
+#include <QTabWidget>
+#include <QDialogButtonBox>
+#include <QMap>
+#include <QString>
+
+class BracketTab;
+
+class WidgetSettingsDialog : public QDialog
 {
-    QApplication a(argc, argv);
-    a.setStyle("fusion");
-    MainWindow mainWindow;
-    mainWindow.show();
-    return a.exec();
-}
+    Q_OBJECT
+
+public:
+    explicit WidgetSettingsDialog(QWidget *parent = 0);
+
+    void setConfig(QMap<QString, QString> config);
+    QMap<QString, QString> getConfig() const;
+
+public slots:
+    void saveDetails();
+
+private:
+
+    QMap<QString, QString> settings;
+
+    BracketTab* bracketTab;
+
+    QTabWidget *tabWidget;
+    QDialogButtonBox *buttonBox;
+
+};
+
+#endif // DIALOG_WIDGETSETTINGSDIALOG_H

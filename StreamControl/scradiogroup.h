@@ -1,5 +1,6 @@
 #ifndef SCRADIOGROUP_H
 #define SCRADIOGROUP_H
+
 #include <QButtonGroup>
 #include <QStringList>
 

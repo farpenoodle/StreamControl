@@ -29,21 +29,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "configwindow.h"
-#include <QMap>
-#include <QList>
-#include <QSignalMapper>
-#include "config.h"
 #include <QtXml/QDomDocument>
-#include <QModelIndex>
+
+#include "configwindow.h"
+#include "dialogs/widgetsettingsdialog.h"
+#include "config.h"
 #include "ScCompleter.h"
-#include "twitterhandler.h"
-#include <QTimer>
+
+class TwitterHandler;
+
+class QWidget;
+class QSignalMapper;
+class QToolBar;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
 public:
     MainWindow();
     ~MainWindow();
@@ -73,6 +75,7 @@ public slots:
     void addComboBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
+    void addChallongeMatchWidget(QDomElement, QWidget*, QMap<QString, QObject*> widgetList);
     QString addTabWidget(QDomElement, QWidget*);
     QString saveXML();
     QString saveJSON();
@@ -89,6 +92,7 @@ public slots:
     void tsClick(QString);
     void setButtonClick(QString);
     void openConfig();
+    void openWidgetSettings();
     void toggleAlwaysOnTop(bool);
     void completerActivate(QString);
     void removeLineFromDataSet();
@@ -112,6 +116,8 @@ public slots:
     QStringList checkTabLayout(QDomElement);
     QStringList checkRadioGroup(QDomElement);
     QStringList checkTweetWidget(QDomElement);
+    QStringList checkChallongeWidget(QDomElement);
+
     QList<QStringList> processDataSet(QList<QStringList>);
     QList<QStringList> condenseDataSet(QList<QStringList>);
 
@@ -124,12 +130,18 @@ public slots:
     void keyPoll();
 
 private:
+    void loadSettingsFromXml(const QDomNode& element,
+                             QMap<QString, QString>& settings,
+                             bool appendNodeName = false,
+                             QStringList prefix = QStringList());
+
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
     QSignalMapper *tsMapper;
     QSignalMapper *setButtonMapper;
     int layoutIterator;
     ConfigWindow *cWindow;
+    WidgetSettingsDialog *widgetSettingsDialog;
     QMap<QString, QString> settings;
     QMap<QString, QObject*> widgetList;
     QMap<QString, QWidget*> visualList;
@@ -154,7 +166,7 @@ private:
     bool useCDATA;
     bool altHotkeyHandling;
     int saveFormat;
-    twitterHandler *th;
+    TwitterHandler *th;
     bool needLink;
 
     QTimer *keyPoller;

@@ -3,37 +3,37 @@
 
 #include <QLineEdit>
 
-    class QToolButton;
+class QToolButton;
 
-    class ScLineEdit : public QLineEdit
-    {
-        Q_OBJECT
+class ScLineEdit : public QLineEdit
+{
+    Q_OBJECT
 
-    public:
-        ScLineEdit(QWidget *parent = 0);
+public:
+    ScLineEdit(QWidget *parent = 0);
 
-    protected:
-        void resizeEvent(QResizeEvent *);
+protected:
+    void resizeEvent(QResizeEvent *);
 
-    private slots:
+private slots:
 
-    public slots:
-        void setName(QString,QString);
-        QString getName();
-        QString getDataSetName();
-        void setButtonVisible(bool);
-        void clearButtonSlot();
+public slots:
+    void setName(QString,QString);
+    QString getName();
+    QString getDataSetName();
+    void setButtonVisible(bool);
+    void clearButtonSlot();
 
 
-    private:
-        QToolButton *clearButton;
-        QString lineEditName;
-        QString dataSetName;
+private:
+    QToolButton *clearButton;
+    QString lineEditName;
+    QString dataSetName;
 
-    signals:
-        void clearButtonClicked();
+signals:
+    void clearButtonClicked();
 
-    };
+};
 
 
 #endif // SCLINEEDIT_H

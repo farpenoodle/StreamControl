@@ -25,44 +25,41 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include <QFile>
-#include <QTextStream>
-#include <QDateTime>
-#include "mainwindow.h"
-#include "configwindow.h"
-#include <QtDebug>
-#include <QShortcut>
-#include <QMessageBox>
+#include <QSignalMapper>
+#include <QToolBar>
 #include <QAction>
-#include <QLabel>
-#include <QInputDialog>
-#include <QToolButton>
 #include <QMenu>
+#include <QToolButton>
+#include <QFile>
+#include <QMessageBox>
 #include <QSpinBox>
-#include <QPainter>
-#include <QToolbar>
-#include <QPushButton>
 #include <QCheckBox>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QProcess>
 #include <QScrollArea>
-#include "csv.h"
-#include <QCompleter>
-#include <QFileInfo>
 #include <QDir>
-#include "ScCompleter.h"
+#include <QRadioButton>
 #include <QStringListModel>
-#include <QLineEdit>
+#include <QLabel>
+#include <QNoDebug>
+#include <QDateTime>
+
+
+#include "configwindow.h"
+#include "csv.h"
+#include "ScCompleter.h"
 #include "ScLineEdit.h"
 #include "ScComboBox.h"
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
-#include <QRadioButton>
-#include "twitterwidget.h"
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QProcess>
+#include "widgets/challongematchwidget.h"
 #include "twitterhandler.h"
+#include "twitterwidget.h"
+#include "widgets/challongematchwidget.h"
+#include "mainwindow.h"
+
 
 #ifdef Q_OS_WIN
 #include <QTimer>
@@ -75,7 +72,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MainWindow::MainWindow()
 {
-
     if (objectName().isEmpty())
                 setObjectName(QStringLiteral("MainWindow"));
 
@@ -94,6 +90,7 @@ MainWindow::MainWindow()
     setWindowFlags(windowFlags()^Qt::WindowMaximizeButtonHint);
 
     cWindow = new ConfigWindow(this);
+    widgetSettingsDialog = new WidgetSettingsDialog(this);
 
     toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
@@ -110,9 +107,19 @@ MainWindow::MainWindow()
     actionSave->setShortcuts(QKeySequence::Save);
     connect(actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
 
+    QAction* actionReloadLayout = new QAction(this);
+    actionReloadLayout->setObjectName(QStringLiteral("actionReloadLayout"));
+    QIcon reloadIcon;
+    reloadIcon.addFile(QStringLiteral(":/StreamControl/icons/fugue/bonus/icons-24/arrow-circle-double.png"), QSize(), QIcon::Normal, QIcon::Off);
+    actionReloadLayout->setIcon(reloadIcon);
+    connect(actionReloadLayout,SIGNAL( triggered() ),this,SLOT( loadLayout() ));
+
+
     QMenu *configMenu = new QMenu();
     QAction *actionConfig = new QAction("Configuration", this);
     configMenu->addAction(actionConfig);
+    QAction *actionWidgetSettings = new QAction("Widget Settings", this);
+    configMenu->addAction(actionWidgetSettings);
     QAction *actionAlwaysOnTop = new QAction("Always on top", this);
     actionAlwaysOnTop->setCheckable(true);
     configMenu->addAction(actionAlwaysOnTop);
@@ -125,15 +132,17 @@ MainWindow::MainWindow()
     configIcon.addFile(QString::fromUtf8(":/StreamControl/icons/fugue/bonus/icons-24/gear.png"), QSize(), QIcon::Normal, QIcon::Off);
     configButton->setIcon(configIcon);
     connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
+    connect(actionWidgetSettings,SIGNAL( triggered() ),this,SLOT( openWidgetSettings() ));
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
 
     needLink = false;
-    th = new twitterHandler();
+    th = new TwitterHandler();
 
     //code to add non buttons to toolbar
     QLabel* spaceLabel = new QLabel("   ");
 
     toolBar->addAction(actionSave);
+    toolBar->addAction(actionReloadLayout);
     toolBar->addWidget(configButton);
     toolBar->addWidget(spaceLabel);
     toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
@@ -233,7 +242,6 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 }
 
 void MainWindow::loadSettings() {
-
     QFile file("settings.xml");
     QString outputPath;
     QString layoutPath;
@@ -241,55 +249,37 @@ void MainWindow::loadSettings() {
 
         QDomDocument doc;
         doc.setContent(&file);
-
         file.close();
 
-        QDomElement settingsXML = doc.namedItem("settings").toElement();
+        loadSettingsFromXml(doc.namedItem("settings"), settings);
 
-        QDomElement outputPathE = settingsXML.namedItem("outputPath").toElement();
-        //load old name if coming from 0.3 or lower
-        if (outputPathE.isNull()) {
-            outputPathE = settingsXML.namedItem("xsplitPath").toElement();
-        }
-        QDomElement layoutPathE = settingsXML.namedItem("layoutPath").toElement();
+        //load old name (xsplitPath) if coming from 0.3 or lower
+        outputPath = settings.value("outputPath", settings.value("xsplitPath"));
+        settings["outputPath"] = outputPath;
 
-        outputPath = outputPathE.text();
-        layoutPath = layoutPathE.text();
+        layoutPath = settings["layoutPath"];
 
-        QDomElement useCDATAE = settingsXML.namedItem("useCDATA").toElement();
-
-        if (useCDATAE.text() == "1") {
+        if (settings["useCDATA"] == "1") {
             useCDATA = true;
-            settings["useCDATA"] = "1";
         } else {
             useCDATA = false;
             settings["useCDATA"] = "0";
         }
 
-        QDomElement formatE = settingsXML.namedItem("format").toElement();
-
-        saveFormat = formatE.text().toInt();
+        saveFormat = settings["format"].toInt();
 
         if(saveFormat < 1 || saveFormat > 3) {
             saveFormat = SC_XML;
         }
 
-        QDomElement altHotKeyE = settingsXML.namedItem("altHotkeyHandling").toElement();
+        settings["format"] = QString::number(saveFormat);
 
-        if (altHotKeyE.text() == "1") {
+        if (settings["altHotkeyHandling"] == "1") {
             altHotkeyHandling = true;
-            settings["altHotkeyHandling"] = "1";
         } else {
             altHotkeyHandling = false;
             settings["altHotkeyHandling"] = "0";
         }
-
-        settings["format"] = QString::number(saveFormat);
-
-        settings["outputPath"] = outputPath;
-        settings["layoutPath"] = layoutPath;
-
-
     } else {
         QFile xsplitExe32("C:\\Program Files\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
         QFile xsplitExe("C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
@@ -320,53 +310,90 @@ void MainWindow::loadSettings() {
 
         saveSettings();
     }
-
-
 }
 
+
+/*
+    Saves the complete contents of the settings map to the settings xml file.
+*/
 void MainWindow::saveSettings() {
     QFile file("settings.xml");
     file.open(QIODevice::WriteOnly | QIODevice::Text);
 
     QDomDocument doc ("StreamControl");
+    // Allows us to wrap text in CDATA tags if the contents are invalid
+    doc.implementation().setInvalidDataPolicy(QDomImplementation::ReturnNullNode);
 
     QDomElement settingsXML = doc.createElement("settings");
     doc.appendChild(settingsXML);
 
-    QDomElement outputPathE = doc.createElement("outputPath");
-    settingsXML.appendChild(outputPathE);
+    foreach(const QString& key, settings.keys())
+    {
+        QString elementName;
 
-    QDomCDATASection outputPathT = doc.createCDATASection(settings["outputPath"]);
-    outputPathE.appendChild(outputPathT);
+        QDomNode currentElement = settingsXML;
 
-    QDomElement layoutPathE = doc.createElement("layoutPath");
-    settingsXML.appendChild(layoutPathE);
+        // Split the key in to its parts and cycle through them,
+        // attaching the later nodes to the previous node
+        QStringList keyList = key.split('>');
+        for (int i = 0; i < keyList.length(); i++)
+        {
+            QDomElement newElement;
+            // Check if a node was already created in the process of saving an
+            // earlier key - in which case it will already be a child node of
+            // the node we are processing
+            QDomNode node = currentElement.namedItem(keyList[i]);
 
-    QDomCDATASection layoutPathT = doc.createCDATASection(settings["layoutPath"]);
-    layoutPathE.appendChild(layoutPathT);
+            if (!node.isNull())
+                newElement = node.toElement();
+            else
+                // Otherwise just make a new one
+                newElement = doc.createElement(keyList[i]);
 
-    QDomElement useCDATAE = doc.createElement("useCDATA");
-    settingsXML.appendChild(useCDATAE);
+            // If this is the last node then add the value of the setting as text
+            if (i == keyList.length() - 1)
+            {
+                QDomText value = doc.createTextNode(settings[key]);
+                if (value.isNull()) value = doc.createCDATASection(settings[key]);
+                newElement.appendChild(value);
+            }
 
-    QDomText useCDATAT = doc.createTextNode(settings["useCDATA"]);
-    useCDATAE.appendChild(useCDATAT);
-
-    QDomElement formatE = doc.createElement("format");
-    settingsXML.appendChild(formatE);
-
-    QDomText formatT = doc.createTextNode(settings["format"]);
-    formatE.appendChild(formatT);
-
-    QDomElement altHotKeyE = doc.createElement("altHotkeyHandling");
-    settingsXML.appendChild(altHotKeyE);
-
-    QDomText altHotKeyT = doc.createTextNode(settings["altHotkeyHandling"]);
-    altHotKeyE.appendChild(altHotKeyT);
+            // Add the newly created node, and set it as the next node to process
+            currentElement = currentElement.appendChild(newElement);
+        }
+    }
 
     QTextStream out(&file);
     out.setCodec("UTF-8");
     out << doc.toString();
     file.close();
+}
+
+/*
+    Recursively scans the WidgetSettings node and loads any values it finds
+    in to the settings as a way of supporting nested XML.
+*/
+void MainWindow::loadSettingsFromXml(const QDomNode& element,
+                                         QMap<QString, QString>& settings,
+                                         bool appendNodeName,
+                                         QStringList prefix)
+{
+    QDomNodeList children = element.childNodes();
+    if (children.length() > 0)
+    {
+        // Can choose to not append the name of the root node to the setting
+        if (appendNodeName)
+            prefix.append(element.toElement().tagName());
+
+        for (int i = 0; i < children.length(); i++)
+        {
+            const QDomNode& child = children.at(i);
+            if (child.isText())
+                settings.insert(prefix.join('>'), element.toElement().text());
+            else
+                loadSettingsFromXml(child, settings, true, prefix);
+        }
+    }
 }
 
 void MainWindow::loadData()
@@ -492,6 +519,7 @@ void MainWindow::saveData()
     saveDataSets();
 }
 
+
 QString MainWindow::saveXML() {
     QDomDocument doc ("StreamControl");
 
@@ -556,35 +584,42 @@ QString MainWindow::saveXML() {
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
         } else if (wType == "tweet") {
-            QVector<QMap<QString,QString> > urlArray = ((twitterWidget*)widgetList[i.key()])->getURLs();
-            QVector<QMap<QString,QString> > mediaArray = ((twitterWidget*)widgetList[i.key()])->getMedia();
+            QVector<QMap<QString,QString> > urlArray = ((TwitterWidget*)widgetList[
+                i.key()])->getURLs();
+            QVector<QMap<QString,QString> > mediaArray = ((TwitterWidget*)widgetList[
+                i.key()])->getMedia();
             if (useCDATA) {
                 QDomElement username = doc.createElement("username");
-                QDomCDATASection username_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getUsername());
+                QDomCDATASection username_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getUsername());
 
                 username.appendChild(username_t);
                 newItem.appendChild(username);
 
                 QDomElement twittername = doc.createElement("twittername");
-                QDomCDATASection twittername_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+                QDomCDATASection twittername_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getTwitterName());
 
                 twittername.appendChild(twittername_t);
                 newItem.appendChild(twittername);
 
                 QDomElement tweetText = doc.createElement("text");
-                QDomCDATASection tweetText_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getTweetText());
+                QDomCDATASection tweetText_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getTweetText());
 
                 tweetText.appendChild(tweetText_t);
                 newItem.appendChild(tweetText);
 
                 QDomElement created = doc.createElement("created");
-                QDomCDATASection created_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getDate());
+                QDomCDATASection created_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getDate());
 
                 created.appendChild(created_t);
                 newItem.appendChild(created);
 
                 QDomElement picFileName = doc.createElement("picFileName");
-                QDomCDATASection picFileName_t = doc.createCDATASection(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+                QDomCDATASection picFileName_t = doc.createCDATASection(((TwitterWidget*)widgetList[
+                    i.key()])->getProfilePicFilename());
 
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
@@ -656,31 +691,36 @@ QString MainWindow::saveXML() {
                 newItem.appendChild(mediaContainer);
             } else {
                 QDomElement username = doc.createElement("username");
-                QDomText username_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getUsername());
+                QDomText username_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getUsername());
 
                 username.appendChild(username_t);
                 newItem.appendChild(username);
 
                 QDomElement twittername = doc.createElement("twittername");
-                QDomText twittername_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTwitterName());
+                QDomText twittername_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getTwitterName());
 
                 twittername.appendChild(twittername_t);
                 newItem.appendChild(twittername);
 
                 QDomElement tweetText = doc.createElement("text");
-                QDomText tweetText_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getTweetText());
+                QDomText tweetText_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getTweetText());
 
                 tweetText.appendChild(tweetText_t);
                 newItem.appendChild(tweetText);
 
                 QDomElement created = doc.createElement("created");
-                QDomText created_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getDate());
+                QDomText created_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getDate());
 
                 created.appendChild(created_t);
                 newItem.appendChild(created);
 
                 QDomElement picFileName = doc.createElement("picFileName");
-                QDomText picFileName_t = doc.createTextNode(((twitterWidget*)widgetList[i.key()])->getProfilePicFilename());
+                QDomText picFileName_t = doc.createTextNode(((TwitterWidget*)widgetList[
+                    i.key()])->getProfilePicFilename());
 
                 picFileName.appendChild(picFileName_t);
                 newItem.appendChild(picFileName);
@@ -810,15 +850,22 @@ QString MainWindow::saveJSON() {
             QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
             Obj[i.key()] = value;
         } else if (wType == "tweet") {
-            QVector<QMap<QString,QString> > urlArray = ((twitterWidget*)widgetList[i.key()])->getURLs();
-            QVector<QMap<QString,QString> > mediaArray = ((twitterWidget*)widgetList[i.key()])->getMedia();
+            QVector<QMap<QString,QString> > urlArray = ((TwitterWidget*)widgetList[
+                i.key()])->getURLs();
+            QVector<QMap<QString,QString> > mediaArray = ((TwitterWidget*)widgetList[
+                i.key()])->getMedia();
             QJsonObject tweet;
 
-            tweet["username"] = ((twitterWidget*)widgetList[i.key()])->getUsername();
-            tweet["twittername"] = ((twitterWidget*)widgetList[i.key()])->getTwitterName();
-            tweet["text"] = ((twitterWidget*)widgetList[i.key()])->getTweetText();
-            tweet["created"] = ((twitterWidget*)widgetList[i.key()])->getDate();
-            tweet["picFileName"] = ((twitterWidget*)widgetList[i.key()])->getProfilePicFilename();
+            tweet["username"] = ((TwitterWidget*)widgetList[
+                i.key()])->getUsername();
+            tweet["twittername"] = ((TwitterWidget*)widgetList[
+                i.key()])->getTwitterName();
+            tweet["text"] = ((TwitterWidget*)widgetList[
+                i.key()])->getTweetText();
+            tweet["created"] = ((TwitterWidget*)widgetList[
+                i.key()])->getDate();
+            tweet["picFileName"] = ((TwitterWidget*)widgetList[
+                i.key()])->getProfilePicFilename();
 
             QJsonObject urlContainer;
 
@@ -1049,37 +1096,28 @@ void MainWindow::openConfig() {
     cWindow->show();
 
     if (cWindow->exec() == 1) {
-        QMap<QString, QString> configSettings = cWindow->getConfig();
+        settings = cWindow->getConfig();
 
-        settings["outputPath"] = configSettings["outputPath"];
-        settings["layoutPath"] = configSettings["layoutPath"];
-        settings["useCDATA"] = configSettings["useCDATA"];
-        settings["format"] = configSettings["format"];
-        settings["altHotkeyHandling"] = configSettings["altHotkeyHandling"];
-
-        if (settings["useCDATA"] == "1") {
-            useCDATA = true;
-        } else {
-            useCDATA = false;
-        }
-
-        if (settings["altHotkeyHandling"] == "1") {
-            altHotkeyHandling = true;
-        } else {
-            altHotkeyHandling = false;
-        }
-
+        useCDATA = (settings["useCDATA"] == "1");
+        altHotkeyHandling = (settings["altHotkeyHandling"] == "1");
         saveFormat = settings["format"].toInt();
 
-        if(saveFormat < 1 || saveFormat > 3) {
+        if(saveFormat < 1 || saveFormat > 3)
             saveFormat = SC_XML;
-        }
 
         saveSettings();
-
         loadLayout();
-
         loadData();
+    }
+}
+
+void MainWindow::openWidgetSettings() {
+    widgetSettingsDialog->setConfig(settings);
+    widgetSettingsDialog->show();
+
+    if (widgetSettingsDialog->exec() == 1) {
+        settings = widgetSettingsDialog->getConfig();
+        saveSettings();
     }
 }
 
@@ -1238,6 +1276,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
+        } else if (tagName == "challongeMatch") {
+            addChallongeMatchWidget(child.toElement(), parent, widgetList);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -1548,10 +1588,10 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
 void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     QString newTweet = element.attribute("id");
-    widgetList[newTweet] = new twitterWidget(th,parent);
+    widgetList[newTweet] = new TwitterWidget(th, parent);
     widgetType[newTweet] = "tweet";
     widgetList[newTweet]->setObjectName(newTweet);
-    ((twitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),
+    ((TwitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
@@ -1574,8 +1614,30 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
         newPath.mkpath(newPath.path()+"/media");
     }
 
-    ((twitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
+    ((TwitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
 
+    layoutIterator++;
+}
+
+void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
+                                         QMap<QString, QObject*>)
+{
+    QString newWidgetId = element.attribute("id");
+    QString playerOneWidgetId = element.attribute("playerOneWidget");
+    QString playerTwoWidgetId = element.attribute("playerTwoWidget");
+
+    ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
+                                                               settings,
+                                                               playerOneWidgetId,
+                                                               playerTwoWidgetId);
+    newWidget->setObjectName(newWidgetId);
+    newWidget->setGeometry(QRect(element.attribute("x").toInt(),
+                                 element.attribute("y").toInt(),
+                                 element.attribute("width").toInt(),
+                                 element.attribute("height").toInt()));
+
+    widgetList[newWidgetId] = newWidget;
+    widgetType[newWidgetId] = "challongeMatch";
     layoutIterator++;
 }
 

@@ -2,23 +2,20 @@
 #define TWITTERWIDGET_H
 
 #include <QWidget>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLabel>
-#include <QGridLayout>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QVector>
+#include <QMap>
 
-#include "twitterHandler.h"
+class TwitterHandler;
+class QNetworkAccessManager;
+class QLineEdit;
+class QLabel;
+class QGridLayout;
+class QPushButton;
 
-
-class twitterWidget : public QWidget
+class TwitterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit twitterWidget(twitterHandler *th, QWidget *parent = 0);
+    explicit TwitterWidget(TwitterHandler *th, QWidget *parent = 0);
 
 private:
     QGridLayout     *layout;
@@ -42,11 +39,10 @@ private:
     QNetworkAccessManager   *picManager;
     QNetworkAccessManager   *mediaManager;
 
-    twitterHandler *th;
+    TwitterHandler *th;
 
-    
 signals:
-    
+
 public slots:
     void fetchTweet();
     void replyFinished();
@@ -65,4 +61,5 @@ public slots:
 
 };
 
-#endif // TWITTER_H
+
+#endif // TWITTERWIDGET_H

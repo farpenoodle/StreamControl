@@ -2,7 +2,7 @@
 #define SCCOMBOBOX_H
 
 #include <QComboBox>
-#include <QStringListModel>
+class QStringListModel;
 
 class QToolButton;
 
