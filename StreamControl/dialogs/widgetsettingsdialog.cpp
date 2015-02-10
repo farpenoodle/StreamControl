@@ -28,8 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QVBoxLayout>
 #include <QLineEdit>
 
-#include "dialogs/brackettab.h"
-#include "dialogs/widgetsettingsdialog.h"
+#include "brackettab.h"
+#include "widgetsettingsdialog.h"
 
 
 WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)

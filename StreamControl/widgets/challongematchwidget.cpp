@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "widgets/challongematchwidget.h"
+#include "challongematchwidget.h"
 
 ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
                                            QMap<QString, QObject*>& widgetList,

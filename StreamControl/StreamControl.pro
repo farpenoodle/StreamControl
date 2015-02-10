@@ -9,15 +9,15 @@ QT       += core gui xml widgets network script
 TARGET = StreamControl
 TEMPLATE = app
 
-SOURCES += *.cpp\
-    o2/*.cpp \
-    dialogs/*.cpp \
-    widgets/*.cpp
+SOURCES += *.cpp \
+    $$files(o2/*.cpp) \
+    $$files(dialogs/*.cpp) \
+    $$files(widgets/*.cpp)
 
 HEADERS  += *.h \
-    o2/*.h \
-    dialogs/*.h \
-    widgets/*.h
+    $$files(o2/*.h) \
+    $$files(dialogs/*.h) \
+    $$files(widgets/*.h)
 
 FORMS    += \
     configwindow.ui

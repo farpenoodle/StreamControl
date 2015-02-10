@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-#include "dialogs/brackettab.h"
+#include "brackettab.h"
 
 BracketTab::BracketTab(QMap<QString, QString>& settings, QWidget *parent) :
     QWidget(parent), settings(settings)
