@@ -95,6 +95,7 @@ public slots:
     void openConfig();
     void openWidgetSettings();
     void toggleAlwaysOnTop(bool);
+    void toggleHideReloadLayout(bool);
     void completerActivate(QString);
     void removeLineFromDataSet();
     void removeComboFromDataSet();
@@ -172,6 +173,8 @@ private:
 
     QTimer *keyPoller;
     bool hotkeyDown;
+
+    QAction *actionReloadLayout;
 };
 
 #endif // MAINWINDOW_H

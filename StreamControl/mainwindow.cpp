@@ -107,7 +107,7 @@ MainWindow::MainWindow()
     actionSave->setShortcuts(QKeySequence::Save);
     connect(actionSave,SIGNAL( triggered() ),this,SLOT( saveData() ));
 
-    QAction* actionReloadLayout = new QAction(this);
+    actionReloadLayout = new QAction(this);
     actionReloadLayout->setObjectName(QStringLiteral("actionReloadLayout"));
     QIcon reloadIcon;
     reloadIcon.addFile(QStringLiteral(":/StreamControl/icons/fugue/bonus/icons-24/arrow-circle-double.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -120,6 +120,9 @@ MainWindow::MainWindow()
     configMenu->addAction(actionConfig);
     QAction *actionWidgetSettings = new QAction("Widget Settings", this);
     configMenu->addAction(actionWidgetSettings);
+    QAction *hideReloadLayout = new QAction("Hide Reload Layout Button", this);
+    hideReloadLayout->setCheckable(true);
+    configMenu->addAction(hideReloadLayout);
     QAction *actionAlwaysOnTop = new QAction("Always on top", this);
     actionAlwaysOnTop->setCheckable(true);
     configMenu->addAction(actionAlwaysOnTop);
@@ -134,6 +137,7 @@ MainWindow::MainWindow()
     connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
     connect(actionWidgetSettings,SIGNAL( triggered() ),this,SLOT( openWidgetSettings() ));
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
+    connect(hideReloadLayout,SIGNAL(toggled(bool)),this,SLOT( toggleHideReloadLayout(bool) ));
 
     needLink = false;
     th = new TwitterHandler();
@@ -1127,6 +1131,14 @@ void MainWindow::toggleAlwaysOnTop(bool on_top) {
     setWindowFlags( newflags );
     show();
     #endif
+}
+
+void MainWindow::toggleHideReloadLayout(bool hide ) {
+    if (hide) {
+        actionReloadLayout->setVisible(false);
+    } else {
+        actionReloadLayout->setVisible(true);
+    }
 }
 
 void MainWindow::loadLayout() {
