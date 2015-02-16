@@ -435,7 +435,66 @@ Do not check if you want to use with XSplit title plugin.</string>
 default doesn't work.</string>
    </property>
   </widget>
+  <widget class="QCheckBox" name="outputRelativePathCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>0</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Relative Path</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="layoutRelativePathCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>50</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Relative Path</string>
+   </property>
+  </widget>
+  <zorder>label</zorder>
+  <zorder>outputPathTB</zorder>
+  <zorder>outputRelativePathCheckBox</zorder>
+  <zorder>outputButton</zorder>
+  <zorder>configTabs</zorder>
+  <zorder>label_6</zorder>
+  <zorder>layoutPathTB</zorder>
+  <zorder>layoutRelativePathCheckBox</zorder>
+  <zorder>layoutButton</zorder>
+  <zorder>CDATACheckBox</zorder>
+  <zorder>formatXML</zorder>
+  <zorder>formatJSON</zorder>
+  <zorder>formatBoth</zorder>
+  <zorder>label_7</zorder>
+  <zorder>altHotkeyCheckbox</zorder>
+  <zorder>buttonBox</zorder>
  </widget>
+ <tabstops>
+  <tabstop>outputRelativePathCheckBox</tabstop>
+  <tabstop>outputPathTB</tabstop>
+  <tabstop>outputButton</tabstop>
+  <tabstop>layoutRelativePathCheckBox</tabstop>
+  <tabstop>layoutPathTB</tabstop>
+  <tabstop>layoutButton</tabstop>
+  <tabstop>CDATACheckBox</tabstop>
+  <tabstop>formatXML</tabstop>
+  <tabstop>formatJSON</tabstop>
+  <tabstop>formatBoth</tabstop>
+  <tabstop>altHotkeyCheckbox</tabstop>
+  <tabstop>configTabs</tabstop>
+  <tabstop>aboutQtButton</tabstop>
+  <tabstop>textBrowser</tabstop>
+  <tabstop>textBrowser_2</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

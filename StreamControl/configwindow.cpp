@@ -26,7 +26,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********************************************************************************/
 
 #include <QFileDialog>
-#include <QDir>
 #include <QMessageBox>
 #include <QtDebug>
 #include "configwindow.h"
@@ -45,6 +44,8 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->outputButton,SIGNAL( clicked() ),this,SLOT( findOutput() ));
     connect(ui->layoutButton,SIGNAL( clicked() ),this,SLOT( findLayout() ));
     connect(ui->aboutQtButton,SIGNAL( clicked() ),this,SLOT( abtQt() ));
+    connect(ui->outputRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( outputRelativeToggle( int ) ));
+    connect(ui->layoutRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( layoutRelativeToggle( int ) ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
     connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
     connect(ui->formatGroup,SIGNAL( buttonClicked(int) ),this, SLOT ( formatChange( int ) ));
@@ -53,6 +54,8 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     ui->layoutPathTB->setDisabled(true);
     ui->streamControlLabel->setText(QString("StreamControl ") + QString(SC_VERSION) );
     ui->qtLabel->setText(QString("This program uses Qt version ")+ QString(qVersion() + QString(".")) );
+
+    currentDir = QDir("");
 
 }
 
@@ -64,8 +67,22 @@ ConfigWindow::~ConfigWindow()
 void ConfigWindow::setConfig(QMap<QString, QString> settings) {
 
     configsettings = settings;
+    QDir outputPath = QDir(configsettings["outputPath"]);
+    QDir layoutPath = QDir(configsettings["layoutPath"]);
+
+    if (outputPath.isRelative()) {
+        ui->outputRelativePathCheckBox->setCheckState(Qt::Checked);
+    } else {
+        ui->outputRelativePathCheckBox->setCheckState(Qt::Unchecked);
+    }
+    if (layoutPath.isRelative()) {
+        ui->layoutRelativePathCheckBox->setCheckState(Qt::Checked);
+    } else {
+        ui->layoutRelativePathCheckBox->setCheckState(Qt::Unchecked);
+    }
     ui->outputPathTB->setText(configsettings["outputPath"]);
     ui->layoutPathTB->setText(configsettings["layoutPath"]);
+
     if (configsettings["useCDATA"] == "1") {
         ui->CDATACheckBox->setCheckState(Qt::Checked);
     } else {
@@ -95,9 +112,16 @@ QMap<QString, QString> ConfigWindow::getConfig() {
 void ConfigWindow::findOutput() {
 
     QString output = QFileDialog::getExistingDirectory(this, tr("Find Output Directory"), configsettings["outputPath"], QFileDialog::ShowDirsOnly);
+
+    if (ui->outputRelativePathCheckBox->checkState() == Qt::Checked) {
+        output = currentDir.relativeFilePath(output);
+    }
+
     if (output != "") {
         output.replace("/","\\");
-        output = output + "\\";
+        if (QString(output[output.length()-1]) != "\\" && output != "") {
+            output = output + "\\";
+        }
         ui->outputPathTB->setText(output);
         configsettings["outputPath"] = output;
     }
@@ -106,6 +130,11 @@ void ConfigWindow::findOutput() {
 void ConfigWindow::findLayout() {
 
     QString layoutPath = QFileDialog::getOpenFileName(this, tr("Find Layout File"), QFileInfo(configsettings["layoutPath"]).path(), tr("XML Files (*.xml)"));
+
+    if (ui->layoutRelativePathCheckBox->checkState() == Qt::Checked) {
+        layoutPath = currentDir.relativeFilePath(layoutPath);
+    }
+
     if (layoutPath != "") {
         layoutPath.replace("/","\\");
         ui->layoutPathTB->setText(layoutPath);
@@ -114,6 +143,35 @@ void ConfigWindow::findLayout() {
         ui->layoutPathTB->setText(layoutPath);
         configsettings["layoutPath"] = layoutPath;
     }
+}
+
+void ConfigWindow::layoutRelativeToggle( int state ) {
+    QString layoutPath = configsettings["layoutPath"];
+    if (state == Qt::Checked) {
+        layoutPath = currentDir.relativeFilePath(layoutPath);
+    } else {
+        layoutPath = currentDir.cleanPath(currentDir.absoluteFilePath(layoutPath));
+    }
+
+    layoutPath.replace("/","\\");
+    ui->layoutPathTB->setText(layoutPath);
+    configsettings["layoutPath"] = layoutPath;
+}
+
+void ConfigWindow::outputRelativeToggle( int state ) {
+    QString outputPath = configsettings["outputPath"];
+    if (state == Qt::Checked) {
+        outputPath = currentDir.relativeFilePath(outputPath);
+    } else {
+        outputPath = currentDir.cleanPath(currentDir.absoluteFilePath(outputPath));
+    }
+
+    outputPath.replace("/","\\");
+    if (QString(outputPath[outputPath.length()-1]) != "\\" && outputPath != "") {
+        outputPath = outputPath + "\\";
+    }
+    ui->outputPathTB->setText(outputPath);
+    configsettings["outputPath"] = outputPath;
 }
 
 void ConfigWindow::CDATAToggle( int state ) {

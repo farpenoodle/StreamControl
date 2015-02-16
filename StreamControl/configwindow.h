@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QDialog>
 #include <QMap>
+#include <QDir>
 #include "config.h"
 
 namespace Ui {
@@ -51,6 +52,8 @@ public slots:
     void findOutput();
     void findLayout();
     void abtQt();
+    void outputRelativeToggle( int state );
+    void layoutRelativeToggle( int state );
     void CDATAToggle( int state );
     void altHotkeyToggle( int state );
     void formatChange( int state );
@@ -58,6 +61,7 @@ public slots:
 private:
     QMap<QString, QString> configsettings;
     Ui::ConfigWindow *ui;
+    QDir currentDir;
 };
 
 #endif // CONFIGWINDOW_H
