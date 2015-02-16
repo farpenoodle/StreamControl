@@ -68,7 +68,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>XML/JSON Path. (Usually C:\Program Files (x86)\SplitMediaLabs\XSplit\)</string>
+    <string>XML/JSON Path.</string>
    </property>
   </widget>
   <widget class="QPushButton" name="outputButton">
