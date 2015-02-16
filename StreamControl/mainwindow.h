@@ -61,6 +61,7 @@ public slots:
     void saveData();
     void saveSettings();
     void loadLayout();
+    void reloadLayout();
     void clearMaps();
     void parseLayout(QDomElement, QWidget*);
     void parseTabLayout(QDomElement, QWidget*);

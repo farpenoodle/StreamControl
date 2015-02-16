@@ -112,7 +112,7 @@ MainWindow::MainWindow()
     QIcon reloadIcon;
     reloadIcon.addFile(QStringLiteral(":/StreamControl/icons/fugue/bonus/icons-24/arrow-circle-double.png"), QSize(), QIcon::Normal, QIcon::Off);
     actionReloadLayout->setIcon(reloadIcon);
-    connect(actionReloadLayout,SIGNAL( triggered() ),this,SLOT( loadLayout() ));
+    connect(actionReloadLayout,SIGNAL( triggered() ),this,SLOT( reloadLayout() ));
 
 
     QMenu *configMenu = new QMenu();
@@ -281,32 +281,18 @@ void MainWindow::loadSettings() {
             settings["altHotkeyHandling"] = "0";
         }
     } else {
-        QFile xsplitExe32("C:\\Program Files\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
-        QFile xsplitExe("C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\XSplit.Core.exe");
-        if (xsplitExe.exists() || xsplitExe32.exists()) {
-            if (xsplitExe.exists()) {
-                outputPath = "C:\\Program Files (x86)\\SplitMediaLabs\\XSplit\\";
-            } else {
-                outputPath = "C:\\Program Files\\SplitMediaLabs\\XSplit\\";
-            }
-            QMessageBox msgBox;
 
-            msgBox.setText("XSplit Installation detected at default location. Saving settings.");
-            msgBox.exec();
+        QMessageBox msgBox;
+        msgBox.setText("Please be sure to configure StreamControl before you start.");
+        msgBox.exec();
 
-            settings["outputPath"] = outputPath;
-            settings["useCDATA"] = "0";
-            useCDATA = false;
-            settings["format"] = QString::number(SC_XML);
-            saveFormat = SC_XML;
+        outputPath = "";
 
-
-        } else {
-            QMessageBox msgBox;
-            msgBox.setText("Please be sure to configure StreamControl before you start.");
-            msgBox.exec();
-            outputPath = "";
-        }
+        settings["outputPath"] = outputPath;
+        settings["useCDATA"] = "0";
+        useCDATA = false;
+        settings["format"] = QString::number(SC_XML);
+        saveFormat = SC_XML;
 
         saveSettings();
     }
@@ -1251,6 +1237,11 @@ void MainWindow::loadLayout() {
         keyPoller->start(16);
     }
 
+}
+
+void MainWindow::reloadLayout() {
+    loadLayout();
+    loadData();
 }
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
