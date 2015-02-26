@@ -37,6 +37,7 @@ class QGridLayout;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QAuthenticator;
+class QLineEdit;
 
 class ChallongeMatchWidget : public QWidget
 {
@@ -55,6 +56,8 @@ private:
 
     QComboBox       *tournamentsBox;
     QLabel          *tournamentLabel;
+    QLabel          *tournamentCustomLabel;
+    QLineEdit       *tournamentCustomLineEdit;
     QPushButton     *tournamentFetchButton;
 
     QComboBox       *matchesBox;
@@ -81,6 +84,7 @@ public slots:
     void processTournamentListJson();
     void processTournamentJson();
     void setData();
+    void updateCustomIdBoxState();
 };
 
 #endif // WIDGETS_CHALLONGEMATCHWIDGET_H

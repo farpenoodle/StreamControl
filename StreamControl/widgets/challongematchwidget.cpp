@@ -53,6 +53,8 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
     tournamentLabel = new QLabel();
+    tournamentCustomLabel = new QLabel();
+    tournamentCustomLineEdit = new QLineEdit();
     tournamentFetchButton = new QPushButton();
     matchesBox = new QComboBox();
     matchLabel = new QLabel();
@@ -63,20 +65,27 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     matchFetchButton->setText("Fetch Matches");
     setDataButton->setText("Set Match Details");
     tournamentLabel->setText("Tournament");
+    tournamentCustomLabel->setText("or Tournament ID:");
     matchLabel->setText("Match");
 
-    layout->addWidget(tournamentFetchButton,0, 0,1,2);
-    layout->addWidget(matchFetchButton,0,2,1,2);
+    tournamentsBox->addItem("Custom...", "custom"),
 
-    layout->addWidget(tournamentLabel,1,0);
-    layout->addWidget(matchLabel,2,0);
-    layout->addWidget(tournamentsBox,1,1,1,3);
-    layout->addWidget(matchesBox,2,1,1,3);
+    layout->addWidget(tournamentFetchButton, 0, 0,1,2);
+    layout->addWidget(matchFetchButton, 0, 2, 1, 2);
+    layout->addWidget(tournamentLabel, 1, 0);
+    layout->addWidget(tournamentsBox, 1, 1, 1, 3);
+    layout->addWidget(tournamentCustomLabel, 2, 0, 1, 1);
+    layout->addWidget(tournamentCustomLineEdit, 2, 1, 1, 3);
+    layout->addWidget(matchLabel, 3, 0);
+    layout->addWidget(matchesBox, 3, 1, 1, 3);
 
-    layout->addWidget(setDataButton,3,0, 1, 4);
+    layout->addWidget(setDataButton, 4, 0, 1, 4);
 
 
     manager = new QNetworkAccessManager;
+
+    connect(tournamentsBox, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(updateCustomIdBoxState()));
 
     connect(tournamentFetchButton, SIGNAL(clicked()), this, SLOT(fetchTournaments()));
     connect(matchFetchButton, SIGNAL(clicked()), this, SLOT(fetchMatches()));
@@ -105,8 +114,14 @@ void ChallongeMatchWidget::fetchTournaments()
 
 void ChallongeMatchWidget::fetchMatches()
 {
-    QString currentTournamentId =
-        tournamentsBox->itemData(tournamentsBox->currentIndex()).toString();
+    QString currentTournamentId;
+    int currentIndex = tournamentsBox->currentIndex();
+
+    // If custom is selected...
+    if (tournamentsBox->currentIndex() == tournamentsBox->count() - 1)
+        currentTournamentId = tournamentCustomLineEdit->text();
+    else
+        currentTournamentId = tournamentsBox->itemData(currentIndex).toString();
 
     QString urlString =
         QString("https://api.challonge.com/v1/tournaments/%1.json?include_matches=1&include_participants=1").arg(currentTournamentId);
@@ -149,6 +164,9 @@ void ChallongeMatchWidget::processTournamentListJson()
         tournamentsBox->addItem(tournamentObject["name"].toString(),
                                 QString::number(tournamentObject["id"].toInt()));
     }
+    tournamentsBox->addItem("Custom...", "custom");
+
+    updateCustomIdBoxState();
 }
 
 void ChallongeMatchWidget::processTournamentJson()
@@ -210,4 +228,12 @@ void ChallongeMatchWidget::setData()
             ((QLineEdit*)widgetList[playerTwoWidgetId])->setText(playerNames[1]);
         }
     }
+}
+
+void ChallongeMatchWidget::updateCustomIdBoxState()
+{
+    // The last entry in the tournaments box should always be the custom option
+    bool boxEnabled = (tournamentsBox->currentIndex() == tournamentsBox->count() - 1);
+
+    tournamentCustomLineEdit->setEnabled(boxEnabled);
 }
