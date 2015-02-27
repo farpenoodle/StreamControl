@@ -67,6 +67,7 @@ private:
     QPushButton     *setDataButton;
 
     QNetworkAccessManager   *manager;
+    QLabel          *statusLabel;
 
     // So we can set the target widgets with the bracket data
     QMap<QString, QObject*>& widgetList;

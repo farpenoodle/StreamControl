@@ -60,6 +60,7 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     matchLabel = new QLabel();
     matchFetchButton = new QPushButton();
     setDataButton = new QPushButton();
+    statusLabel = new QLabel();
 
     tournamentFetchButton->setText("Fetch Tournaments");
     matchFetchButton->setText("Fetch Matches");
@@ -67,6 +68,8 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     tournamentLabel->setText("Tournament");
     tournamentCustomLabel->setText("or Tournament ID:");
     matchLabel->setText("Match");
+
+    statusLabel->setStyleSheet("QLabel { color : red; }");
 
     tournamentsBox->addItem("Custom...", "custom"),
 
@@ -80,6 +83,7 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     layout->addWidget(matchesBox, 3, 1, 1, 3);
 
     layout->addWidget(setDataButton, 4, 0, 1, 4);
+    layout->addWidget(statusLabel, 5, 0, 1, -1);
 
 
     manager = new QNetworkAccessManager;
@@ -150,6 +154,12 @@ void ChallongeMatchWidget::processTournamentListJson()
 
     QString replyData = reply->readAll();
 
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        statusLabel->setText("Error loading tournament data");
+        return;
+    }
+
     QJsonDocument response = QJsonDocument::fromJson(replyData.toUtf8());
     QJsonArray tournamentsArray = response.array();
 
@@ -175,6 +185,11 @@ void ChallongeMatchWidget::processTournamentJson()
 
     QString replyData = reply->readAll();
 
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        statusLabel->setText("Error loading tournament data");
+        return;
+    }
 
     const QJsonDocument response = QJsonDocument::fromJson(replyData.toUtf8());
     const QJsonObject tournamentObject = response.object()["tournament"].toObject();
