@@ -1628,11 +1628,13 @@ void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
     QString newWidgetId = element.attribute("id");
     QString playerOneWidgetId = element.attribute("playerOneWidget");
     QString playerTwoWidgetId = element.attribute("playerTwoWidget");
+    QString tournamentStageWidgetId = element.attribute("tournamentStageWidget");
 
     ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
                                                                settings,
                                                                playerOneWidgetId,
-                                                               playerTwoWidgetId);
+                                                               playerTwoWidgetId,
+                                                               tournamentStageWidgetId);
     newWidget->setObjectName(newWidgetId);
     newWidget->setGeometry(QRect(element.attribute("x").toInt(),
                                  element.attribute("y").toInt(),

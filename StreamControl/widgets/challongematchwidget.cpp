@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
-#include <QStringList>
+#include <QList>
 #include <QComboBox>
 #include <QtDebug>
 #include <QAuthenticator>
@@ -46,9 +46,11 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
                                            QMap<QString, QObject*>& widgetList,
                                            const QMap<QString, QString>& settings,
                                            QString playerOneWidgetId,
-                                           QString playerTwoWidgetId) :
+                                           QString playerTwoWidgetId,
+                                           QString tournamentStageWidgetId) :
     QWidget(parent), widgetList(widgetList), settings(settings),
-    playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId)
+    playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
+    tournamentStageWidgetId(tournamentStageWidgetId)
 {
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
@@ -221,28 +223,191 @@ void ChallongeMatchWidget::processTournamentJson()
 
             QString str = QString("%1 vs %2").arg(player1Name, player2Name);
 
-            QStringList playerNames;
-            playerNames.append(player1Name);
-            playerNames.append(player2Name);
-            matchesBox->addItem(str, playerNames);
+            QVariantList matchDetails;
+            matchDetails.append(tournamentObject["tournament_type"].toString());
+            matchDetails.append(tournamentObject["participants_count"].toInt());
+            matchDetails.append(match["round"].toInt());
+            matchDetails.append(player1Name);
+            matchDetails.append(player2Name);
+            matchesBox->addItem(str, matchDetails);
         }
+    }
+}
+
+
+QString getSingleEliminationMatchPhase(int currentRound, int tournamentEntrants)
+{
+    QString roundName = "";
+
+    int maxRounds = 0;
+    int counter = 1;
+    while (counter < tournamentEntrants)
+    {
+        maxRounds += 1;
+        counter *= 2;
+    }
+
+    switch (maxRounds - currentRound)
+    {
+        case 0:
+            roundName = "Final";
+            break;
+        case 1:
+            roundName = "Semi-Final";
+            break;
+        case 2:
+            roundName = "Quarter Final";
+            break;
+        case 3:
+            roundName = "Last 16";
+            break;
+        default:
+            roundName = QString("Round %1").arg(currentRound);
+    }
+
+    return roundName;
+}
+
+
+// Returns how many rounds there will be in winners bracket in a DE tournament
+int getWinnersRounds(int numPlayers)
+{
+    double participants = numPlayers;
+    int matches = 0;
+    while (participants > 1)
+    {
+        participants /= 2;
+        matches += 1;
+    }
+
+    return matches;
+}
+
+// Returns how many rounds there will be in losers bracket in a DE tournament
+int getLosersRounds(int numPlayers)
+{
+    if (numPlayers <= 2) return 0;
+
+    int count = 2;
+    int rounds = 2;
+    int increment_diff = 2;
+    bool will_increment = false;
+
+    count += increment_diff;
+    while (count < numPlayers)
+    {
+        count += increment_diff;
+        rounds += 1;
+        if (will_increment)
+        {
+            increment_diff *= 2;
+            will_increment = false;
+        }
+        else
+            will_increment = true;
+    }
+    return rounds;
+}
+
+
+QString getDoubleEliminationMatchPhase(int currentRound, int tournamentEntrants)
+{
+    int winnersRounds = getWinnersRounds(tournamentEntrants);
+    int losersRounds = getLosersRounds(tournamentEntrants);
+
+    int realRound = abs(currentRound);
+    QString stage = "";
+
+    QString roundName = QString("Round %1").arg(realRound - 1);
+
+    int roundLimit = currentRound < 0 ? losersRounds : winnersRounds;
+
+    if (currentRound >= 1)
+    {
+        stage = "Winners ";
+        roundName = "Bracket";
+    }
+    if (currentRound < 0)
+    {
+        //roundName = QString("Round %1").arg(realRound);
+        roundName = "Bracket";
+        stage = "Losers ";
+    }
+
+    if (realRound == roundLimit - 1)
+        roundName = "Semi-Final";
+    if (realRound == roundLimit)
+        roundName = "Final";
+    if (currentRound == roundLimit + 1)
+    {
+        stage = "";
+        roundName = "Grand Final";
+    }
+
+    return QString("%1%2").arg(stage, roundName).trimmed();
+}
+
+
+
+QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
+{
+    switch (t)
+    {
+        case ROUND_ROBIN:
+        {
+            QString templateString = "Round %1";
+            return templateString.arg(currentRound);
+            break;
+        }
+        case SINGLE_ELIMINATION:
+        {
+            return getSingleEliminationMatchPhase(currentRound, tournamentEntrants);
+            break;
+        }
+        case DOUBLE_ELIMINATION:
+        {
+            return getDoubleEliminationMatchPhase(currentRound, tournamentEntrants);
+            break;
+        }
+        default:
+            return "ok";
     }
 }
 
 void ChallongeMatchWidget::setData()
 {
     QVariant var = (matchesBox->itemData(matchesBox->currentIndex()));
-    QStringList playerNames = var.toStringList();
+    QVariantList matchDetails = var.toList();
 
-    if (!playerNames.empty())
+    if (!matchDetails.empty())
     {
         if (widgetList[playerOneWidgetId] && widgetList[playerTwoWidgetId])
         {
             ///TODO: use a more generic set data method
-            ((QLineEdit*)widgetList[playerOneWidgetId])->setText(playerNames[0]);
-            ((QLineEdit*)widgetList[playerTwoWidgetId])->setText(playerNames[1]);
+            ((QLineEdit*)widgetList[playerOneWidgetId])->setText(matchDetails[3].toString());
+            ((QLineEdit*)widgetList[playerTwoWidgetId])->setText(matchDetails[4].toString());
         }
+        //Also calculate the current tournament stage
+        int playerCount = matchDetails[1].toInt();
+        int roundNumber = matchDetails[2].toInt();
+        QString tournamentTypeString = matchDetails[0].toString();
+
+        TournamentType tournamentType = DOUBLE_ELIMINATION;
+        if (tournamentTypeString == "double elimination")
+            tournamentType = DOUBLE_ELIMINATION;
+        if (tournamentTypeString == "single elimination")
+            tournamentType = SINGLE_ELIMINATION;
+        if (tournamentTypeString == "round robin")
+            tournamentType = ROUND_ROBIN;
+
+
+        //TODO: Hard-coded for now - externalize the strings
+        QString phase = getPhase(tournamentType, roundNumber, playerCount);
+
+        QLineEdit* widget= ((QLineEdit*)widgetList[tournamentStageWidgetId]);
+        if (widget) widget->setText(phase);
     }
+
 }
 
 void ChallongeMatchWidget::updateCustomIdBoxState()

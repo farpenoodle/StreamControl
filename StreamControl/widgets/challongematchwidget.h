@@ -39,6 +39,8 @@ class QNetworkReply;
 class QAuthenticator;
 class QLineEdit;
 
+enum TournamentType {SINGLE_ELIMINATION, DOUBLE_ELIMINATION, ROUND_ROBIN};
+
 class ChallongeMatchWidget : public QWidget
 {
     Q_OBJECT
@@ -47,7 +49,9 @@ public:
                                   QMap<QString, QObject*>& widgets,
                                   const QMap<QString, QString>& settings,
                                   QString playerOneWidget,
-                                  QString playerTwoWidget);
+                                  QString playerTwoWidget,
+                                  QString tournamentStageWidget);
+
 
 signals:
 
@@ -75,7 +79,7 @@ private:
     // Needed to get the challonge username/api key
     const QMap<QString, QString>& settings;
 
-    const QString playerOneWidgetId, playerTwoWidgetId;
+    const QString playerOneWidgetId, playerTwoWidgetId, tournamentStageWidgetId;
 
     QByteArray getAuthHeader() const;
 
