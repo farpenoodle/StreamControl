@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define WIDGETS_CHALLONGEMATCHWIDGET_H
 
 #include <QWidget>
+#include <QJsonDocument>
 
 class QPushButton;
 class QLabel;
@@ -50,6 +51,7 @@ public:
                                   const QMap<QString, QString>& settings,
                                   QString playerOneWidget,
                                   QString playerTwoWidget,
+                                  QString bracketWidgetId,
                                   QString tournamentStageWidget);
 
 
@@ -77,7 +79,7 @@ private:
 
     // Stores the json response of a tournament when fetched
     // Used to save bracket data to a file when the button is pressed
-    QByteArray currentTournamentJson;
+    QJsonDocument currentTournamentJson;
 
     // So we can set the target widgets with the bracket data
     QMap<QString, QObject*>& widgetList;
@@ -85,7 +87,8 @@ private:
     // Needed to get the challonge username/api key
     const QMap<QString, QString>& settings;
 
-    const QString playerOneWidgetId, playerTwoWidgetId, tournamentStageWidgetId;
+    const QString playerOneWidgetId, playerTwoWidgetId, tournamentStageWidgetId,
+      bracketWidgetId;
 
     QByteArray getAuthHeader() const;
 

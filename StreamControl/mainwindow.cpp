@@ -57,7 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "widgets/challongematchwidget.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
-#include "widgets/challongematchwidget.h"
 #include "mainwindow.h"
 
 
@@ -1629,12 +1628,14 @@ void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
     QString playerOneWidgetId = element.attribute("playerOneWidget");
     QString playerTwoWidgetId = element.attribute("playerTwoWidget");
     QString tournamentStageWidgetId = element.attribute("tournamentStageWidget");
+    QString bracketWidgetId = element.attribute("bracketWidget");
 
     ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
                                                                settings,
                                                                playerOneWidgetId,
                                                                playerTwoWidgetId,
-                                                               tournamentStageWidgetId);
+                                                               tournamentStageWidgetId,
+                                                               bracketWidgetId);
     newWidget->setObjectName(newWidgetId);
     newWidget->setGeometry(QRect(element.attribute("x").toInt(),
                                  element.attribute("y").toInt(),

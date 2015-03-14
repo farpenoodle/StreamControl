@@ -48,10 +48,11 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
                                            const QMap<QString, QString>& settings,
                                            QString playerOneWidgetId,
                                            QString playerTwoWidgetId,
-                                           QString tournamentStageWidgetId) :
+                                           QString tournamentStageWidgetId,
+                                           QString bracketWidgetId) :
     QWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
-    tournamentStageWidgetId(tournamentStageWidgetId)
+    tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId)
 {
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
@@ -212,11 +213,8 @@ void ChallongeMatchWidget::processTournamentJson()
         return;
     }
 
-    currentTournamentJson = replyData.toUtf8();
-
-
-    const QJsonDocument response = QJsonDocument::fromJson(replyData.toUtf8());
-    const QJsonObject tournamentObject = response.object()["tournament"].toObject();
+    currentTournamentJson = QJsonDocument::fromJson(replyData.toUtf8());
+    const QJsonObject tournamentObject = currentTournamentJson.object()["tournament"].toObject();
 
     QString tournamentName = tournamentObject["name"].toString();
     currentTournamentLabel->setText(QString("Current Tournament: %1").arg(tournamentName));
@@ -403,7 +401,7 @@ void ChallongeMatchWidget::setBracketData()
 {
     QFile bracketFile(settings["outputPath"] + "bracket.json");
     bracketFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
-    bracketFile.write(currentTournamentJson);
+    bracketFile.write(currentTournamentJson.toJson());
     bracketFile.close();
 }
 
@@ -420,25 +418,36 @@ void ChallongeMatchWidget::setMatchData()
             ((QLineEdit*)widgetList[playerOneWidgetId])->setText(matchDetails[3].toString());
             ((QLineEdit*)widgetList[playerTwoWidgetId])->setText(matchDetails[4].toString());
         }
-        //Also calculate the current tournament stage
-        int playerCount = matchDetails[1].toInt();
-        int roundNumber = matchDetails[2].toInt();
-        QString tournamentTypeString = matchDetails[0].toString();
-
-        TournamentType tournamentType = DOUBLE_ELIMINATION;
-        if (tournamentTypeString == "double elimination")
-            tournamentType = DOUBLE_ELIMINATION;
-        if (tournamentTypeString == "single elimination")
-            tournamentType = SINGLE_ELIMINATION;
-        if (tournamentTypeString == "round robin")
-            tournamentType = ROUND_ROBIN;
 
 
-        //TODO: Hard-coded for now - externalize the strings
-        QString phase = getPhase(tournamentType, roundNumber, playerCount);
+        QLineEdit* tournamentStageWidget = (QLineEdit*)widgetList[tournamentStageWidgetId];
+        if (tournamentStageWidget)
+        {
+            //Also calculate the current tournament stage
+            int playerCount = matchDetails[1].toInt();
+            int roundNumber = matchDetails[2].toInt();
+            QString tournamentTypeString = matchDetails[0].toString();
 
-        QLineEdit* widget= ((QLineEdit*)widgetList[tournamentStageWidgetId]);
-        if (widget) widget->setText(phase);
+            TournamentType tournamentType = DOUBLE_ELIMINATION;
+            if (tournamentTypeString == "double elimination")
+                tournamentType = DOUBLE_ELIMINATION;
+            if (tournamentTypeString == "single elimination")
+                tournamentType = SINGLE_ELIMINATION;
+            if (tournamentTypeString == "round robin")
+                tournamentType = ROUND_ROBIN;
+
+
+            //TODO: Hard-coded for now - externalize the strings
+            QString phase = getPhase(tournamentType, roundNumber, playerCount);
+            tournamentStageWidget->setText(phase);
+        }
+
+        QLineEdit* bracketWidget = (QLineEdit*)widgetList[bracketWidgetId];
+        if (bracketWidget)
+        {
+            bracketWidget->setText(currentTournamentJson.object()["tournament"].toObject()["url"].toString());
+        }
+
     }
 
 }
