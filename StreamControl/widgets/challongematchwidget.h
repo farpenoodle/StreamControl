@@ -60,6 +60,7 @@ private:
 
     QComboBox       *tournamentsBox;
     QLabel          *tournamentLabel;
+    QLabel          *currentTournamentLabel;
     QLabel          *tournamentCustomLabel;
     QLineEdit       *tournamentCustomLineEdit;
     QPushButton     *tournamentFetchButton;
@@ -68,10 +69,15 @@ private:
     QLabel          *matchLabel;
     QPushButton     *matchFetchButton;
 
-    QPushButton     *setDataButton;
+    QPushButton     *setMatchDataButton;
+    QPushButton     *setBracketDataButton;
 
     QNetworkAccessManager   *manager;
     QLabel          *statusLabel;
+
+    // Stores the json response of a tournament when fetched
+    // Used to save bracket data to a file when the button is pressed
+    QByteArray currentTournamentJson;
 
     // So we can set the target widgets with the bracket data
     QMap<QString, QObject*>& widgetList;
@@ -88,7 +94,8 @@ public slots:
     void fetchMatches();
     void processTournamentListJson();
     void processTournamentJson();
-    void setData();
+    void setMatchData();
+    void setBracketData();
     void updateCustomIdBoxState();
 };
 

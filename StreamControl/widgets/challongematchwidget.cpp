@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QFile>
 
 #include "challongematchwidget.h"
 
@@ -59,15 +60,23 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     tournamentCustomLineEdit = new QLineEdit();
     tournamentFetchButton = new QPushButton();
     matchesBox = new QComboBox();
+    currentTournamentLabel = new QLabel();
     matchLabel = new QLabel();
     matchFetchButton = new QPushButton();
-    setDataButton = new QPushButton();
+    setMatchDataButton = new QPushButton();
+    setBracketDataButton = new QPushButton();
     statusLabel = new QLabel();
 
-    tournamentFetchButton->setText("Fetch Tournaments");
-    matchFetchButton->setText("Fetch Matches");
-    setDataButton->setText("Set Match Details");
+    QFrame* frame = new QFrame();
+    frame->setFrameStyle(QFrame::Panel);
+    frame->setFrameShadow(QFrame::Sunken);
+
+    tournamentFetchButton->setText("Fetch");
+    matchFetchButton->setText("Load Tournament Data/Matches");
+    setMatchDataButton->setText("Set Match Details");
+    setBracketDataButton->setText("Set Bracket Data");
     tournamentLabel->setText("Tournament");
+    currentTournamentLabel->setText("Current Tournament: (none)");
     tournamentCustomLabel->setText("or Tournament ID:");
     matchLabel->setText("Match");
 
@@ -75,17 +84,26 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
 
     tournamentsBox->addItem("Custom...", "custom"),
 
-    layout->addWidget(tournamentFetchButton, 0, 0,1,2);
-    layout->addWidget(matchFetchButton, 0, 2, 1, 2);
-    layout->addWidget(tournamentLabel, 1, 0);
-    layout->addWidget(tournamentsBox, 1, 1, 1, 3);
-    layout->addWidget(tournamentCustomLabel, 2, 0, 1, 1);
-    layout->addWidget(tournamentCustomLineEdit, 2, 1, 1, 3);
-    layout->addWidget(matchLabel, 3, 0);
-    layout->addWidget(matchesBox, 3, 1, 1, 3);
+    layout->addWidget(tournamentLabel, 0, 0, 1, 1);
+    layout->addWidget(tournamentsBox, 0, 1, 1, 2);
+    layout->addWidget(tournamentFetchButton, 0, 3, 1, 1);
 
-    layout->addWidget(setDataButton, 4, 0, 1, 4);
-    layout->addWidget(statusLabel, 5, 0, 1, -1);
+    layout->addWidget(tournamentCustomLabel, 1, 0, 1, 1);
+    layout->addWidget(tournamentCustomLineEdit, 1, 1, 1, 3);
+
+    layout->addWidget(matchFetchButton, 2, 0, 1, -1);
+
+    layout->addWidget(frame, 3, 0, 1, -1);
+
+    QGridLayout* frameLayout = new QGridLayout;
+    frameLayout->addWidget(currentTournamentLabel, 0, 0, 1, -1);
+    frameLayout->addWidget(matchLabel, 1, 0, 1, 1);
+    frameLayout->addWidget(matchesBox, 1, 1, 1, 1);
+    frameLayout->addWidget(setMatchDataButton, 2, 0, 1, -1);
+    frameLayout->addWidget(setBracketDataButton, 3, 0, 1, -1);
+    frame->setLayout(frameLayout);
+
+    layout->addWidget(statusLabel, 4, 0, 1, -1);
 
 
     manager = new QNetworkAccessManager;
@@ -95,7 +113,8 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
 
     connect(tournamentFetchButton, SIGNAL(clicked()), this, SLOT(fetchTournaments()));
     connect(matchFetchButton, SIGNAL(clicked()), this, SLOT(fetchMatches()));
-    connect(setDataButton, SIGNAL(clicked()), this, SLOT(setData()));
+    connect(setMatchDataButton, SIGNAL(clicked()), this, SLOT(setMatchData()));
+    connect(setBracketDataButton, SIGNAL(clicked()), this, SLOT(setBracketData()));
 
     this->setLayout(layout);
 }
@@ -193,8 +212,14 @@ void ChallongeMatchWidget::processTournamentJson()
         return;
     }
 
+    currentTournamentJson = replyData.toUtf8();
+
+
     const QJsonDocument response = QJsonDocument::fromJson(replyData.toUtf8());
     const QJsonObject tournamentObject = response.object()["tournament"].toObject();
+
+    QString tournamentName = tournamentObject["name"].toString();
+    currentTournamentLabel->setText(QString("Current Tournament: %1").arg(tournamentName));
 
     QJsonArray participants = tournamentObject["participants"].toArray();
     QJsonArray matches = tournamentObject["matches"].toArray();
@@ -374,7 +399,15 @@ QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
     }
 }
 
-void ChallongeMatchWidget::setData()
+void ChallongeMatchWidget::setBracketData()
+{
+    QFile bracketFile(settings["outputPath"] + "bracket.json");
+    bracketFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+    bracketFile.write(currentTournamentJson);
+    bracketFile.close();
+}
+
+void ChallongeMatchWidget::setMatchData()
 {
     QVariant var = (matchesBox->itemData(matchesBox->currentIndex()));
     QVariantList matchDetails = var.toList();
