@@ -25,8 +25,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef WIDGETS_CHALLONGEMATCHWIDGET_H
-#define WIDGETS_CHALLONGEMATCHWIDGET_H
+#ifndef WIDGETS_CHALLONGEWIDGET_H
+#define WIDGETS_CHALLONGEWIDGET_H
 
 #include <QWidget>
 #include <QJsonDocument>
@@ -42,11 +42,11 @@ class QLineEdit;
 
 enum TournamentType {SINGLE_ELIMINATION, DOUBLE_ELIMINATION, ROUND_ROBIN};
 
-class ChallongeMatchWidget : public QWidget
+class ChallongeWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ChallongeMatchWidget(QWidget *parent,
+    explicit ChallongeWidget(QWidget *parent,
                                   QMap<QString, QObject*>& widgets,
                                   const QMap<QString, QString>& settings,
                                   QString playerOneWidget,
@@ -102,4 +102,4 @@ public slots:
     void updateCustomIdBoxState();
 };
 
-#endif // WIDGETS_CHALLONGEMATCHWIDGET_H
+#endif // WIDGETS_CHALLONGEWIDGET_H

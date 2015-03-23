@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
-#include "widgets/challongematchwidget.h"
+#include "widgets/challongewidget.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
 #include "mainwindow.h"
@@ -1279,7 +1279,7 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
         } else if (tagName == "challongeMatch") {
-            addChallongeMatchWidget(child.toElement(), parent, widgetList);
+            addChallongeWidget(child.toElement(), parent, widgetList);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -1621,7 +1621,7 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
     layoutIterator++;
 }
 
-void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
+void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
                                          QMap<QString, QObject*>)
 {
     QString newWidgetId = element.attribute("id");
@@ -1630,7 +1630,7 @@ void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
     QString tournamentStageWidgetId = element.attribute("tournamentStageWidget");
     QString bracketWidgetId = element.attribute("bracketWidget");
 
-    ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
+    ChallongeWidget* newWidget = new ChallongeWidget(parent, widgetList,
                                                                settings,
                                                                playerOneWidgetId,
                                                                playerTwoWidgetId,

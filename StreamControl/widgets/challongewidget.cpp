@@ -41,9 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonObject>
 #include <QFile>
 
-#include "challongematchwidget.h"
+#include "challongewidget.h"
 
-ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
+ChallongeWidget::ChallongeWidget(QWidget *parent,
                                            QMap<QString, QObject*>& widgetList,
                                            const QMap<QString, QString>& settings,
                                            QString playerOneWidgetId,
@@ -120,7 +120,7 @@ ChallongeMatchWidget::ChallongeMatchWidget(QWidget *parent,
     this->setLayout(layout);
 }
 
-void ChallongeMatchWidget::fetchTournaments()
+void ChallongeWidget::fetchTournaments()
 {
     QString urlString =
         QString("https://api.challonge.com/v1/tournaments.json?state=in_progress");
@@ -138,7 +138,7 @@ void ChallongeMatchWidget::fetchTournaments()
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentListJson()));
 }
 
-void ChallongeMatchWidget::fetchMatches()
+void ChallongeWidget::fetchMatches()
 {
     QString currentTournamentId;
     int currentIndex = tournamentsBox->currentIndex();
@@ -161,7 +161,7 @@ void ChallongeMatchWidget::fetchMatches()
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentJson()));
 }
 
-QByteArray ChallongeMatchWidget::getAuthHeader() const
+QByteArray ChallongeWidget::getAuthHeader() const
 {
     QString concatenated = settings["challonge>username"] + ":" +
                            settings["challonge>apiKey"];
@@ -170,7 +170,7 @@ QByteArray ChallongeMatchWidget::getAuthHeader() const
     return headerData.toLocal8Bit();
 }
 
-void ChallongeMatchWidget::processTournamentListJson()
+void ChallongeWidget::processTournamentListJson()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -201,7 +201,7 @@ void ChallongeMatchWidget::processTournamentListJson()
     updateCustomIdBoxState();
 }
 
-void ChallongeMatchWidget::processTournamentJson()
+void ChallongeWidget::processTournamentJson()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -397,7 +397,7 @@ QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
     }
 }
 
-void ChallongeMatchWidget::setBracketData()
+void ChallongeWidget::setBracketData()
 {
     QFile bracketFile(settings["outputPath"] + "bracket.json");
     bracketFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
@@ -405,7 +405,7 @@ void ChallongeMatchWidget::setBracketData()
     bracketFile.close();
 }
 
-void ChallongeMatchWidget::setMatchData()
+void ChallongeWidget::setMatchData()
 {
     QVariant var = (matchesBox->itemData(matchesBox->currentIndex()));
     QVariantList matchDetails = var.toList();
@@ -452,7 +452,7 @@ void ChallongeMatchWidget::setMatchData()
 
 }
 
-void ChallongeMatchWidget::updateCustomIdBoxState()
+void ChallongeWidget::updateCustomIdBoxState()
 {
     // The last entry in the tournaments box should always be the custom option
     bool boxEnabled = (tournamentsBox->currentIndex() == tournamentsBox->count() - 1);
