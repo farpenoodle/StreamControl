@@ -222,10 +222,9 @@ void ChallongeWidget::processTournamentJson()
     QJsonArray participants = tournamentObject["participants"].toArray();
     QJsonArray matches = tournamentObject["matches"].toArray();
 
-    QMap<int, QString> playerIdMap;
-
     matchesBox->clear();
     //Loop through the players and add them to an id->name map
+    playerIdMap.clear();
     for (QJsonArray::const_iterator iter = participants.constBegin();
          iter != participants.constEnd(); iter++)
     {

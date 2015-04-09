@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define WIDGETS_CHALLONGEWIDGET_H
 
 #include <QWidget>
+#include <QMap>
 #include <QJsonDocument>
 
 class QPushButton;
@@ -80,6 +81,9 @@ private:
     // Stores the json response of a tournament when fetched
     // Used to save bracket data to a file when the button is pressed
     QJsonDocument currentTournamentJson;
+
+    // A map of player ids to names for the current tournament data
+    QMap<int, QString> playerIdMap;
 
     // So we can set the target widgets with the bracket data
     QMap<QString, QObject*>& widgetList;
