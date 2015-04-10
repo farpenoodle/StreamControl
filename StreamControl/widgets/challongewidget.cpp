@@ -43,14 +43,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "challongewidget.h"
 
-ChallongeWidget::ChallongeWidget(QWidget *parent,
+static QString GRAND_FINAL = "grandFinal";
+static QString GRAND_FINAL_RESET = "grandFinalReset";
+static QString WINNERS_FINAL = "winnersFinal";
+static QString WINNERS_SEMI_FINAL = "winnersSemiFinal";
+static QString WINNERS_QUARTER_FINAL = "winnersQuarterFinal";
+static QString LOSERS_FINAL = "losersFinal";
+static QString LOSERS_SEMI_FINAL = "losersSemiFinal";
+static QString TOP_6_LOSERS = "top6Losers";
+static QString TOP_8_LOSERS = "top8Losers";
+static QString TOP_12_LOSERS = "top12Losers";
+static QString TOP_16_LOSERS = "top16Losers";
+
+ChallongeWidget::ChallongeWidget(QWidget *parent) : QWidget(parent) {};
+
+ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
                                            QMap<QString, QObject*>& widgetList,
                                            const QMap<QString, QString>& settings,
                                            QString playerOneWidgetId,
                                            QString playerTwoWidgetId,
                                            QString tournamentStageWidgetId,
                                            QString bracketWidgetId) :
-    QWidget(parent), widgetList(widgetList), settings(settings),
+    ChallongeWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
     tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId)
 {
@@ -120,7 +134,7 @@ ChallongeWidget::ChallongeWidget(QWidget *parent,
     this->setLayout(layout);
 }
 
-void ChallongeWidget::fetchTournaments()
+void ChallongeWidgetImpl::fetchTournaments()
 {
     QString urlString =
         QString("https://api.challonge.com/v1/tournaments.json?state=in_progress");
@@ -138,7 +152,7 @@ void ChallongeWidget::fetchTournaments()
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentListJson()));
 }
 
-void ChallongeWidget::fetchMatches()
+void ChallongeWidgetImpl::fetchMatches()
 {
     QString currentTournamentId;
     int currentIndex = tournamentsBox->currentIndex();
@@ -161,7 +175,7 @@ void ChallongeWidget::fetchMatches()
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentJson()));
 }
 
-QByteArray ChallongeWidget::getAuthHeader() const
+QByteArray ChallongeWidgetImpl::getAuthHeader() const
 {
     QString concatenated = settings["challonge>username"] + ":" +
                            settings["challonge>apiKey"];
@@ -170,7 +184,7 @@ QByteArray ChallongeWidget::getAuthHeader() const
     return headerData.toLocal8Bit();
 }
 
-void ChallongeWidget::processTournamentListJson()
+void ChallongeWidgetImpl::processTournamentListJson()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -201,7 +215,7 @@ void ChallongeWidget::processTournamentListJson()
     updateCustomIdBoxState();
 }
 
-void ChallongeWidget::processTournamentJson()
+void ChallongeWidgetImpl::processTournamentJson()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -480,13 +494,15 @@ void fillBracketWithMatch(const QString boxPrefix, const QJsonObject& match,
 }
 
 
-void ChallongeWidget::setBracketData()
+void ChallongeWidgetImpl::setBracketData()
 {
     // Write to file mode
-/*    QFile bracketFile(settings["outputPath"] + "bracket.json");
+    /*
+    QFile bracketFile(settings["outputPath"] + "bracket.json");
     bracketFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
     bracketFile.write(currentTournamentJson.toJson());
-    bracketFile.close();*/
+    bracketFile.close();
+    */
 
     //Set widgets mode
 
@@ -546,9 +562,17 @@ void ChallongeWidget::setBracketData()
     const QJsonArray& losersTop8 = getPrerequisiteMatches(matches, losersTop6);
     fillBracketWithMatch("lm1", losersTop8.first().toObject(), playerIdMap, widgetList);
     fillBracketWithMatch("lm2", losersTop8.last().toObject(), playerIdMap, widgetList);
+
+    //while true
+        //getPreviousMatches();
+        //get previous matches
+        // if in top
+
+    //whilever we are still in top 16, and the layout has boxes for this
+    //match, build them
 }
 
-void ChallongeWidget::setMatchData()
+void ChallongeWidgetImpl::setMatchData()
 {
     QVariant var = (matchesBox->itemData(matchesBox->currentIndex()));
     QVariantList matchDetails = var.toList();
@@ -595,7 +619,7 @@ void ChallongeWidget::setMatchData()
 
 }
 
-void ChallongeWidget::updateCustomIdBoxState()
+void ChallongeWidgetImpl::updateCustomIdBoxState()
 {
     // The last entry in the tournaments box should always be the custom option
     bool boxEnabled = (tournamentsBox->currentIndex() == tournamentsBox->count() - 1);

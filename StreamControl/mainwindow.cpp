@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "sctsbutton.h"
 #include "scsetbutton.h"
 #include "widgets/challongewidget.h"
+#include "widgets/challongewidgetbuilder.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
 #include "mainwindow.h"
@@ -1624,18 +1625,57 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
                                          QMap<QString, QObject*>)
 {
-    QString newWidgetId = element.attribute("id");
-    QString playerOneWidgetId = element.attribute("playerOneWidget");
-    QString playerTwoWidgetId = element.attribute("playerTwoWidget");
-    QString tournamentStageWidgetId = element.attribute("tournamentStageWidget");
-    QString bracketWidgetId = element.attribute("bracketWidget");
+    // a map with the expected number of children for a tournament stage
+    QMap<QString, int> stages;
+    stages.insert("grandFinal", 1);
+    stages.insert("grandFinalReset", 1);
+    stages.insert("winnersFinal", 1);
+    stages.insert("winnersSemiFinal", 2);
+    stages.insert("winnersQuarterFinal", 4);
+    stages.insert("losersFinal", 1);
+    stages.insert("losersSemiFinal", 1);
+    stages.insert("top6Losers", 2);
+    stages.insert("top8Losers", 2);
+    stages.insert("top12Losers", 4);
+    stages.insert("top16Losers", 4);
 
-    ChallongeWidget* newWidget = new ChallongeWidget(parent, widgetList,
-                                                               settings,
-                                                               playerOneWidgetId,
-                                                               playerTwoWidgetId,
-                                                               tournamentStageWidgetId,
-                                                               bracketWidgetId);
+    QList<QString> stageNames = stages.keys();
+
+    ChallongeWidgetBuilder builder(parent, widgetList, settings);
+    QString newWidgetId = element.attribute("id");
+
+    foreach(const QString& stage, stageNames)
+    {
+        QDomNodeList stageElements = element.elementsByTagName(stage);
+        qDebug() << stage << stageElements.length() << stages[stage];
+        //complain if incorrect number of boxes
+
+        for (int i = 0; i < stageElements.length(); i++)
+        {
+            // if
+                //
+            //builder.addMatch(stage, targetWidgetNameId, targetWidgetScoreId);
+        }
+    }
+
+    /*
+
+    for (x in y)
+
+    builder.
+    builder.addMatch("", "")
+
+
+    */
+
+    builder.setPlayerNameWidgets(element.attribute("playerOneWidget"),
+                                 element.attribute("playerTwoWidget"));
+
+    builder.setTournamentStageWidget(element.attribute("tournamentStageWidget"));
+    builder.setBracketStageWidget(element.attribute("bracketWidget"));
+
+    ChallongeWidget* newWidget = builder.build();
+
     newWidget->setObjectName(newWidgetId);
     newWidget->setGeometry(QRect(element.attribute("x").toInt(),
                                  element.attribute("y").toInt(),
