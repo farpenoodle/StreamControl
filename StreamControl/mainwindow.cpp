@@ -1279,7 +1279,7 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
-        } else if (tagName == "challongeMatch") {
+        } else if (tagName == "challonge") {
             addChallongeWidget(child.toElement(), parent, widgetList);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
@@ -1683,7 +1683,7 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
                                  element.attribute("height").toInt()));
 
     widgetList[newWidgetId] = newWidget;
-    widgetType[newWidgetId] = "challongeMatch";
+    widgetType[newWidgetId] = "challonge";
     layoutIterator++;
 }
 
