@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QWidget>
 #include <QMap>
 #include <QJsonDocument>
+#include "tournamenttreenode.h"
 
 class QPushButton;
 class QLabel;
@@ -70,8 +71,9 @@ public:
                                  const QMap<QString, QString>& settings,
                                  QString playerOneWidget,
                                  QString playerTwoWidget,
+                                 QString tournamentStageWidget,
                                  QString bracketWidgetId,
-                                 QString tournamentStageWidget);
+                                 QMap<QString, QStringList> bracketWidgets);
 
 
     virtual void fetchTournaments();
@@ -118,8 +120,29 @@ private:
     const QString playerOneWidgetId, playerTwoWidgetId, tournamentStageWidgetId,
       bracketWidgetId;
 
+    // ids of widgets to fill
+    QMap<QString, QStringList> bracketWidgets;
+
+    // Where to save challonge bracket data
+    QString outputFileName;
+
     QByteArray getAuthHeader() const;
 
+    // Sets up tournament structures in terms of tournament nodes
+    void setUpTournamentNodes();
+
+    // Fills other stream control widgets with the data from a challonge bracket
+    void fillBracketWidgets();
+
+    // Clears all challonge associated widgets specified in the layout file
+    void clearBracketWidgets();
+
+    void fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match);
+
+    // Saves challonge bracket data to a file in json format
+    void writeBracketToFile();
+
+    QMap<QString, TournamentTreeNode> doubleElimNodes;
 };
 
 #endif // WIDGETS_CHALLONGEWIDGET_H

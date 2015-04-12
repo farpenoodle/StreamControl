@@ -53,12 +53,42 @@ void ChallongeWidgetBuilder::setBracketStageWidget(QString widgetId)
     bracketStageWidget = widgetId;
 }
 
+void ChallongeWidgetBuilder::addMatchWidget(QString tournamentStage,
+                                            QString playerOneNameWidget,
+                                            QString playerOneScoreWidget,
+                                            QString playerTwoNameWidget,
+                                            QString playerTwoScoreWidget)
+{
+    QStringList l;
+    l.append(playerOneNameWidget);
+    l.append(playerOneScoreWidget);
+    l.append(playerTwoNameWidget);
+    l.append(playerTwoScoreWidget);
+    matchWidgets.insertMulti(tournamentStage, l);
+}
+
+
 ChallongeWidget* ChallongeWidgetBuilder::build() const
 {
+    QMap<QString, QStringList> bracketWidgets;
+
+    foreach (const QString& key, matchWidgets.uniqueKeys() )
+    {
+        int i = matchWidgets.values(key).size();
+        foreach (const QStringList& widgetDetails, matchWidgets.values(key) )
+        {
+            // values() lists values in reverse order so we do the below stuff backwards
+
+            bracketWidgets.insert(key + (matchWidgets.values(key).size() > 1 ? QString::number(i) : ""), widgetDetails);
+            i--;
+        }
+    }
+
     ChallongeWidget* widget =  new ChallongeWidgetImpl(parent, widgetList, settings,
                                                        playerOneWidget, playerTwoWidget,
                                                        tournamentStageWidget,
-                                                       bracketStageWidget);
+                                                       bracketStageWidget,
+                                                       bracketWidgets);
 
     return widget;
 }

@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QWidget>
 #include <QMap>
+#include <QMultiMap>
 
 class ChallongeWidget;
 
@@ -44,6 +45,9 @@ public:
     void setTournamentStageWidget(QString widgetId);
     void setBracketStageWidget(QString widgetId);
 
+    void addMatchWidget(QString tournamentStage,
+        QString playerOneNameWidget, QString playerOneScoreWidget,
+        QString playerTwoNameWidget, QString playerTwoScoreWidget);
     ChallongeWidget* build() const;
 
 private:
@@ -52,6 +56,7 @@ private:
     const QMap<QString, QString>& settings;
     QString playerOneWidget, playerTwoWidget;
     QString tournamentStageWidget, bracketStageWidget;
+    QMultiMap<QString, QStringList> matchWidgets;
 };
 
 #endif // WIDGETS_CHALLONGEWIDGETBUILDER_H

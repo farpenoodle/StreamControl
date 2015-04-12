@@ -1644,29 +1644,29 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
     ChallongeWidgetBuilder builder(parent, widgetList, settings);
     QString newWidgetId = element.attribute("id");
 
+
     foreach(const QString& stage, stageNames)
     {
+        // Get the xml elements for the tournament stage
         QDomNodeList stageElements = element.elementsByTagName(stage);
+
         qDebug() << stage << stageElements.length() << stages[stage];
-        //complain if incorrect number of boxes
+        //permit there to be no elements for a stage
+        if (stageElements.length() != 0 && stageElements.length() != stages[stage])
+        {
+            //Incorrect
+            qDebug() << "Incorrect number of elements (" << stageElements.length() <<
+                        ") for stage " << stage;
+        }
 
         for (int i = 0; i < stageElements.length(); i++)
         {
-            // if
-                //
-            //builder.addMatch(stage, targetWidgetNameId, targetWidgetScoreId);
+            const QDomElement& stageElement = stageElements.item(i).toElement();
+            builder.addMatchWidget(stage,
+                                   stageElement.attribute("p1name"), stageElement.attribute("p1score"),
+                                   stageElement.attribute("p2name"), stageElement.attribute("p2score"));
         }
     }
-
-    /*
-
-    for (x in y)
-
-    builder.
-    builder.addMatch("", "")
-
-
-    */
 
     builder.setPlayerNameWidgets(element.attribute("playerOneWidget"),
                                  element.attribute("playerTwoWidget"));

@@ -34,7 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QNetworkRequest>
 #include <QList>
 #include <QComboBox>
-#include <QtDebug>
 #include <QAuthenticator>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -63,10 +62,12 @@ ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
                                            QString playerOneWidgetId,
                                            QString playerTwoWidgetId,
                                            QString tournamentStageWidgetId,
-                                           QString bracketWidgetId) :
+                                           QString bracketWidgetId,
+                                           QMap<QString, QStringList> bracketWidgets) :
     ChallongeWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
-    tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId)
+    tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId),
+    bracketWidgets(bracketWidgets)
 {
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
@@ -132,6 +133,43 @@ ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
     connect(setBracketDataButton, SIGNAL(clicked()), this, SLOT(setBracketData()));
 
     this->setLayout(layout);
+
+    setUpTournamentNodes();
+}
+
+void ChallongeWidgetImpl::setUpTournamentNodes()
+{
+    //set up top 16 structure for a double elimination tournament
+    doubleElimNodes.insert("grandFinal", TournamentTreeNode("winnersFinal", "losersFinal"));
+    doubleElimNodes.insert("winnersFinal", TournamentTreeNode("winnersSemiFinal1", "winnersSemiFinal2"));
+
+    doubleElimNodes.insert("winnersSemiFinal1", TournamentTreeNode("winnersQuarterFinal1", "winnersQuarterFinal2"));
+    doubleElimNodes.insert("winnersSemiFinal2", TournamentTreeNode("winnersQuarterFinal3", "winnersQuarterFinal4"));
+
+    doubleElimNodes.insert("winnersQuarterFinal1", TournamentTreeNode("", ""));
+    doubleElimNodes.insert("winnersQuarterFinal2", TournamentTreeNode("", ""));
+    doubleElimNodes.insert("winnersQuarterFinal3", TournamentTreeNode("", ""));
+    doubleElimNodes.insert("winnersQuarterFinal4", TournamentTreeNode("", ""));
+
+    doubleElimNodes.insert("losersFinal", TournamentTreeNode(""/*"winnersFinal"*/, "losersSemiFinal"));
+
+    doubleElimNodes.insert("losersSemiFinal", TournamentTreeNode("top6Losers1", "top6Losers2"));
+
+    doubleElimNodes.insert("top6Losers1", TournamentTreeNode("" /*winnersSemiFinal1*/, "top8Losers1"));
+    doubleElimNodes.insert("top6Losers2", TournamentTreeNode("" /*winnersSemiFinal2*/, "top8Losers2"));
+
+    doubleElimNodes.insert("top8Losers1", TournamentTreeNode("top12Losers1", "top12Losers2"));
+    doubleElimNodes.insert("top8Losers2", TournamentTreeNode("top12Losers3", "top12Losers4"));
+
+    doubleElimNodes.insert("top12Losers1", TournamentTreeNode("" /*winnersQuarterFinal1*/, "top16Losers1"));
+    doubleElimNodes.insert("top12Losers2", TournamentTreeNode("" /*winnersQuarterFinal2*/, "top16Losers2"));
+    doubleElimNodes.insert("top12Losers3", TournamentTreeNode("" /*winnersQuarterFinal3*/, "top16Losers3"));
+    doubleElimNodes.insert("top12Losers4", TournamentTreeNode("" /*winnersQuarterFinal4*/, "top16Losers4"));
+
+    doubleElimNodes.insert("top16Losers1", TournamentTreeNode("", ""));
+    doubleElimNodes.insert("top16Losers2", TournamentTreeNode("", ""));
+    doubleElimNodes.insert("top16Losers3", TournamentTreeNode("", ""));
+    doubleElimNodes.insert("top16Losers4", TournamentTreeNode("", ""));
 }
 
 void ChallongeWidgetImpl::fetchTournaments()
@@ -383,7 +421,6 @@ QString getDoubleEliminationMatchPhase(int currentRound, int tournamentEntrants)
 }
 
 
-
 QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
 {
     switch (t)
@@ -404,8 +441,6 @@ QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
             return getDoubleEliminationMatchPhase(currentRound, tournamentEntrants);
             break;
         }
-        default:
-            return "ok";
     }
 }
 
@@ -423,8 +458,9 @@ QJsonArray getMatchesForRound(const QJsonArray& matches, int round)
             // in the returned array
             // The grand final, unlike the reset, has both previous matches
             // as the same id
-            bool isGrandFinal = match["player1_prereq_match_id"].toInt() ==
+            bool isGrandFinal = match["player1_prereq_match_id"].toInt() !=
                                 match["player2_prereq_match_id"].toInt();
+
             isGrandFinal ? returnValue.prepend(match) : returnValue.append(match);
         }
     }
@@ -447,34 +483,31 @@ QJsonObject getMatchById(const QJsonArray& matches, QString matchId)
 }
 
 QJsonArray getPrerequisiteMatches(const QJsonArray& allMatches,
-                                  const QJsonArray& parentMatches)
+                                  const QJsonObject& parentMatch)
 {
     QJsonArray returnValue;
 
-    for (QJsonArray::const_iterator iter = parentMatches.constBegin();
-         iter != parentMatches.constEnd(); iter++)
+    const QString prerequisiteMatchIdString = parentMatch["prerequisite_match_ids_csv"].toString();
+    QStringList prerequisiteMatchIds = prerequisiteMatchIdString.split(',');
+
+    // ...and fetch the winners/losers final match objects from them
+
+    for (QStringList::const_iterator matchIter = prerequisiteMatchIds.constBegin();
+         matchIter != prerequisiteMatchIds.constEnd(); matchIter++)
     {
-        const QString prerequisiteMatchIdString = iter->toObject()["prerequisite_match_ids_csv"].toString();
-        QStringList prerequisiteMatchIds = prerequisiteMatchIdString.split(',');
-
-        // ...and fetch the winners/losers final match objects from them
-
-        for (QStringList::const_iterator matchIter = prerequisiteMatchIds.constBegin();
-             matchIter != prerequisiteMatchIds.constEnd(); matchIter++)
+        const QJsonObject& match = getMatchById(allMatches, *matchIter);
+        if ((parentMatch["round"].toInt() > 0 && match["round"].toInt() > 0) ||
+            (parentMatch["round"].toInt() < 0 && match["round"].toInt() < 0) )
         {
-            const QJsonObject& match = getMatchById(allMatches, *matchIter);
-            if ((iter->toObject()["round"].toInt() > 0 && match["round"].toInt() > 0) ||
-                (iter->toObject()["round"].toInt() < 0 && match["round"].toInt() < 0) )
-            {
-                qDebug() << "appending " << *matchIter;
-                returnValue.append(match);
-            }
+            returnValue.append(match);
         }
     }
+
     return returnValue;
 }
 
-void fillBracketWithMatch(const QString boxPrefix, const QJsonObject& match,
+
+void fillBracketWithMatch(const QStringList boxes, const QJsonObject& match,
                           const QMap<int, QString>& playerIdMap,
                           QMap<QString, QObject*>& widgetList)
 {
@@ -482,17 +515,58 @@ void fillBracketWithMatch(const QString boxPrefix, const QJsonObject& match,
     const int playerTwoId = match["player2_id"].toInt();
 
     // Get competitor's names
-    ((QLineEdit*)widgetList[boxPrefix+"p1"])->setText( playerIdMap[playerOneId] );
-    ((QLineEdit*)widgetList[boxPrefix+"p2"])->setText( playerIdMap[playerTwoId] );
+    ((QLineEdit*)widgetList[boxes[0]])->setText( playerIdMap[playerOneId] );
+    ((QLineEdit*)widgetList[boxes[2]])->setText( playerIdMap[playerTwoId] );
 
     const QStringList scores = match["scores_csv"].toString().split("-");
     if (scores.size() == 2)
     {
-        ((QLineEdit*)widgetList[boxPrefix+"p1s"])->setText(scores[0]);
-        ((QLineEdit*)widgetList[boxPrefix+"p2s"])->setText(scores[1]);
+        ((QLineEdit*)widgetList[boxes[1]])->setText(scores[0]);
+        ((QLineEdit*)widgetList[boxes[3]])->setText(scores[1]);
     }
 }
 
+void ChallongeWidgetImpl::clearBracketWidgets()
+{
+    foreach(const QStringList& widgets, bracketWidgets)
+    {
+        foreach(const QString& widgetId, widgets)
+        {
+            ((QLineEdit*)widgetList[widgetId])->setText( "" );
+        }
+    }
+}
+
+void ChallongeWidgetImpl::fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match)
+{
+    if (!bracketWidgets.contains(matchId)) return;
+
+    //fill match
+    fillBracketWithMatch(bracketWidgets[matchId], match, playerIdMap, widgetList);
+
+    //get tournament node
+    const TournamentTreeNode& node = doubleElimNodes.value(matchId);
+
+    if (!node.child1Id.isEmpty())
+    {
+        QString previousMatch = QString::number(match["player1_prereq_match_id"].toInt());
+        if (!previousMatch.isEmpty())
+        {
+            const QJsonObject& childMatch = getMatchById(matches, previousMatch);
+            fillWidget(matches, node.child1Id, childMatch);
+        }
+    }
+
+    if (!node.child2Id.isEmpty())
+    {
+        QString previousMatch = QString::number(match["player2_prereq_match_id"].toInt());
+        if (!previousMatch.isEmpty())
+        {
+            const QJsonObject& childMatch = getMatchById(matches, previousMatch);
+            fillWidget(matches, node.child2Id, childMatch);
+        }
+    }
+}
 
 void ChallongeWidgetImpl::setBracketData()
 {
@@ -506,11 +580,12 @@ void ChallongeWidgetImpl::setBracketData()
 
     //Set widgets mode
 
+    clearBracketWidgets();
+
     // Work backwards from grand finals
     const QJsonObject tournamentObject = currentTournamentJson.object()["tournament"].toObject();
     const QJsonArray participants = tournamentObject["participants"].toArray();
     const QJsonArray matches = tournamentObject["matches"].toArray();
-
 
     // The grand final is the round after winners final
     const int grandFinalRound = getWinnersRounds(participants.size()) + 1;
@@ -520,56 +595,14 @@ void ChallongeWidgetImpl::setBracketData()
     const QJsonArray grandFinalMatches = getMatchesForRound(matches,
                                                             grandFinalRound);
 
-    //Fill out the reset match first
+    if (grandFinalMatches.size() == 2)
+    {
+        const QJsonObject& grandFinalResetMatch = grandFinalMatches.last().toObject();
+        fillBracketWithMatch(bracketWidgets["grandFinalReset"], grandFinalResetMatch, playerIdMap, widgetList);
+    }
+
     const QJsonObject& grandFinalMatch = grandFinalMatches.first().toObject();
-    const QJsonObject& grandFinalResetMatch = grandFinalMatches.last().toObject();
-
-    fillBracketWithMatch("gf", grandFinalMatch, playerIdMap, widgetList);
-    fillBracketWithMatch("gf2", grandFinalResetMatch, playerIdMap, widgetList);
-
-    // Get the previous match ids for the grand final
-    const QString prerequisiteMatchIdString = grandFinalMatch["prerequisite_match_ids_csv"].toString();
-    QStringList prerequisiteMatchIds = prerequisiteMatchIdString.split(',');
-
-    // ...and fetch the winners/losers final match objects from them
-    const QJsonObject& winnersFinalMatch = getMatchById(matches, prerequisiteMatchIds.first());
-    const QJsonObject& losersFinalMatch = getMatchById(matches, prerequisiteMatchIds.last());
-
-    fillBracketWithMatch("wf", winnersFinalMatch, playerIdMap, widgetList);
-    fillBracketWithMatch("lf", losersFinalMatch, playerIdMap, widgetList);
-
-    QJsonArray arr;
-    arr.append(winnersFinalMatch);
-
-    const QJsonArray& winnersSemiFinals = getPrerequisiteMatches(matches, arr);
-    fillBracketWithMatch("wm1", winnersSemiFinals.first().toObject(), playerIdMap, widgetList);
-    fillBracketWithMatch("wm2", winnersSemiFinals.last().toObject(), playerIdMap, widgetList);
-
-    QJsonArray arr2;
-    arr2.append(losersFinalMatch);
-
-    const QJsonArray& losersSemiFinals = getPrerequisiteMatches(matches, arr2);
-    const QJsonObject& losersSemiFinalMatch = losersSemiFinals.first().toObject();
-    fillBracketWithMatch("ls", losersSemiFinalMatch, playerIdMap, widgetList);
-
-    QJsonArray arr3;
-    arr3.append(losersSemiFinalMatch);
-
-    const QJsonArray& losersTop6 = getPrerequisiteMatches(matches, arr3);
-    fillBracketWithMatch("lms1", losersTop6.first().toObject(), playerIdMap, widgetList);
-    fillBracketWithMatch("lms2", losersTop6.last().toObject(), playerIdMap, widgetList);
-
-    const QJsonArray& losersTop8 = getPrerequisiteMatches(matches, losersTop6);
-    fillBracketWithMatch("lm1", losersTop8.first().toObject(), playerIdMap, widgetList);
-    fillBracketWithMatch("lm2", losersTop8.last().toObject(), playerIdMap, widgetList);
-
-    //while true
-        //getPreviousMatches();
-        //get previous matches
-        // if in top
-
-    //whilever we are still in top 16, and the layout has boxes for this
-    //match, build them
+    fillWidget(matches, "grandFinal", grandFinalMatch);
 }
 
 void ChallongeWidgetImpl::setMatchData()
@@ -614,9 +647,7 @@ void ChallongeWidgetImpl::setMatchData()
         {
             bracketWidget->setText(currentTournamentJson.object()["tournament"].toObject()["url"].toString());
         }
-
     }
-
 }
 
 void ChallongeWidgetImpl::updateCustomIdBoxState()
