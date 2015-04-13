@@ -89,7 +89,7 @@ ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
     frame->setFrameShadow(QFrame::Sunken);
 
     tournamentFetchButton->setText("Fetch");
-    matchFetchButton->setText("Load Tournament Data/Matches");
+    matchFetchButton->setText("Load Tournament Data");
     setMatchDataButton->setText("Set Match Details");
     setBracketDataButton->setText("Set Bracket Data");
     tournamentLabel->setText("Tournament");
@@ -140,7 +140,9 @@ ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
 
 void ChallongeWidgetImpl::setUpTournamentNodes()
 {
-    //set up top 16 structure for a double elimination tournament
+    // Set up top 16 structure for a double elimination tournament
+    // Winners bracket prerequisite matches are commented out as there's no
+    // need to traverse backwards from losers to winners, they are already covered
     doubleElimNodes.insert("grandFinal", TournamentTreeNode("winnersFinal", "losersFinal"));
     doubleElimNodes.insert("winnersFinal", TournamentTreeNode("winnersSemiFinal1", "winnersSemiFinal2"));
 
