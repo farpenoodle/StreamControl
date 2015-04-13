@@ -73,6 +73,7 @@ public:
                                  QString playerTwoWidget,
                                  QString tournamentStageWidget,
                                  QString bracketWidgetId,
+                                 QString outputFileName,
                                  QMap<QString, QStringList> bracketWidgets);
 
 

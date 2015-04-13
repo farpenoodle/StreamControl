@@ -63,11 +63,12 @@ ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
                                            QString playerTwoWidgetId,
                                            QString tournamentStageWidgetId,
                                            QString bracketWidgetId,
+                                           QString outputFileName,
                                            QMap<QString, QStringList> bracketWidgets) :
     ChallongeWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
     tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId),
-    bracketWidgets(bracketWidgets)
+    outputFileName(outputFileName), bracketWidgets(bracketWidgets)
 {
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
@@ -568,18 +569,16 @@ void ChallongeWidgetImpl::fillWidget(const QJsonArray& matches, QString matchId,
     }
 }
 
-void ChallongeWidgetImpl::setBracketData()
+void ChallongeWidgetImpl::writeBracketToFile()
 {
-    // Write to file mode
-    /*
-    QFile bracketFile(settings["outputPath"] + "bracket.json");
+    QFile bracketFile(settings["outputPath"] + outputFileName);
     bracketFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
     bracketFile.write(currentTournamentJson.toJson());
     bracketFile.close();
-    */
+}
 
-    //Set widgets mode
-
+void ChallongeWidgetImpl::fillBracketWidgets()
+{
     clearBracketWidgets();
 
     // Work backwards from grand finals
@@ -603,6 +602,14 @@ void ChallongeWidgetImpl::setBracketData()
 
     const QJsonObject& grandFinalMatch = grandFinalMatches.first().toObject();
     fillWidget(matches, "grandFinal", grandFinalMatch);
+}
+
+void ChallongeWidgetImpl::setBracketData()
+{
+    if (outputFileName.isEmpty())
+        fillBracketWidgets();
+    else
+        writeBracketToFile();
 }
 
 void ChallongeWidgetImpl::setMatchData()

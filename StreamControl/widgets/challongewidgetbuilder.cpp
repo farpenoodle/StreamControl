@@ -53,6 +53,11 @@ void ChallongeWidgetBuilder::setBracketStageWidget(QString widgetId)
     bracketStageWidget = widgetId;
 }
 
+void ChallongeWidgetBuilder::setOutputFileName(QString fileName)
+{
+    outputFileName = fileName;
+}
+
 void ChallongeWidgetBuilder::addMatchWidget(QString tournamentStage,
                                             QString playerOneNameWidget,
                                             QString playerOneScoreWidget,
@@ -88,6 +93,7 @@ ChallongeWidget* ChallongeWidgetBuilder::build() const
                                                        playerOneWidget, playerTwoWidget,
                                                        tournamentStageWidget,
                                                        bracketStageWidget,
+                                                       outputFileName,
                                                        bracketWidgets);
 
     return widget;

@@ -1644,13 +1644,15 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
     ChallongeWidgetBuilder builder(parent, widgetList, settings);
     QString newWidgetId = element.attribute("id");
 
+    QString outputType = element.attribute("outputType");
+
+    builder.setOutputFileName(element.attribute("outputFileName"));
 
     foreach(const QString& stage, stageNames)
     {
         // Get the xml elements for the tournament stage
         QDomNodeList stageElements = element.elementsByTagName(stage);
 
-        qDebug() << stage << stageElements.length() << stages[stage];
         //permit there to be no elements for a stage
         if (stageElements.length() != 0 && stageElements.length() != stages[stage])
         {

@@ -37,13 +37,13 @@ class ChallongeWidget;
 class ChallongeWidgetBuilder
 {
 public:
-    ChallongeWidgetBuilder(QWidget *parent,
-                           QMap<QString, QObject*>& widgetList,
+    ChallongeWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
                            const QMap<QString, QString>& settings);
 
     void setPlayerNameWidgets(QString playerOneWidget, QString playerTwoWidget);
     void setTournamentStageWidget(QString widgetId);
     void setBracketStageWidget(QString widgetId);
+    void setOutputFileName(QString fileName);
 
     void addMatchWidget(QString tournamentStage,
         QString playerOneNameWidget, QString playerOneScoreWidget,
@@ -57,6 +57,7 @@ private:
     QString playerOneWidget, playerTwoWidget;
     QString tournamentStageWidget, bracketStageWidget;
     QMultiMap<QString, QStringList> matchWidgets;
+    QString outputFileName;
 };
 
 #endif // WIDGETS_CHALLONGEWIDGETBUILDER_H
