@@ -76,7 +76,7 @@ public slots:
     void addComboBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
-    void addChallongeMatchWidget(QDomElement, QWidget*, QMap<QString, QObject*> widgetList);
+    void addChallongeWidget(QDomElement, QWidget*, QMap<QString, QObject*> widgetList);
     QString addTabWidget(QDomElement, QWidget*);
     QString saveXML();
     QString saveJSON();

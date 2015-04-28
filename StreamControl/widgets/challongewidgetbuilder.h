@@ -25,62 +25,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef WIDGETS_CHALLONGEMATCHWIDGET_H
-#define WIDGETS_CHALLONGEMATCHWIDGET_H
+#ifndef WIDGETS_CHALLONGEWIDGETBUILDER_H
+#define WIDGETS_CHALLONGEWIDGETBUILDER_H
 
 #include <QWidget>
+#include <QMap>
+#include <QMultiMap>
 
-class QPushButton;
-class QLabel;
-class QComboBox;
-class QGridLayout;
-class QNetworkAccessManager;
-class QNetworkReply;
-class QAuthenticator;
+class ChallongeWidget;
 
-class ChallongeMatchWidget : public QWidget
+class ChallongeWidgetBuilder
 {
-    Q_OBJECT
 public:
-    explicit ChallongeMatchWidget(QWidget *parent,
-                                  QMap<QString, QObject*>& widgets,
-                                  const QMap<QString, QString>& settings,
-                                  QString playerOneWidget,
-                                  QString playerTwoWidget);
+    ChallongeWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
+                           const QMap<QString, QString>& settings);
 
-signals:
+    void setPlayerNameWidgets(QString playerOneWidget, QString playerTwoWidget);
+    void setTournamentStageWidget(QString widgetId);
+    void setBracketStageWidget(QString widgetId);
+    void setOutputFileName(QString fileName);
+
+    void addMatchWidget(QString tournamentStage,
+        QString playerOneNameWidget, QString playerOneScoreWidget,
+        QString playerTwoNameWidget, QString playerTwoScoreWidget);
+    ChallongeWidget* build() const;
 
 private:
-    QGridLayout     *layout;
-
-    QComboBox       *tournamentsBox;
-    QLabel          *tournamentLabel;
-    QPushButton     *tournamentFetchButton;
-
-    QComboBox       *matchesBox;
-    QLabel          *matchLabel;
-    QPushButton     *matchFetchButton;
-
-    QPushButton     *setDataButton;
-
-    QNetworkAccessManager   *manager;
-
-    // So we can set the target widgets with the bracket data
+    QWidget *parent;
     QMap<QString, QObject*>& widgetList;
-
-    // Needed to get the challonge username/api key
     const QMap<QString, QString>& settings;
-
-    const QString playerOneWidgetId, playerTwoWidgetId;
-
-    QByteArray getAuthHeader() const;
-
-public slots:
-    void fetchTournaments();
-    void fetchMatches();
-    void processTournamentListJson();
-    void processTournamentJson();
-    void setData();
+    QString playerOneWidget, playerTwoWidget;
+    QString tournamentStageWidget, bracketStageWidget;
+    QMultiMap<QString, QStringList> matchWidgets;
+    QString outputFileName;
 };
 
-#endif // WIDGETS_CHALLONGEMATCHWIDGET_H
+#endif // WIDGETS_CHALLONGEWIDGETBUILDER_H

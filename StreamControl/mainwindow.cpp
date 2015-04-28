@@ -54,10 +54,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
-#include "widgets/challongematchwidget.h"
+#include "widgets/challongewidget.h"
+#include "widgets/challongewidgetbuilder.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
-#include "widgets/challongematchwidget.h"
 #include "mainwindow.h"
 
 
@@ -1279,8 +1279,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
-        } else if (tagName == "challongeMatch") {
-            addChallongeMatchWidget(child.toElement(), parent, widgetList);
+        } else if (tagName == "challonge") {
+            addChallongeWidget(child.toElement(), parent, widgetList);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -1622,17 +1622,62 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
     layoutIterator++;
 }
 
-void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
+void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
                                          QMap<QString, QObject*>)
 {
-    QString newWidgetId = element.attribute("id");
-    QString playerOneWidgetId = element.attribute("playerOneWidget");
-    QString playerTwoWidgetId = element.attribute("playerTwoWidget");
+    // a map with the expected number of children for a tournament stage
+    QMap<QString, int> stages;
+    stages.insert("grandFinal", 1);
+    stages.insert("grandFinalReset", 1);
+    stages.insert("winnersFinal", 1);
+    stages.insert("winnersSemiFinal", 2);
+    stages.insert("winnersQuarterFinal", 4);
+    stages.insert("losersFinal", 1);
+    stages.insert("losersSemiFinal", 1);
+    stages.insert("top6Losers", 2);
+    stages.insert("top8Losers", 2);
+    stages.insert("top12Losers", 4);
+    stages.insert("top16Losers", 4);
 
-    ChallongeMatchWidget* newWidget = new ChallongeMatchWidget(parent, widgetList,
-                                                               settings,
-                                                               playerOneWidgetId,
-                                                               playerTwoWidgetId);
+    QList<QString> stageNames = stages.keys();
+
+    ChallongeWidgetBuilder builder(parent, widgetList, settings);
+    QString newWidgetId = element.attribute("id");
+
+    QString outputType = element.attribute("outputType");
+
+    builder.setOutputFileName(element.attribute("outputFileName"));
+
+    foreach(const QString& stage, stageNames)
+    {
+        // Get the xml elements for the tournament stage
+        QDomNodeList stageElements = element.elementsByTagName(stage);
+
+        //permit there to be no elements for a stage
+        if (stageElements.length() != 0 && stageElements.length() != stages[stage])
+        {
+            //Incorrect
+            qDebug() << "Incorrect number of elements (" << stageElements.length() <<
+                        ") for stage " << stage;
+        }
+
+        for (int i = 0; i < stageElements.length(); i++)
+        {
+            const QDomElement& stageElement = stageElements.item(i).toElement();
+            builder.addMatchWidget(stage,
+                                   stageElement.attribute("p1name"), stageElement.attribute("p1score"),
+                                   stageElement.attribute("p2name"), stageElement.attribute("p2score"));
+        }
+    }
+
+    builder.setPlayerNameWidgets(element.attribute("playerOneWidget"),
+                                 element.attribute("playerTwoWidget"));
+
+    builder.setTournamentStageWidget(element.attribute("tournamentStageWidget"));
+    builder.setBracketStageWidget(element.attribute("bracketWidget"));
+
+    ChallongeWidget* newWidget = builder.build();
+
     newWidget->setObjectName(newWidgetId);
     newWidget->setGeometry(QRect(element.attribute("x").toInt(),
                                  element.attribute("y").toInt(),
@@ -1640,7 +1685,7 @@ void MainWindow::addChallongeMatchWidget(QDomElement element, QWidget *parent,
                                  element.attribute("height").toInt()));
 
     widgetList[newWidgetId] = newWidget;
-    widgetType[newWidgetId] = "challongeMatch";
+    widgetType[newWidgetId] = "challonge";
     layoutIterator++;
 }
 
