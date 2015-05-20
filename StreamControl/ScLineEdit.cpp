@@ -16,6 +16,7 @@ ScLineEdit::ScLineEdit(QWidget *parent)
     QSize msz = minimumSizeHint();
     setMinimumSize(qMax(msz.width(), clearButton->sizeHint().height() + frameWidth * 2 + 2),
                    qMax(msz.height(), clearButton->sizeHint().height() + frameWidth * 2 + 2));
+    noSave = false;
 }
 
 void ScLineEdit::resizeEvent(QResizeEvent *)
@@ -51,4 +52,12 @@ void ScLineEdit::setButtonVisible(bool visible) {
 
 void ScLineEdit::clearButtonSlot(){
     emit clearButtonClicked();
+}
+
+void ScLineEdit::setNoSaveOnChange(bool noSaveVal) {
+    noSave = noSaveVal;
+}
+
+bool ScLineEdit::noSaveOnChange() {
+    return noSave;
 }

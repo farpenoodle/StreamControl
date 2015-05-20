@@ -23,12 +23,15 @@ public slots:
     QString getDataSetName();
     void setButtonVisible(bool);
     void clearButtonSlot();
+    void setNoSaveOnChange(bool);
+    bool noSaveOnChange();
 
 
 private:
     QToolButton *clearButton;
     QString lineEditName;
     QString dataSetName;
+    bool noSave;
 
 signals:
     void clearButtonClicked();

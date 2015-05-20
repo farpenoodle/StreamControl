@@ -19,6 +19,8 @@ public slots:
     void setButtonVisible(bool);
     void addModel(QStringListModel *);
     void clearButtonSlot();
+    void setNoSaveOnChange(bool);
+    bool noSaveOnChange();
 
 protected:
     void resizeEvent(QResizeEvent *);
@@ -27,6 +29,7 @@ private:
     QToolButton *clearButton;
     QString comboBoxName;
     QString dataSetName;
+    bool noSave;
 
 signals:
     void clearButtonClicked();

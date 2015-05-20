@@ -18,6 +18,7 @@ ScComboBox::ScComboBox(QWidget *parent)
     QSize msz = minimumSizeHint();
     setMinimumSize(qMax(msz.width(), clearButton->sizeHint().height() + frameWidth * 2 + 2),
                    qMax(msz.height(), clearButton->sizeHint().height() + frameWidth * 2 + 2));
+    noSave = false;
 }
 
 void ScComboBox::resizeEvent(QResizeEvent *)
@@ -64,4 +65,13 @@ void ScComboBox::addModel(QStringListModel *model){
             addItem(currStr);
         }
     }
+}
+
+
+void ScComboBox::setNoSaveOnChange(bool noSaveVal) {
+    noSave = noSaveVal;
+}
+
+bool ScComboBox::noSaveOnChange() {
+    return noSave;
 }
