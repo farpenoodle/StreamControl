@@ -2036,6 +2036,12 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
         ((ScLineEdit*)widgetList[newLineEdit])->setPlaceholderText(element.text());
     }
 
+    if (element.hasAttribute("noSave")) {
+        if (element.attribute("noSave") == "1") {
+            ((ScLineEdit*)widgetList[newLineEdit])->setNoSaveOnChange(true);
+        }
+    }
+
     if(element.hasAttribute("dataSet")) {
         QString dataSetName = element.attribute("dataSet");
         if (dataSets[dataSetName].isEmpty()) {
@@ -2285,9 +2291,16 @@ void MainWindow::saveDataSets() {
         QString name = i.key();
         QString setName = completerList[name]->getDataSetName();
         int dataField = completerList[name]->getDataField();
+        //check if it's set to not save on change (note to self: please rewrite this.)
+        bool noSaveOnChange;
+        if (widgetType[name] == "lineEdit") {
+            noSaveOnChange = ((ScLineEdit*)widgetList[i.key()])->noSaveOnChange();
+        } else if (widgetType[name] == "comboBox") {
+            noSaveOnChange = ((ScComboBox*)widgetList[i.key()])->noSaveOnChange();
+        }
 
-        if (completerList[name]->hasMaster() == false) { //if it's a master
-            //check if current value in in dataSet
+        if (completerList[name]->hasMaster() == false && noSaveOnChange != true) { //if it's a master & doesn't have noSave set
+            //check if current value is in dataSet
             QString currentVal;
             if (widgetType[name] == "lineEdit") {
                 currentVal = ((ScLineEdit*)widgetList[name])->text();
