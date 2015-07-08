@@ -59,16 +59,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "twitterhandler.h"
 #include "twitterwidget.h"
 #include "mainwindow.h"
-
+#include <QTimer>
 
 #ifdef Q_OS_WIN
-#include <QTimer>
-#include "windows.h"
-#include "win_keyhelper.h"
+    #include "windows.h"
 #endif
 #ifdef Q_OS_MAC
     #include <Carbon/Carbon.h>
 #endif
+#include "win_keyhelper.h"
 
 MainWindow::MainWindow()
 {
@@ -1146,7 +1145,7 @@ void MainWindow::loadLayout() {
     layoutIterator = 0;
 
     clearMaps();
-    keyPoller->stop();
+    //keyPoller->stop();
     deleteHotkeys();
     //add global save hotkey first
     addHotkey("CTRL+ALT+SHIFT+S","Main","Save");

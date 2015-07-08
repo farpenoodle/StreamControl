@@ -1,6 +1,15 @@
 #include "win_keyhelper.h"
 #include <QKeySequence>
-#include "windows.h"
+#ifdef Q_OS_WIN
+    #include "windows.h"
+#endif
+#ifdef Q_OS_MAC
+    #include <Carbon/Carbon.h>
+    #define MOD_ALT 0x0001
+    #define MOD_CONTROL 0x0002
+    #define MOD_SHIFT 0x0004
+    #define MOD_WIN 0x0008
+#endif
 
 int win_keyhelper::getModifiers(int ks)
 {
