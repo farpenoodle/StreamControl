@@ -410,6 +410,13 @@ QString getDoubleEliminationMatchPhase(int currentRound, int tournamentEntrants)
         stage = "Losers ";
     }
 
+    if (currentRound < 0 && realRound == roundLimit - 3)
+    {
+        stage = "";
+        roundName = "Top 8 Losers";
+    }
+    if (realRound == roundLimit - 2)
+        roundName = "Quarter Final";
     if (realRound == roundLimit - 1)
         roundName = "Semi-Final";
     if (realRound == roundLimit)
