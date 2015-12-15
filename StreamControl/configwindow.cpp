@@ -47,7 +47,9 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->outputRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( outputRelativeToggle( int ) ));
     connect(ui->layoutRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( layoutRelativeToggle( int ) ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
+#ifdef Q_OS_WIN
     connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
+#endif
     connect(ui->formatGroup,SIGNAL( buttonClicked(int) ),this, SLOT ( formatChange( int ) ));
 
     ui->outputPathTB->setDisabled(true);
@@ -96,13 +98,13 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
     } else {
         ui->formatXML->setChecked(true);
     }
-
+#ifdef Q_OS_WIN
     if (configsettings["altHotkeyHandling"] == "1") {
         ui->altHotkeyCheckbox->setCheckState(Qt::Checked);
     } else {
         ui->altHotkeyCheckbox->setCheckState(Qt::Unchecked);
     }
-
+#endif
 }
 
 QMap<QString, QString> ConfigWindow::getConfig() {
@@ -118,10 +120,16 @@ void ConfigWindow::findOutput() {
     }
 
     if (output != "") {
+#ifndef Q_OS_LINUX
         output.replace("/","\\");
         if (QString(output[output.length()-1]) != "\\" && output != "") {
             output = output + "\\";
         }
+#else
+        if (QString(output[output.length()-1]) != "/" && output != "") {
+            output = output + "/";
+        }
+#endif
         ui->outputPathTB->setText(output);
         configsettings["outputPath"] = output;
     }
@@ -136,7 +144,9 @@ void ConfigWindow::findLayout() {
     }
 
     if (layoutPath != "") {
+#ifndef Q_OS_LINUX
         layoutPath.replace("/","\\");
+#endif
         ui->layoutPathTB->setText(layoutPath);
         configsettings["layoutPath"] = layoutPath;
     } else {
@@ -152,8 +162,9 @@ void ConfigWindow::layoutRelativeToggle( int state ) {
     } else {
         layoutPath = currentDir.cleanPath(currentDir.absoluteFilePath(layoutPath));
     }
-
+#ifndef Q_OS_LINUX
     layoutPath.replace("/","\\");
+#endif
     ui->layoutPathTB->setText(layoutPath);
     configsettings["layoutPath"] = layoutPath;
 }
@@ -165,11 +176,16 @@ void ConfigWindow::outputRelativeToggle( int state ) {
     } else {
         outputPath = currentDir.cleanPath(currentDir.absoluteFilePath(outputPath));
     }
-
+#ifndef Q_OS_LINUX
     outputPath.replace("/","\\");
     if (QString(outputPath[outputPath.length()-1]) != "\\" && outputPath != "") {
         outputPath = outputPath + "\\";
     }
+#else
+    if (outputPath == "" || QString(outputPath[outputPath.length()-1]) != "/" && outputPath != "") {
+        outputPath = outputPath + "/";
+    }
+#endif
     ui->outputPathTB->setText(outputPath);
     configsettings["outputPath"] = outputPath;
 }
@@ -182,6 +198,7 @@ void ConfigWindow::CDATAToggle( int state ) {
     }
 }
 
+#ifdef Q_OS_WIN
 void ConfigWindow::altHotkeyToggle( int state ) {
     if (state == Qt::Checked) {
         configsettings["altHotkeyHandling"] = "1";
@@ -189,6 +206,7 @@ void ConfigWindow::altHotkeyToggle( int state ) {
         configsettings["altHotkeyHandling"] = "0";
     }
 }
+#endif
 
 void ConfigWindow::formatChange( int state ) {
     configsettings["format"] = QString::number(state);
