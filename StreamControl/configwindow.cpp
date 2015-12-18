@@ -122,11 +122,11 @@ void ConfigWindow::findOutput() {
     if (output != "") {
 #ifndef Q_OS_LINUX
         output.replace("/","\\");
-        if (QString(output[output.length()-1]) != "\\" && output != "") {
+        if (output != "" && QString(output[output.length()-1]) != "\\") {
             output = output + "\\";
         }
 #else
-        if (QString(output[output.length()-1]) != "/" && output != "") {
+        if (output != "" && QString(output[output.length()-1]) != "/") {
             output = output + "/";
         }
 #endif
@@ -178,11 +178,11 @@ void ConfigWindow::outputRelativeToggle( int state ) {
     }
 #ifndef Q_OS_LINUX
     outputPath.replace("/","\\");
-    if (QString(outputPath[outputPath.length()-1]) != "\\" && outputPath != "") {
+    if (outputPath != "" && QString(outputPath[outputPath.length()-1]) != "\\") {
         outputPath = outputPath + "\\";
     }
 #else
-    if (outputPath == "" || QString(outputPath[outputPath.length()-1]) != "/" && outputPath != "") {
+    if (outputPath != "" && QString(outputPath[outputPath.length()-1]) != "/") {
         outputPath = outputPath + "/";
     }
 #endif
