@@ -2,6 +2,7 @@
 #include <QKeySequence>
 #include "windows.h"
 
+
 int win_keyhelper::getModifiers(int ks)
 {
     int modifier = 0;

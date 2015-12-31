@@ -60,14 +60,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "twitterwidget.h"
 #include "mainwindow.h"
 
-
 #ifdef Q_OS_WIN
-#include <QTimer>
-#include "windows.h"
-#include "win_keyhelper.h"
+    #include "windows.h"
+    #include "win_keyhelper.h"
 #endif
 #ifdef Q_OS_MAC
     #include <Carbon/Carbon.h>
+#else
+    #include <QTimer>
 #endif
 
 MainWindow::MainWindow()
@@ -154,9 +154,9 @@ MainWindow::MainWindow()
     #ifdef Q_OS_WIN
     keyPoller = new QTimer(this);
     connect(keyPoller, SIGNAL(timeout()), this, SLOT(keyPoll()));
-    #endif
 
     hotkeyDown = false;
+#endif
 
     loadSettings();
     loadLayout();
@@ -165,7 +165,9 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+#ifdef Q_OS_WIN
     deleteHotkeys();
+#endif
     //delete ui;
 }
 
@@ -278,12 +280,14 @@ void MainWindow::loadSettings() {
 
         settings["format"] = QString::number(saveFormat);
 
+#ifdef Q_OS_WIN
         if (settings["altHotkeyHandling"] == "1") {
             altHotkeyHandling = true;
         } else {
             altHotkeyHandling = false;
             settings["altHotkeyHandling"] = "0";
         }
+#endif
     } else {
 
         QMessageBox msgBox;
@@ -1089,7 +1093,9 @@ void MainWindow::openConfig() {
         settings = cWindow->getConfig();
 
         useCDATA = (settings["useCDATA"] == "1");
+#ifdef Q_OS_WIN
         altHotkeyHandling = (settings["altHotkeyHandling"] == "1");
+#endif
         saveFormat = settings["format"].toInt();
 
         if(saveFormat < 1 || saveFormat > 3)
@@ -1146,11 +1152,12 @@ void MainWindow::loadLayout() {
     layoutIterator = 0;
 
     clearMaps();
+#ifdef Q_OS_WIN
     keyPoller->stop();
     deleteHotkeys();
     //add global save hotkey first
     addHotkey("CTRL+ALT+SHIFT+S","Main","Save");
-
+#endif
     QStringList errors;
     QString parseError;
     int parseErrorLine;
@@ -1244,11 +1251,12 @@ void MainWindow::loadLayout() {
     connect (tsMapper, SIGNAL(mapped(QString)), this, SLOT(tsClick(QString))) ;
     connect (setButtonMapper, SIGNAL(mapped(QString)), this, SLOT(setButtonClick(QString))) ;
 
+#ifdef Q_OS_WIN
     //start the keyPoller
     if (altHotkeyHandling) {
         keyPoller->start(16);
     }
-
+#endif
 }
 
 void MainWindow::reloadLayout() {
@@ -1507,9 +1515,11 @@ void MainWindow::parseToolBar(QDomNode toolBarNode) {
 
                 connect(((ScSetButton*)visualList[newButton]), SIGNAL(clicked()), setButtonMapper, SLOT(map()));
                 setButtonMapper -> setMapping (((ScSetButton*)visualList[newButton]), newButton) ;
+#ifdef Q_OS_WIN
                 if(!buttonElement.attribute("hotkey").isEmpty()) {
                     addHotkey(buttonElement.attribute("hotkey"),newButton,"setButton");
                 }
+#endif
             }
         }
 
@@ -1522,7 +1532,7 @@ void MainWindow::parseCLI(QDomNode cliNode) {
 
     QDomNode child = cliNode.firstChildElement();
 
-    QRegExp rx("(\\[\\$[\\w\\.]+\\])");
+    QRegExp rx("(/[/$[/w/.]+/])");
 
     while (!child.isNull()) {
         if (child.toElement().tagName() == "cmd") {
@@ -1715,6 +1725,7 @@ void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
     ((QCheckBox*)widgetList[newCheckBox])->setText(element.text());
+#ifdef Q_OS_WIN
     if(!element.attribute("toggleHotkey").isEmpty()) {
         addHotkey(element.attribute("toggleHotkey"),newCheckBox,"Toggle");
     }
@@ -1724,6 +1735,7 @@ void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
     if(!element.attribute("uncheckHotkey").isEmpty()) {
         addHotkey(element.attribute("uncheckHotkey"),newCheckBox,"Uncheck");
     }
+#endif
 }
 
 void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
@@ -1881,9 +1893,11 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), resetMapper, SLOT(map()));
         resetMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
+#ifdef Q_OS_WIN
         if(!element.attribute("hotkey").isEmpty()) {
             addHotkey(element.attribute("hotkey"),newButton,"Reset");
         }
+#endif
 
     } else if (element.attribute("type") == "swap") {
 
@@ -1918,10 +1932,11 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((QPushButton*)visualList[newButton]), SIGNAL(clicked()), swapMapper, SLOT(map()));
         swapMapper -> setMapping (((QPushButton*)visualList[newButton]), newButton) ;
+#ifdef Q_OS_WIN
         if(!element.attribute("hotkey").isEmpty()) {
             addHotkey(element.attribute("hotkey"),newButton,"Swap");
         }
-
+#endif
     } else if (element.attribute("type") == "timestamp") {
         bool nSaveOnClick = false;
 
@@ -1946,9 +1961,11 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((ScTSButton*)widgetList[newButton]), SIGNAL(clicked()), tsMapper, SLOT(map()));
         tsMapper -> setMapping (((ScTSButton*)widgetList[newButton]), newButton) ;
+#ifdef Q_OS_WIN
         if(!element.attribute("hotkey").isEmpty()) {
             addHotkey(element.attribute("hotkey"),newButton,"Timestamp");
         }
+#endif
     } else if (element.attribute("type") == "setButton") {
         bool nSaveOnClick = false;
         if (element.attribute("saveonclick") == "true" || element.attribute("saveonclick") == "1") {
@@ -1975,9 +1992,11 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
 
         connect(((ScSetButton*)visualList[newButton]), SIGNAL(clicked()), setButtonMapper, SLOT(map()));
         setButtonMapper -> setMapping (((ScSetButton*)visualList[newButton]), newButton) ;
+#ifdef Q_OS_WIN
         if(!element.attribute("hotkey").isEmpty()) {
             addHotkey(element.attribute("hotkey"),newButton,"setButton");
         }
+#endif
     }
 }
 
@@ -2466,12 +2485,14 @@ void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
     if(!element.attribute("maximum").isEmpty()) {
         ((QSpinBox*)widgetList[newSpinBox])->setMaximum(element.attribute("maximum").toInt());
     }
+#ifdef Q_OS_WIN
     if(!element.attribute("increaseHotkey").isEmpty()) {
         addHotkey(element.attribute("increaseHotkey"),newSpinBox,"Increase");
     }
     if(!element.attribute("decreaseHotkey").isEmpty()) {
         addHotkey(element.attribute("decreaseHotkey"),newSpinBox,"Decrease");
     }
+#endif
     widgetType[newSpinBox] = "spinBox";
 
 }
@@ -2536,7 +2557,7 @@ bool MainWindow::checkDataSet1Blank(QString setName) {
     }
     return empty;
 }
-
+#ifdef Q_OS_WIN
 void MainWindow::addHotkey(QString hotkey,QString widget, QString action) {
     QKeySequence qks(hotkey);
     int ks = qks[0];
@@ -2630,3 +2651,4 @@ void MainWindow::deleteHotkeys() {
     hotkeys.clear();
     hotkeysIndex.clear();
 }
+#endif

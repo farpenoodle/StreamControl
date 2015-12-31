@@ -55,7 +55,9 @@ public slots:
     void outputRelativeToggle( int state );
     void layoutRelativeToggle( int state );
     void CDATAToggle( int state );
+#ifdef Q_OS_WIN
     void altHotkeyToggle( int state );
+#endif
     void formatChange( int state );
     
 private:

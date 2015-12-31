@@ -30,6 +30,12 @@ RC_FILE = streamcontrol.rc
 OTHER_FILES += \
     o2/o2.pri
 
+win32{
+    SOURCES += windows/win_keyhelper.cpp
+
+    HEADERS += windows/win_keyhelper.h
+}
+
 macx {
     LIBS += -framework Carbon
 }
