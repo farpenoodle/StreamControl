@@ -68,7 +68,7 @@ ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
     ChallongeWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
     tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId),
-    outputFileName(outputFileName), bracketWidgets(bracketWidgets)
+    bracketWidgets(bracketWidgets), outputFileName(outputFileName)
 {
     layout = new QGridLayout;
     tournamentsBox = new QComboBox();
@@ -204,7 +204,7 @@ void ChallongeWidgetImpl::fetchMatches()
     else
         currentTournamentId = tournamentsBox->itemData(currentIndex).toString();
 
-    QString urlString =
+    const QString urlString =
         QString("https://api.challonge.com/v1/tournaments/%1.json?include_matches=1&include_participants=1").arg(currentTournamentId);
 
     QNetworkRequest request(urlString);
@@ -227,29 +227,55 @@ QByteArray ChallongeWidgetImpl::getAuthHeader() const
 
 void ChallongeWidgetImpl::processTournamentListJson()
 {
+    statusLabel->setText("");
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
-    QString replyData = reply->readAll();
+    const QString replyData = reply->readAll();
+    const QJsonDocument response = QJsonDocument::fromJson(replyData.toUtf8());
+    const QString labelText = "Error loading tournament list:\n%1";
 
     if (reply->error() != QNetworkReply::NoError)
     {
-        statusLabel->setText("Error loading tournament data");
+        if (response.isEmpty())
+        {
+            statusLabel->setText(labelText.arg(replyData));
+        }
+        else
+        {
+            const QJsonArray errorList = response.object()["errors"].toArray();
+
+            QStringList errors;
+            for (QJsonArray::const_iterator iter = errorList.constBegin();
+                 iter != errorList.constEnd(); iter++)
+            {
+                errors.append(iter->toString());
+            }
+
+            statusLabel->setText(labelText.arg(errors.join("\n")));
+        }
         return;
     }
 
-    QJsonDocument response = QJsonDocument::fromJson(replyData.toUtf8());
-    QJsonArray tournamentsArray = response.array();
+    qDebug() << "Tournament list response: " << replyData;
 
     tournamentsBox->clear();
     matchesBox->clear();
 
-    for (QJsonArray::const_iterator iter = tournamentsArray.constBegin();
-         iter != tournamentsArray.constEnd(); iter++)
+    QJsonArray tournamentsArray = response.array();
+    if (tournamentsArray.isEmpty())
     {
-        QJsonObject tournamentRecord = iter->toObject();
-        QJsonObject tournamentObject = tournamentRecord["tournament"].toObject();
-        tournamentsBox->addItem(tournamentObject["name"].toString(),
-                                QString::number(tournamentObject["id"].toInt()));
+        statusLabel->setText(labelText.arg("There are no tournaments currently in progress."));
+    }
+    else
+    {
+        for (QJsonArray::const_iterator iter = tournamentsArray.constBegin();
+             iter != tournamentsArray.constEnd(); iter++)
+        {
+            QJsonObject tournamentRecord = iter->toObject();
+            QJsonObject tournamentObject = tournamentRecord["tournament"].toObject();
+            tournamentsBox->addItem(tournamentObject["name"].toString(),
+                                    QString::number(tournamentObject["id"].toInt()));
+        }
     }
     tournamentsBox->addItem("Custom...", "custom");
 
@@ -258,13 +284,31 @@ void ChallongeWidgetImpl::processTournamentListJson()
 
 void ChallongeWidgetImpl::processTournamentJson()
 {
+    statusLabel->setText("");
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
     QString replyData = reply->readAll();
 
     if (reply->error() != QNetworkReply::NoError)
     {
-        statusLabel->setText("Error loading tournament data");
+        QString labelText = "Error loading tournament data:\n%1";
+
+        QJsonDocument errorJson = QJsonDocument::fromJson(replyData.toUtf8());
+
+        qDebug() << replyData;
+
+
+        const QJsonArray errorList = errorJson.object()["errors"].toArray();
+
+        QStringList errors;
+        for (QJsonArray::const_iterator iter = errorList.constBegin();
+             iter != errorList.constEnd(); iter++)
+        {
+            errors.append(iter->toString());
+        }
+
+        statusLabel->setText(labelText.arg(errors.join("\n")));
+
         return;
     }
 
@@ -410,6 +454,13 @@ QString getDoubleEliminationMatchPhase(int currentRound, int tournamentEntrants)
         stage = "Losers ";
     }
 
+    if (currentRound < 0 && realRound == roundLimit - 3)
+    {
+        stage = "";
+        roundName = "Top 8 Losers";
+    }
+    if (realRound == roundLimit - 2)
+        roundName = "Quarter Final";
     if (realRound == roundLimit - 1)
         roundName = "Semi-Final";
     if (realRound == roundLimit)
@@ -444,6 +495,8 @@ QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
             return getDoubleEliminationMatchPhase(currentRound, tournamentEntrants);
             break;
         }
+        default:
+            return "";
     }
 }
 
