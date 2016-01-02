@@ -57,6 +57,10 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
 
     currentDir = QDir("");
 
+#ifndef Q_OS_WIN
+    ui->altHotkeyCheckbox->setDisabled(true);
+#endif
+
 }
 
 ConfigWindow::~ConfigWindow()
