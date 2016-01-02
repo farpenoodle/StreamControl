@@ -125,11 +125,10 @@ public slots:
 
     bool checkDataSet1Blank(QString);
     bool nativeEvent(const QByteArray &eventType, void *message, long *result);
-#ifdef Q_OS_WIN
+
     void addHotkey(QString,QString,QString);
     void performHotkey(int);
     void deleteHotkeys();
-#endif
     void keyPoll();
 
 private:
@@ -157,10 +156,8 @@ private:
     QMap<QString, QList<QStringList> > condensedDataSets;
     QMap<QString, int> dataAssoc;
     QMap<QString, QList<QString> > dataMaster;
-#ifdef Q_OS_WIN
     QList<QStringList> hotkeys;
     QList<int> hotkeysIndex;
-#endif
     QStringList cmdList;
     QList<QStringList> cmdIgnores;
     QMap<QString, QList<int> > cmdVars;
@@ -169,17 +166,13 @@ private:
     QStringList removedSetQueue;
 
     bool useCDATA;
-#ifdef Q_OS_WIN
     bool altHotkeyHandling;
-#endif
     int saveFormat;
     TwitterHandler *th;
     bool needLink;
 
-#ifdef Q_OS_WIN
     QTimer *keyPoller;
     bool hotkeyDown;
-#endif
 
     QAction *actionReloadLayout;
 };
