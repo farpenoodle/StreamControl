@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef Q_OS_WIN
     #include "windows.h"
-    #include "win_keyhelper.h"
+    #include "windows/win_keyhelper.h"
 #endif
 #ifdef Q_OS_MAC
     #include <Carbon/Carbon.h>
