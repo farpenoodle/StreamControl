@@ -1,13 +1,3 @@
-This version of farpenoodle's StreamControl can be compiled in GNU+Linux but will have NO HOTKEY FUNCTIONS.
-
-Build instructions: In the same directory as StreamControl.pro run "qmake && make"
-
-//MiggL
-
-
-
-farpenoodle's README:
-
 StreamControl is a simple program I put together in Qt (as a learning experience) to write an XML file for use with XSplit and it's ability to use SWF files to display information. It's specifically tailored for use with Fighting Game tournaments (since that is what I run and stream) but nothing is stopping you from using it for other purposes. For the most part you'll only need to edit the Flash files to get it to do what you want. And if you have specific needs that the software cannot accomplish by itself you're welcome to fork the software.
 
 If you have no idea how to edit the flash files it is also possible to use StreamControl with the default XSplit title plugins. Just point it at the streamcontrol.xml file in your XSplit directory and you'll be good to go.
@@ -19,3 +9,9 @@ Rough how-to:
 4. Done.
 
 Report bugs at http://github.com/farpenoodle/StreamControl/issues
+
+
+GNU+Linux build instructions:
+
+Install QtCreator and Qt5-script.
+In the same directory as StreamControl.pro run "qmake && make".
