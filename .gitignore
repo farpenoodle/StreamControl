@@ -203,3 +203,6 @@ Makefile*
 # QtCreator
 
 *.autosave
+
+#Ignore Twitter
+StreamControl/twitterOauth.h
