@@ -30,6 +30,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char *argv[])
 {
+    //If on Windows set Hi DPI support
+    #ifndef Q_OS_WIN
+        qputenv("QT_DEVICE_PIXEL_RATIO",QByteArray("auto"));
+    #endif
+
     QApplication a(argc, argv);
     a.setStyle("fusion");
     MainWindow mainWindow;
