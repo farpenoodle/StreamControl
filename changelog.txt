@@ -8,6 +8,19 @@ Added support for writing data to JSON
 Tweet widget now downloads media and expands URLs
 Tweet widget now doesn't require you to get access token for each widget
 Added support for global hotkeys
+Added support for launching programs using parameters from StreamControl via CLI
+Added setButton which currently can set a combobox to a specific value
+Allow comments in XML
+Some support for datasets with combobox
+Challonge Widget
+No longer detect XSplit since it's no longer needed
+Allow relative paths in for Layout XML and output path
+Add reload button
+Added noSave option to datasets to prevent from overwriting existing data
+Added GNU+Linux Compatibility
+Added OSX Compatibility
+Added some basic HiDPI support on Windows
+
 
 0.3 - July 3 2013
 -----------------------------------------
