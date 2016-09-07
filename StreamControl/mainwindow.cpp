@@ -1075,6 +1075,11 @@ void MainWindow::swapFields(QString widget)
             bool tempCheck = ((QCheckBox*)widgetList[currField])->isChecked();
             ((QCheckBox*)widgetList[currField])->setChecked(((QCheckBox*)widgetList[newField])->isChecked());
             ((QCheckBox*)widgetList[newField])->setChecked(tempCheck);
+        } else if (widgetType[currField] == "tsButton") {
+            uint tempStamp = ((ScTSButton*)widgetList[currField])->getTimeStamp();
+            ((ScTSButton*)widgetList[currField])->setTimeStamp(((ScTSButton*)widgetList[newField])->getTimeStamp());
+            ((ScTSButton*)widgetList[newField])->setTimeStamp(tempStamp);
+
         }
      }
 
