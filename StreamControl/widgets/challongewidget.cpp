@@ -377,7 +377,7 @@ QString getSingleEliminationMatchPhase(int currentRound, int tournamentEntrants)
             roundName = "Semi-Final";
             break;
         case 2:
-            roundName = "Quarter Final";
+            roundName = "Quarter-Final";
             break;
         case 3:
             roundName = "Last 16";
@@ -460,15 +460,15 @@ QString getDoubleEliminationMatchPhase(int currentRound, int tournamentEntrants)
         roundName = "Top 8 Losers";
     }
     if (realRound == roundLimit - 2)
-        roundName = "Quarter Final";
+        roundName = "Quarters";
     if (realRound == roundLimit - 1)
-        roundName = "Semi-Final";
+        roundName = "Semis";
     if (realRound == roundLimit)
-        roundName = "Final";
+        roundName = "Finals";
     if (currentRound == roundLimit + 1)
     {
         stage = "";
-        roundName = "Grand Final";
+        roundName = "Grand Finals";
     }
 
     return QString("%1%2").arg(stage, roundName).trimmed();
