@@ -25,19 +25,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef WIDGETS_CHALLONGEWIDGETBUILDER_H
-#define WIDGETS_CHALLONGEWIDGETBUILDER_H
+#ifndef WIDGETS_PROVIDERWIDGETBUILDER_H
+#define WIDGETS_PROVIDERWIDGETBUILDER_H
 
 #include <QWidget>
 #include <QMap>
 #include <QMultiMap>
 
-class ChallongeWidget;
+class ProviderWidget;
 
-class ChallongeWidgetBuilder
+class ProviderWidgetBuilder
 {
 public:
-    ChallongeWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
+    ProviderWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
                            const QMap<QString, QString>& settings);
 
     void setPlayerNameWidgets(QString playerOneWidget, QString playerTwoWidget);
@@ -48,7 +48,7 @@ public:
     void addMatchWidget(QString tournamentStage,
         QString playerOneNameWidget, QString playerOneScoreWidget,
         QString playerTwoNameWidget, QString playerTwoScoreWidget);
-    ChallongeWidget* build() const;
+    ProviderWidget* build() const;
 
 private:
     QWidget *parent;
@@ -60,4 +60,4 @@ private:
     QString outputFileName;
 };
 
-#endif // WIDGETS_CHALLONGEWIDGETBUILDER_H
+#endif // WIDGETS_PROVIDERWIDGETBUILDER_H

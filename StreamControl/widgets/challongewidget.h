@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMap>
 #include <QJsonDocument>
 #include "tournamenttreenode.h"
+#include "providerwidget.h"
 
 class QPushButton;
 class QLabel;
@@ -44,29 +45,10 @@ class QLineEdit;
 
 enum TournamentType {SINGLE_ELIMINATION, DOUBLE_ELIMINATION, ROUND_ROBIN};
 
-class ChallongeWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit ChallongeWidget(QWidget *parent);
-
-signals:
-
-public slots:
-    virtual void fetchTournaments() = 0;
-    virtual void fetchMatches() = 0;
-    virtual void processTournamentListJson() = 0;
-    virtual void processTournamentJson() = 0;
-    virtual void setMatchData() = 0;
-    virtual void setBracketData() = 0;
-    virtual void updateCustomIdBoxState() = 0;
-};
-
-
-class ChallongeWidgetImpl : public ChallongeWidget
+class ChallongeWidget : public ProviderWidget
 {
 public:
-    explicit ChallongeWidgetImpl(QWidget *parent,
+    explicit ChallongeWidget(QWidget *parent,
                                  QMap<QString, QObject*>& widgets,
                                  const QMap<QString, QString>& settings,
                                  QString playerOneWidget,
@@ -144,6 +126,8 @@ private:
     void writeBracketToFile();
 
     QMap<QString, TournamentTreeNode> doubleElimNodes;
+
+    QString smashggRequest = "query EventStandings($eventId: Int) {event(id: $eventId) {name}}";
 };
 
 #endif // WIDGETS_CHALLONGEWIDGET_H

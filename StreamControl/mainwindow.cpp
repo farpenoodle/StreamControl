@@ -54,8 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
-#include "widgets/challongewidget.h"
-#include "widgets/challongewidgetbuilder.h"
+#include "widgets/providerwidget.h"
+#include "widgets/providerwidgetbuilder.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
 #include "mainwindow.h"
@@ -1645,7 +1645,7 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
 
     QList<QString> stageNames = stages.keys();
 
-    ChallongeWidgetBuilder builder(parent, widgetList, settings);
+    ProviderWidgetBuilder builder(parent, widgetList, settings);
     QString newWidgetId = element.attribute("id");
 
     QString outputType = element.attribute("outputType");
@@ -1680,7 +1680,7 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
     builder.setTournamentStageWidget(element.attribute("tournamentStageWidget"));
     builder.setBracketStageWidget(element.attribute("bracketWidget"));
 
-    ChallongeWidget* newWidget = builder.build();
+    ProviderWidget* newWidget = builder.build();
 
     newWidget->setObjectName(newWidgetId);
     newWidget->setGeometry(QRect(element.attribute("x").toInt(),
