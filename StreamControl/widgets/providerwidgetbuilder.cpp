@@ -74,7 +74,7 @@ void ProviderWidgetBuilder::addMatchWidget(QString tournamentStage,
 }
 
 
-ProviderWidget* ProviderWidgetBuilder::build() const
+ProviderWidget* ProviderWidgetBuilder::build(ProviderWidgetBuilder::Provider provider) const
 {
     QMap<QString, QStringList> bracketWidgets;
 
@@ -90,12 +90,14 @@ ProviderWidget* ProviderWidgetBuilder::build() const
         }
     }
 
-    ProviderWidget* widget =  new ChallongeWidget(parent, widgetList, settings,
-                                                       playerOneWidget, playerTwoWidget,
-                                                       tournamentStageWidget,
-                                                       bracketStageWidget,
-                                                       outputFileName,
-                                                       bracketWidgets);
-
-    return widget;
+    if (provider == Provider::Challonge) {
+        return new ChallongeWidget(parent, widgetList, settings,
+                                   playerOneWidget, playerTwoWidget,
+                                   tournamentStageWidget,
+                                   bracketStageWidget,
+                                   outputFileName,
+                                   bracketWidgets);
+    } else if (provider == Provider::Smashgg) {
+        return nullptr;
+    }
 }

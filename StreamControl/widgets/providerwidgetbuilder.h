@@ -37,6 +37,12 @@ class ProviderWidget;
 class ProviderWidgetBuilder
 {
 public:
+    enum class Provider
+    {
+        Smashgg,
+        Challonge
+    };
+
     ProviderWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
                            const QMap<QString, QString>& settings);
 
@@ -48,7 +54,7 @@ public:
     void addMatchWidget(QString tournamentStage,
         QString playerOneNameWidget, QString playerOneScoreWidget,
         QString playerTwoNameWidget, QString playerTwoScoreWidget);
-    ProviderWidget* build() const;
+    ProviderWidget* build(Provider provider) const;
 
 private:
     QWidget *parent;
