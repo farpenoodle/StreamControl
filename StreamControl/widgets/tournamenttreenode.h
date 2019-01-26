@@ -1,6 +1,7 @@
 #ifndef WIDGETS_TOURNAMENTTREENODE_H
 #define WIDGETS_TOURNAMENTTREENODE_H
 
+#include <QString>
 
 // A class to help represent the structure of a tournament's matches
 class TournamentTreeNode

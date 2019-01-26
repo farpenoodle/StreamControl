@@ -29,12 +29,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define WIDGETS_PROVIDERWIDGET_H
 
 #include <QWidget>
+#include <QMap>
+#include <QJsonDocument>
+#include "tournamenttreenode.h"
+
+class QPushButton;
+class QLabel;
+class QComboBox;
+class QGridLayout;
+class QLineEdit;
+
+enum TournamentType {SINGLE_ELIMINATION, DOUBLE_ELIMINATION, ROUND_ROBIN};
 
 class ProviderWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ProviderWidget(QWidget *parent);
+    virtual ~ProviderWidget(){}
+    explicit ProviderWidget(QWidget *parent, QMap<QString, QObject*>& widgetList,
+                            const QMap<QString, QString>& settings,
+                            QString playerOneWidgetId,
+                            QString playerTwoWidgetId,
+                            QString tournamentStageWidgetId,
+                            QString bracketWidgetId,
+                            QString outputFileName,
+                            QMap<QString, QStringList> bracketWidgets);
 
 signals:
 
@@ -43,9 +62,69 @@ public slots:
     virtual void fetchMatches() = 0;
     virtual void processTournamentListJson() = 0;
     virtual void processTournamentJson() = 0;
-    virtual void setMatchData() = 0;
-    virtual void setBracketData() = 0;
-    virtual void updateCustomIdBoxState() = 0;
+    virtual void setMatchData();// = 0;
+    virtual void setBracketData();// = 0;
+    virtual void updateCustomIdBoxState();// = 0;
+
+protected:
+    QComboBox       *tournamentsBox;
+    QLabel          *currentTournamentLabel;
+    QLineEdit       *tournamentCustomLineEdit;
+
+    QComboBox       *matchesBox;
+
+    QLabel          *statusLabel;
+
+    // Stores the json response of a tournament when fetched
+    // Used to save bracket data to a file when the button is pressed
+    QJsonDocument currentTournamentJson;
+
+    // A map of player ids to names for the current tournament data
+    QMap<int, QString> playerIdMap;
+
+    // Needed to get the challonge username/api key and the outputPath
+    const QMap<QString, QString>& settings;
+
+private:
+    QGridLayout     *layout;
+
+    QLabel          *tournamentLabel;
+    QLabel          *tournamentCustomLabel;
+    QPushButton     *tournamentFetchButton;
+
+    QLabel          *matchLabel;
+    QPushButton     *matchFetchButton;
+
+    QPushButton     *setMatchDataButton;
+    QPushButton     *setBracketDataButton;
+
+    // So we can set the target widgets with the bracket data
+    QMap<QString, QObject*>& widgetList;
+
+    const QString playerOneWidgetId, playerTwoWidgetId, tournamentStageWidgetId,
+      bracketWidgetId;
+
+    // ids of widgets to fill
+    QMap<QString, QStringList> bracketWidgets;
+
+    // Where to save challonge bracket data
+    QString outputFileName;
+
+    // Sets up tournament structures in terms of tournament nodes
+    void setUpTournamentNodes();
+
+    // Fills other stream control widgets with the data from a challonge bracket
+    void fillBracketWidgets();
+
+    // Clears all challonge associated widgets specified in the layout file
+    void clearBracketWidgets();
+
+    void fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match);
+
+    // Saves challonge bracket data to a file in json format
+    void writeBracketToFile();
+
+    QMap<QString, TournamentTreeNode> doubleElimNodes;
 };
 
 #endif // WIDGETS_PROVIDERWIDGET_H
