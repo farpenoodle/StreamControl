@@ -25,41 +25,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef DIALOG_WIDGETSETTINGSDIALOG_H
-#define DIALOG_WIDGETSETTINGSDIALOG_H
+#include <QLabel>
+#include <QLineEdit>
+#include <QVBoxLayout>
 
-#include <QDialog>
-#include <QTabWidget>
-#include <QDialogButtonBox>
-#include <QMap>
-#include <QString>
+#include "smashggtab.h"
 
-class SmashggTab;
-class BracketTab;
-
-class WidgetSettingsDialog : public QDialog
+SmashggTab::SmashggTab(QMap<QString, QString>& settings, QWidget *parent) :
+    QWidget(parent), settings(settings)
 {
-    Q_OBJECT
+    QLabel *smashggOwnerIdLabel = new QLabel(tr("Owner Id:"));
+    smashggOwnerIdEdit = new QLineEdit();
 
-public:
-    explicit WidgetSettingsDialog(QWidget *parent = 0);
+    QLabel *smashggAuthenticationTokenLabel = new QLabel(tr("Authentication Token:"));
+    smashggAuthenticationTokenEdit = new QLineEdit();
+    smashggAuthenticationTokenEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 
-    void setConfig(QMap<QString, QString> config);
-    QMap<QString, QString> getConfig() const;
-
-public slots:
-    void saveDetails();
-
-private:
-
-    QMap<QString, QString> settings;
-
-    SmashggTab* smashggTab;
-    BracketTab* bracketTab;
-
-    QTabWidget *tabWidget;
-    QDialogButtonBox *buttonBox;
-
-};
-
-#endif // DIALOG_WIDGETSETTINGSDIALOG_H
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->addWidget(smashggOwnerIdLabel);
+    mainLayout->addWidget(smashggOwnerIdEdit);
+    mainLayout->addWidget(smashggAuthenticationTokenLabel);
+    mainLayout->addWidget(smashggAuthenticationTokenEdit);
+    mainLayout->addStretch(1);
+    setLayout(mainLayout);
+}

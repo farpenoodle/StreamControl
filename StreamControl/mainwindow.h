@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dialogs/widgetsettingsdialog.h"
 #include "config.h"
 #include "ScCompleter.h"
+#include "widgets/providerwidgetbuilder.h"
 
 class TwitterHandler;
 
@@ -76,7 +77,7 @@ public slots:
     void addComboBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
-    void addChallongeWidget(QDomElement, QWidget*, QMap<QString, QObject*> widgetList);
+    void addProviderWidget(QDomElement, QWidget*, QMap<QString, QObject*> widgetList, ProviderWidgetBuilder::Provider);
     QString addTabWidget(QDomElement, QWidget*);
     QString saveXML();
     QString saveJSON();

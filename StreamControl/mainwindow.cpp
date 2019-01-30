@@ -54,8 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
-#include "widgets/challongewidget.h"
-#include "widgets/challongewidgetbuilder.h"
+#include "widgets/providerwidget.h"
+#include "widgets/providerwidgetbuilder.h"
 #include "twitterhandler.h"
 #include "twitterwidget.h"
 #include "mainwindow.h"
@@ -1284,7 +1284,9 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
         } else if (tagName == "challonge") {
-            addChallongeWidget(child.toElement(), parent, widgetList);
+            addProviderWidget(child.toElement(), parent, widgetList, ProviderWidgetBuilder::Provider::Challonge);
+        } else if (tagName == "smashgg") {
+            addProviderWidget(child.toElement(), parent, widgetList, ProviderWidgetBuilder::Provider::Smashgg);
         } else if (tagName == "tabSet") {
             QString newTabSet = addTabWidget(child.toElement(), parent);
             parseTabLayout(child.toElement(), visualList[newTabSet]);
@@ -1626,8 +1628,8 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
     layoutIterator++;
 }
 
-void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
-                                         QMap<QString, QObject*>)
+void MainWindow::addProviderWidget(QDomElement element, QWidget *parent,
+                                         QMap<QString, QObject*>, ProviderWidgetBuilder::Provider provider)
 {
     // a map with the expected number of children for a tournament stage
     QMap<QString, int> stages;
@@ -1645,7 +1647,7 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
 
     QList<QString> stageNames = stages.keys();
 
-    ChallongeWidgetBuilder builder(parent, widgetList, settings);
+    ProviderWidgetBuilder builder(parent, widgetList, settings);
     QString newWidgetId = element.attribute("id");
 
     QString outputType = element.attribute("outputType");
@@ -1680,7 +1682,7 @@ void MainWindow::addChallongeWidget(QDomElement element, QWidget *parent,
     builder.setTournamentStageWidget(element.attribute("tournamentStageWidget"));
     builder.setBracketStageWidget(element.attribute("bracketWidget"));
 
-    ChallongeWidget* newWidget = builder.build();
+    ProviderWidget* newWidget = builder.build(provider);
 
     newWidget->setObjectName(newWidgetId);
     newWidget->setGeometry(QRect(element.attribute("x").toInt(),

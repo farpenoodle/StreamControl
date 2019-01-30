@@ -37,11 +37,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "challongewidget.h"
+#include "smashggwidget.h"
 
 QString getPhase(TournamentType t, int currentRound, int tournamentEntrants);
 
-ChallongeWidget::ChallongeWidget(QWidget *parent,
+SmashggWidget::SmashggWidget(QWidget *parent,
                                  QMap<QString, QObject*>& widgetList,
                                  const QMap<QString, QString>& settings,
                                  QString playerOneWidgetId,
@@ -56,25 +56,23 @@ ChallongeWidget::ChallongeWidget(QWidget *parent,
     manager = new QNetworkAccessManager;
 };
 
-void ChallongeWidget::fetchTournaments()
+void SmashggWidget::fetchTournaments()
 {
-    QString urlString =
-        QString("https://api.challonge.com/v1/tournaments.json?state=in_progress");
-
-    QString organization = settings["challonge>organization"];
-    if (!organization.isEmpty())
-        urlString.append(QString("&subdomain=%1").arg(organization));
+    QString ownerId = settings["smashgg>ownerId"];
+    QJsonObject variables {
+        {"ownerId", ownerId},
+        {"perPage", 10}
+    };
 
     QNetworkRequest request(urlString);
+    QString data = smashggRequest(request, tourneysRequest, variables);
 
-    request.setRawHeader("Authorization", getAuthHeader());
-
-    QNetworkReply *reply = manager->get(request);
+    QNetworkReply *reply = manager->post(request, data.toLocal8Bit());
 
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentListJson()));
 }
 
-void ChallongeWidget::fetchMatches()
+void SmashggWidget::fetchMatches()
 {
     QString currentTournamentId;
     int currentIndex = tournamentsBox->currentIndex();
@@ -85,28 +83,36 @@ void ChallongeWidget::fetchMatches()
     else
         currentTournamentId = tournamentsBox->itemData(currentIndex).toString();
 
-    const QString urlString =
-        QString("https://api.challonge.com/v1/tournaments/%1.json?include_matches=1&include_participants=1").arg(currentTournamentId);
+    QJsonObject variables {
+        {"tourneyId", currentTournamentId}
+    };
 
     QNetworkRequest request(urlString);
 
-    request.setRawHeader("Authorization", getAuthHeader());
-
-    QNetworkReply *reply = manager->get(request);
+    QString data = smashggRequest(request, streamQueueRequest, variables);
+    QNetworkReply *reply = manager->post(request, data.toLocal8Bit());
 
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentJson()));
 }
 
-QByteArray ChallongeWidget::getAuthHeader() const
+QByteArray SmashggWidget::getAuthHeader() const
 {
-    QString concatenated = settings["challonge>username"] + ":" +
-                           settings["challonge>apiKey"];
-    QByteArray data = concatenated.toLocal8Bit().toBase64();
-    QString headerData = "Basic " + data;
+    QString headerData = "Bearer " + settings["smashgg>authenticationToken"];
     return headerData.toLocal8Bit();
 }
 
-void ChallongeWidget::processTournamentListJson()
+QString SmashggWidget::smashggRequest(QNetworkRequest& request, QString smashggRequestString, QJsonObject variables)
+{
+    request.setRawHeader("Authorization", getAuthHeader());
+    request.setRawHeader("Content-Type", "application/json");
+    QJsonObject data {
+        {"query", smashggRequestString},
+        {"variables", variables}
+    };
+    return QJsonDocument(data).toJson(QJsonDocument::Compact);
+}
+
+void SmashggWidget::processTournamentListJson()
 {
     statusLabel->setText("");
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
@@ -142,18 +148,20 @@ void ChallongeWidget::processTournamentListJson()
     tournamentsBox->clear();
     matchesBox->clear();
 
-    QJsonArray tournamentsArray = response.array();
+    QJsonArray tournamentsArray = response.object()["data"]
+                                          .toObject()["tournaments"]
+                                          .toObject()["nodes"]
+                                          .toArray();
     if (tournamentsArray.isEmpty())
     {
-        statusLabel->setText(labelText.arg("There are no tournaments currently in progress."));
+        statusLabel->setText(labelText.arg("No tournaments found with this owner."));
     }
     else
     {
         for (QJsonArray::const_iterator iter = tournamentsArray.constBegin();
              iter != tournamentsArray.constEnd(); iter++)
         {
-            QJsonObject tournamentRecord = iter->toObject();
-            QJsonObject tournamentObject = tournamentRecord["tournament"].toObject();
+            QJsonObject tournamentObject = iter->toObject();
             tournamentsBox->addItem(tournamentObject["name"].toString(),
                                     QString::number(tournamentObject["id"].toInt()));
         }
@@ -163,7 +171,7 @@ void ChallongeWidget::processTournamentListJson()
     updateCustomIdBoxState();
 }
 
-void ChallongeWidget::processTournamentJson()
+void SmashggWidget::processTournamentJson()
 {
     statusLabel->setText("");
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
@@ -193,45 +201,32 @@ void ChallongeWidget::processTournamentJson()
         return;
     }
 
-    currentTournamentJson = QJsonDocument::fromJson(replyData.toUtf8());
-    const QJsonObject tournamentObject = currentTournamentJson.object()["tournament"].toObject();
-
-    QString tournamentName = tournamentObject["name"].toString();
+    QJsonObject streamQueueJson = QJsonDocument::fromJson(replyData.toUtf8()).object()["data"].toObject();
+    QString tournamentName = streamQueueJson["tournament"].toObject()["name"].toString();
     currentTournamentLabel->setText(QString("Current Tournament: %1").arg(tournamentName));
 
-    QJsonArray participants = tournamentObject["participants"].toArray();
-    QJsonArray matches = tournamentObject["matches"].toArray();
+    QJsonArray setsJson = streamQueueJson["streamQueue"].toArray()[0].toObject()["sets"].toArray();
 
     matchesBox->clear();
     //Loop through the players and add them to an id->name map
     playerIdMap.clear();
-    for (QJsonArray::const_iterator iter = participants.constBegin();
-         iter != participants.constEnd(); iter++)
-    {
-        QJsonObject participant = iter->toObject()["participant"].toObject();
-        playerIdMap.insert(participant["id"].toInt(),
-                           participant["name"].toString());
-    }
 
-    for (QJsonArray::const_iterator iter = matches.constBegin();
-         iter != matches.constEnd(); iter++)
+    for (QJsonArray::const_iterator iter = setsJson.constBegin();
+         iter != setsJson.constEnd(); iter++)
     {
+        QJsonArray players = iter->toObject()["slots"].toArray();
+        QJsonObject p1Json = players[0].toObject()["entrant"].toObject();
+        QJsonObject p2Json = players[1].toObject()["entrant"].toObject();
+        QString p1Name = p1Json["name"].toString();
+        QString p2Name = p2Json["name"].toString();
+        QString str = QString("%1 vs %2").arg(p1Name, p2Name);
+        QVariantList matchDetails;
+        matchDetails.append("double elimination");
+        matchDetails.append(-1);
+        matchDetails.append(iter->toObject()["fullRoundText"].toString());
+        matchDetails.append(p1Name);
+        matchDetails.append(p2Name);
         QJsonObject match = iter->toObject()["match"].toObject();
-
-        if (match["state"].toString() == "open")
-        {
-            QString player1Name = playerIdMap.value(match["player1_id"].toInt());
-            QString player2Name = playerIdMap.value(match["player2_id"].toInt());
-
-            QString str = QString("%1 vs %2").arg(player1Name, player2Name);
-
-            QVariantList matchDetails;
-            matchDetails.append(tournamentObject["tournament_type"].toString());
-            matchDetails.append(tournamentObject["participants_count"].toInt());
-            matchDetails.append(match["round"].toInt());
-            matchDetails.append(player1Name);
-            matchDetails.append(player2Name);
-            matchesBox->addItem(str, matchDetails);
-        }
+        matchesBox->addItem(str, matchDetails);
     }
 }

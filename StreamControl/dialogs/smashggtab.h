@@ -25,41 +25,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef DIALOG_WIDGETSETTINGSDIALOG_H
-#define DIALOG_WIDGETSETTINGSDIALOG_H
+#ifndef DIALOG_SMASHGGTAB_H
+#define DIALOG_SMASHGGTAB_H
 
-#include <QDialog>
-#include <QTabWidget>
-#include <QDialogButtonBox>
-#include <QMap>
-#include <QString>
+#include <QWidget>
 
-class SmashggTab;
-class BracketTab;
+class QLineEdit;
 
-class WidgetSettingsDialog : public QDialog
+class SmashggTab : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit WidgetSettingsDialog(QWidget *parent = 0);
+    explicit SmashggTab(QMap<QString, QString>& settings, QWidget *parent = 0);
 
-    void setConfig(QMap<QString, QString> config);
-    QMap<QString, QString> getConfig() const;
-
-public slots:
-    void saveDetails();
-
+    QLineEdit* smashggOwnerIdEdit;
+    QLineEdit* smashggAuthenticationTokenEdit;
 private:
-
-    QMap<QString, QString> settings;
-
-    SmashggTab* smashggTab;
-    BracketTab* bracketTab;
-
-    QTabWidget *tabWidget;
-    QDialogButtonBox *buttonBox;
-
+    QMap<QString, QString>& settings;
 };
 
-#endif // DIALOG_WIDGETSETTINGSDIALOG_H
+#endif //DIALOG_SMASHGGTAB_H

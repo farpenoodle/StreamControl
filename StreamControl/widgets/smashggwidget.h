@@ -25,12 +25,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef WIDGETS_CHALLONGEWIDGET_H
-#define WIDGETS_CHALLONGEWIDGET_H
+#ifndef WIDGETS_SMASHGGWIDGET_H
+#define WIDGETS_SMASHGGWIDGET_H
 
 #include <QWidget>
 #include <QMap>
-#include <QJsonDocument>
+#include <QJsonObject>
 #include "providerwidget.h"
 
 class QPushButton;
@@ -39,14 +39,15 @@ class QComboBox;
 class QGridLayout;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QNetworkRequest;
 class QAuthenticator;
 class QLineEdit;
 
-class ChallongeWidget : public ProviderWidget
+class SmashggWidget : public ProviderWidget
 {
     Q_OBJECT
 public:
-    explicit ChallongeWidget(QWidget *parent,
+    explicit SmashggWidget(QWidget *parent,
                                  QMap<QString, QObject*>& widgets,
                                  const QMap<QString, QString>& settings,
                                  QString playerOneWidget,
@@ -69,6 +70,7 @@ private:
     QNetworkAccessManager   *manager;
 
     QByteArray getAuthHeader() const;
+    QString smashggRequest(QNetworkRequest& request, QString smashggRequest, QJsonObject variables);
 
     // Sets up tournament structures in terms of tournament nodes
     //void setUpTournamentNodes();
@@ -83,6 +85,40 @@ private:
 
     // Saves challonge bracket data to a file in json format
     //void writeBracketToFile();
+
+    QString urlString = "https://api.smash.gg/gql/alpha";
+    QString tourneysRequest =
+            R"(query TournamentsByOwner($ownerId: Int, $perPage: Int) {
+                tournaments(query: {
+                    perPage: $perPage
+                    filter: {
+                        ownerId: $ownerId
+                    }
+                    sort: startAt
+                }) {
+                    nodes {
+                        id
+                        name
+                    }
+                }
+            })";
+    QString streamQueueRequest =
+            R"(query StreamQueue($tourneyId: Int!) {
+                tournament(id: $tourneyId) {
+                    name
+                }
+                streamQueue(tournamentId: $tourneyId) {
+                    sets {
+                        id
+                        fullRoundText
+                        slots {
+                            entrant {
+                                name
+                            }
+                        }
+                    }
+                }
+            })";
 };
 
-#endif // WIDGETS_CHALLONGEWIDGET_H
+#endif // WIDGETS_SMASHGGWIDGET_H
