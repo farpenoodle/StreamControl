@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "providerwidgetbuilder.h"
 #include "providerwidget.h"
 #include "challongewidget.h"
+#include "smashggwidget.h"
 
 ProviderWidgetBuilder::ProviderWidgetBuilder(QWidget *parent,
                                                QMap<QString, QObject*>& widgetList,
@@ -98,6 +99,11 @@ ProviderWidget* ProviderWidgetBuilder::build(ProviderWidgetBuilder::Provider pro
                                    outputFileName,
                                    bracketWidgets);
     } else if (provider == Provider::Smashgg) {
-        return nullptr;
+        return new SmashggWidget(parent, widgetList, settings,
+                                   playerOneWidget, playerTwoWidget,
+                                   tournamentStageWidget,
+                                   bracketStageWidget,
+                                   outputFileName,
+                                   bracketWidgets);
     }
 }

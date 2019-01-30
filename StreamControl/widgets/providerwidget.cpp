@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QFile>
 
 #include "providerwidget.h"
+#include "challongewidget.h" // BAD! Remove and refactor asap.
 
 ProviderWidget::ProviderWidget(QWidget *parent,
                                QMap<QString, QObject*>& widgetList,
@@ -477,29 +478,35 @@ void ProviderWidget::setMatchData()
         QLineEdit* tournamentStageWidget = (QLineEdit*)widgetList[tournamentStageWidgetId];
         if (tournamentStageWidget)
         {
-            //Also calculate the current tournament stage
-            int playerCount = matchDetails[1].toInt();
-            int roundNumber = matchDetails[2].toInt();
-            QString tournamentTypeString = matchDetails[0].toString();
+            if (typeid(this) == typeid(ChallongeWidget)) {
+                //Also calculate the current tournament stage
+                int playerCount = matchDetails[1].toInt();
+                int roundNumber = matchDetails[2].toInt();
+                QString tournamentTypeString = matchDetails[0].toString();
 
-            TournamentType tournamentType = DOUBLE_ELIMINATION;
-            if (tournamentTypeString == "double elimination")
-                tournamentType = DOUBLE_ELIMINATION;
-            if (tournamentTypeString == "single elimination")
-                tournamentType = SINGLE_ELIMINATION;
-            if (tournamentTypeString == "round robin")
-                tournamentType = ROUND_ROBIN;
+                TournamentType tournamentType = DOUBLE_ELIMINATION;
+                if (tournamentTypeString == "double elimination")
+                    tournamentType = DOUBLE_ELIMINATION;
+                if (tournamentTypeString == "single elimination")
+                    tournamentType = SINGLE_ELIMINATION;
+                if (tournamentTypeString == "round robin")
+                    tournamentType = ROUND_ROBIN;
 
 
-            //TODO: Hard-coded for now - externalize the strings
-            QString phase = getPhase(tournamentType, roundNumber, playerCount);
-            tournamentStageWidget->setText(phase);
+                //TODO: Hard-coded for now - externalize the strings
+                QString phase = getPhase(tournamentType, roundNumber, playerCount);
+                tournamentStageWidget->setText(phase);
+            } else
+                tournamentStageWidget->setText(matchDetails[2].toString());
         }
 
         QLineEdit* bracketWidget = (QLineEdit*)widgetList[bracketWidgetId];
         if (bracketWidget)
         {
-            bracketWidget->setText(currentTournamentJson.object()["tournament"].toObject()["url"].toString());
+            if (typeid(this) == typeid(ChallongeWidget))
+                bracketWidget->setText(currentTournamentJson.object()["tournament"].toObject()["url"].toString());
+            else
+                bracketWidget->setText(currentTournamentLabel->text().replace("Current Tournament: ", ""));
         }
     }
 }
