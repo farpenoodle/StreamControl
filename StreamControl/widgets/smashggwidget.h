@@ -95,6 +95,9 @@ private:
                 tournament(slug: $tourneySlug) {
                     name
                     streamQueue {
+                        stream {
+                            streamName
+                        }
                         sets {
                             id
                             fullRoundText

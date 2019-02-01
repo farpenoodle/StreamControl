@@ -54,6 +54,7 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     connect(smashggTab->smashggOwnerIdEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
+    connect(smashggTab->smashggStreamNameEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
     connect(smashggTab->smashggAuthenticationTokenEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
     connect(bracketTab->challongeUsernameEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
     connect(bracketTab->challongeApiKeyEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
@@ -67,6 +68,7 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
 void WidgetSettingsDialog::saveDetails()
 {
     settings["smashgg>ownerId"] = smashggTab->smashggOwnerIdEdit->text();
+    settings["smashgg>streamName"] = smashggTab->smashggStreamNameEdit->text();
     settings["smashgg>authenticationToken"] = smashggTab->smashggAuthenticationTokenEdit->text();
     settings["challonge>username"] = bracketTab->challongeUsernameEdit->text();
     settings["challonge>apiKey"] = bracketTab->challongeApiKeyEdit->text();
@@ -76,6 +78,7 @@ void WidgetSettingsDialog::saveDetails()
 void WidgetSettingsDialog::setConfig(QMap<QString, QString> newSettings) {
     settings = newSettings;
     smashggTab->smashggOwnerIdEdit->setText(settings.value("smashgg>ownerId"));
+    smashggTab->smashggStreamNameEdit->setText(settings.value("smashgg>streamName"));
     smashggTab->smashggAuthenticationTokenEdit->setText(settings.value("smashgg>authenticationToken"));
     bracketTab->challongeUsernameEdit->setText(settings.value("challonge>username"));
     bracketTab->challongeApiKeyEdit->setText(settings.value("challonge>apiKey"));

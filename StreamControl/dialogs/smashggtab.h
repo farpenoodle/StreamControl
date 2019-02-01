@@ -40,6 +40,7 @@ public:
     explicit SmashggTab(QMap<QString, QString>& settings, QWidget *parent = 0);
 
     QLineEdit* smashggOwnerIdEdit;
+    QLineEdit* smashggStreamNameEdit;
     QLineEdit* smashggAuthenticationTokenEdit;
 private:
     QMap<QString, QString>& settings;

@@ -41,9 +41,14 @@ SmashggTab::SmashggTab(QMap<QString, QString>& settings, QWidget *parent) :
     smashggAuthenticationTokenEdit = new QLineEdit();
     smashggAuthenticationTokenEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 
+    QLabel *smashggStreamNameLabel = new QLabel(tr("Stream Name:"));
+    smashggStreamNameEdit = new QLineEdit();
+
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(smashggOwnerIdLabel);
     mainLayout->addWidget(smashggOwnerIdEdit);
+    mainLayout->addWidget(smashggStreamNameLabel);
+    mainLayout->addWidget(smashggStreamNameEdit);
     mainLayout->addWidget(smashggAuthenticationTokenLabel);
     mainLayout->addWidget(smashggAuthenticationTokenEdit);
     mainLayout->addStretch(1);

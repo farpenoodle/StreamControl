@@ -206,27 +206,40 @@ void SmashggWidget::processTournamentJson()
     QString tournamentName = tournamentJson["name"].toString();
     currentTournamentLabel->setText(QString("Current Tournament: %1").arg(tournamentName));
 
-    QJsonArray setsJson = tournamentJson["streamQueue"].toArray()[0].toObject()["sets"].toArray();
+    QJsonArray streamQueues = tournamentJson["streamQueue"].toArray();
 
     matchesBox->clear();
 
-    for (QJsonArray::const_iterator iter = setsJson.constBegin();
-         iter != setsJson.constEnd(); iter++)
+    const QString userStreamName = settings["smashgg>streamName"];
+
+    for (QJsonArray::const_iterator queueIter = streamQueues.constBegin();
+         queueIter != streamQueues.constEnd(); ++queueIter)
     {
-        QJsonArray players = iter->toObject()["slots"].toArray();
-        QJsonObject p1Json = players[0].toObject()["entrant"].toObject();
-        QJsonObject p2Json = players[1].toObject()["entrant"].toObject();
-        QString p1Name = p1Json["name"].toString();
-        QString p2Name = p2Json["name"].toString();
-        QString str = QString("%1 vs %2").arg(p1Name, p2Name);
-        QVariantList matchDetails;
-        matchDetails.append("double elimination");
-        matchDetails.append(tournamentName);
-        matchDetails.append(iter->toObject()["fullRoundText"].toString());
-        matchDetails.append(p1Name);
-        matchDetails.append(p2Name);
-        QJsonObject match = iter->toObject()["match"].toObject();
-        matchesBox->addItem(str, matchDetails);
+        const QJsonObject currentQueue = queueIter->toObject();
+        const QJsonObject queueStream = currentQueue["stream"].toObject();
+        const QString queueStreamName = queueStream["streamName"].toString();
+        if (userStreamName.isEmpty() ||
+                QString::compare(userStreamName, queueStreamName, Qt::CaseInsensitive) == 0) {
+            const QJsonArray sets = currentQueue["sets"].toArray();
+            for (QJsonArray::const_iterator setIter = sets.constBegin();
+                 setIter != sets.constEnd(); setIter++)
+            {
+                QJsonArray players = setIter->toObject()["slots"].toArray();
+                QJsonObject p1Json = players[0].toObject()["entrant"].toObject();
+                QJsonObject p2Json = players[1].toObject()["entrant"].toObject();
+                QString p1Name = p1Json["name"].toString();
+                QString p2Name = p2Json["name"].toString();
+                QString str = QString("%1 vs %2").arg(p1Name, p2Name);
+                QVariantList matchDetails;
+                matchDetails.append("double elimination");
+                matchDetails.append(tournamentName);
+                matchDetails.append(setIter->toObject()["fullRoundText"].toString());
+                matchDetails.append(p1Name);
+                matchDetails.append(p2Name);
+                QJsonObject match = setIter->toObject()["match"].toObject();
+                matchesBox->addItem(str, matchDetails);
+            }
+        }
     }
 }
 
