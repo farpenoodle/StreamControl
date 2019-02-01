@@ -42,6 +42,8 @@ class QNetworkReply;
 class QAuthenticator;
 class QLineEdit;
 
+enum TournamentType {SINGLE_ELIMINATION, DOUBLE_ELIMINATION, ROUND_ROBIN};
+
 class ChallongeWidget : public ProviderWidget
 {
     Q_OBJECT
@@ -56,33 +58,35 @@ public:
                                  QString outputFileName,
                                  QMap<QString, QStringList> bracketWidgets);
 
+signals:
 
+public slots:
     virtual void fetchTournaments();
     virtual void fetchMatches();
     virtual void processTournamentListJson();
     virtual void processTournamentJson();
-    //virtual void setMatchData();
-    //virtual void setBracketData();
-    //virtual void updateCustomIdBoxState();
+    virtual void setMatchData();
+    virtual void setBracketData();
 
 private:
     QNetworkAccessManager   *manager;
 
+    // A map of player ids to names for the current tournament data
+    QMap<int, QString> playerIdMap;
+
     QByteArray getAuthHeader() const;
 
     // Sets up tournament structures in terms of tournament nodes
-    //void setUpTournamentNodes();
+    void setUpTournamentNodes();
 
     // Fills other stream control widgets with the data from a challonge bracket
-    //void fillBracketWidgets();
+    void fillBracketWidgets();
+    void fillBracketWithMatch(const QString matchId, const QJsonObject& match,
+                              const QMap<int, QString>& playerIdMap);
 
-    // Clears all challonge associated widgets specified in the layout file
-    //void clearBracketWidgets();
+    void fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match);
 
-    //void fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match);
-
-    // Saves challonge bracket data to a file in json format
-    //void writeBracketToFile();
+    QMap<QString, TournamentTreeNode> doubleElimNodes;
 };
 
 #endif // WIDGETS_CHALLONGEWIDGET_H

@@ -7,7 +7,7 @@
 class TournamentTreeNode
 {
 public:
-    TournamentTreeNode() {};
+    TournamentTreeNode() {}
 
     TournamentTreeNode(QString child1Id, QString child2Id)
         : child1Id(child1Id), child2Id(child2Id) {}
