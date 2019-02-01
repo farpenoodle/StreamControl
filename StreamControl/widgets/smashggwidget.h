@@ -57,34 +57,21 @@ public:
                                  QString outputFileName,
                                  QMap<QString, QStringList> bracketWidgets);
 
+signals:
 
+public slots:
     virtual void fetchTournaments();
     virtual void fetchMatches();
     virtual void processTournamentListJson();
     virtual void processTournamentJson();
-    //virtual void setMatchData();
-    //virtual void setBracketData();
-    //virtual void updateCustomIdBoxState();
+    virtual void setMatchData();
+    virtual void setBracketData();
 
 private:
-    QNetworkAccessManager   *manager;
+    QNetworkAccessManager *manager;
 
     QByteArray getAuthHeader() const;
     QString smashggRequest(QNetworkRequest& request, QString smashggRequest, QJsonObject variables);
-
-    // Sets up tournament structures in terms of tournament nodes
-    //void setUpTournamentNodes();
-
-    // Fills other stream control widgets with the data from a challonge bracket
-    //void fillBracketWidgets();
-
-    // Clears all challonge associated widgets specified in the layout file
-    //void clearBracketWidgets();
-
-    //void fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match);
-
-    // Saves challonge bracket data to a file in json format
-    //void writeBracketToFile();
 
     QString urlString = "https://api.smash.gg/gql/alpha";
     QString tourneysRequest =
@@ -97,23 +84,23 @@ private:
                     sort: startAt
                 }) {
                     nodes {
-                        id
+                        slug
                         name
                     }
                 }
             })";
-    QString streamQueueRequest =
-            R"(query StreamQueue($tourneyId: Int!) {
-                tournament(id: $tourneyId) {
+    QString streamQueueBySlugRequest =
+            R"(query StreamQueue($tourneySlug: String!) {
+                tournament(slug: $tourneySlug) {
                     name
-                }
-                streamQueue(tournamentId: $tourneyId) {
-                    sets {
-                        id
-                        fullRoundText
-                        slots {
-                            entrant {
-                                name
+                    streamQueue {
+                        sets {
+                            id
+                            fullRoundText
+                            slots {
+                                entrant {
+                                    name
+                                }
                             }
                         }
                     }

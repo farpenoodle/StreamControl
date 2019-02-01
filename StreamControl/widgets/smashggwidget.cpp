@@ -39,8 +39,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "smashggwidget.h"
 
-QString getPhase(TournamentType t, int currentRound, int tournamentEntrants);
-
 SmashggWidget::SmashggWidget(QWidget *parent,
                                  QMap<QString, QObject*>& widgetList,
                                  const QMap<QString, QString>& settings,
@@ -50,8 +48,9 @@ SmashggWidget::SmashggWidget(QWidget *parent,
                                  QString bracketWidgetId,
                                  QString outputFileName,
                                  QMap<QString, QStringList> bracketWidgets) :
-    ProviderWidget(parent, widgetList, settings, playerOneWidgetId, playerTwoWidgetId,
-                   tournamentStageWidgetId, bracketWidgetId, outputFileName, bracketWidgets)
+    ProviderWidget(parent, widgetList, settings, playerOneWidgetId,
+                   playerTwoWidgetId, tournamentStageWidgetId, bracketWidgetId,
+                   outputFileName, bracketWidgets, "or Tournament Slug:")
 {
     manager = new QNetworkAccessManager;
 };
@@ -74,22 +73,22 @@ void SmashggWidget::fetchTournaments()
 
 void SmashggWidget::fetchMatches()
 {
-    QString currentTournamentId;
+    QString currentTournamentSlug;
     int currentIndex = tournamentsBox->currentIndex();
 
     // If custom is selected...
     if (tournamentsBox->currentIndex() == tournamentsBox->count() - 1)
-        currentTournamentId = tournamentCustomLineEdit->text();
+        currentTournamentSlug = tournamentCustomLineEdit->text();
     else
-        currentTournamentId = tournamentsBox->itemData(currentIndex).toString();
+        currentTournamentSlug = tournamentsBox->itemData(currentIndex).toString();
 
     QJsonObject variables {
-        {"tourneyId", currentTournamentId}
+        {"tourneySlug", currentTournamentSlug}
     };
 
     QNetworkRequest request(urlString);
 
-    QString data = smashggRequest(request, streamQueueRequest, variables);
+    QString data = smashggRequest(request, streamQueueBySlugRequest, variables);
     QNetworkReply *reply = manager->post(request, data.toLocal8Bit());
 
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentJson()));
@@ -163,7 +162,7 @@ void SmashggWidget::processTournamentListJson()
         {
             QJsonObject tournamentObject = iter->toObject();
             tournamentsBox->addItem(tournamentObject["name"].toString(),
-                                    QString::number(tournamentObject["id"].toInt()));
+                                    tournamentObject["slug"].toString());
         }
     }
     tournamentsBox->addItem("Custom...", "custom");
@@ -201,15 +200,14 @@ void SmashggWidget::processTournamentJson()
         return;
     }
 
-    QJsonObject streamQueueJson = QJsonDocument::fromJson(replyData.toUtf8()).object()["data"].toObject();
-    QString tournamentName = streamQueueJson["tournament"].toObject()["name"].toString();
+    QJsonObject replyDataJson = QJsonDocument::fromJson(replyData.toUtf8()).object();
+    QJsonObject tournamentJson = replyDataJson["data"].toObject()["tournament"].toObject();
+    QString tournamentName = tournamentJson["name"].toString();
     currentTournamentLabel->setText(QString("Current Tournament: %1").arg(tournamentName));
 
-    QJsonArray setsJson = streamQueueJson["streamQueue"].toArray()[0].toObject()["sets"].toArray();
+    QJsonArray setsJson = tournamentJson["streamQueue"].toArray()[0].toObject()["sets"].toArray();
 
     matchesBox->clear();
-    //Loop through the players and add them to an id->name map
-    playerIdMap.clear();
 
     for (QJsonArray::const_iterator iter = setsJson.constBegin();
          iter != setsJson.constEnd(); iter++)
@@ -222,11 +220,29 @@ void SmashggWidget::processTournamentJson()
         QString str = QString("%1 vs %2").arg(p1Name, p2Name);
         QVariantList matchDetails;
         matchDetails.append("double elimination");
-        matchDetails.append(-1);
+        matchDetails.append(tournamentName);
         matchDetails.append(iter->toObject()["fullRoundText"].toString());
         matchDetails.append(p1Name);
         matchDetails.append(p2Name);
         QJsonObject match = iter->toObject()["match"].toObject();
         matchesBox->addItem(str, matchDetails);
+    }
+}
+
+void SmashggWidget::setBracketData()
+{
+
+}
+
+void SmashggWidget::setMatchData()
+{
+    QVariant var = (matchesBox->itemData(matchesBox->currentIndex()));
+    QVariantList matchDetails = var.toList();
+
+    if (!matchDetails.empty()) {
+        fillMatchWidgets(matchDetails[3].toString(),
+                         matchDetails[4].toString(),
+                         matchDetails[2].toString(),
+                         matchDetails[1].toString());
     }
 }
