@@ -1,6 +1,7 @@
 /**********************************************************************************
 
 Copyright (c) 2015, Antony Clarke
+Copyright (c) 2019, Miguel Müller <miguel.muller@tutanota.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

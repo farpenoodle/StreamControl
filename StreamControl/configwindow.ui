@@ -32,11 +32,16 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>270</x>
+     <x>240</x>
      <y>180</y>
-     <width>111</width>
+     <width>141</width>
      <height>30</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
@@ -94,7 +99,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="aboutTab">
     <attribute name="title">
@@ -125,6 +130,11 @@
        <height>80</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copyright © 2012-2015&lt;br/&gt;Yu Sheng &amp;quot;Farpenoodle&amp;quot; Tan &lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;http://www.round1.sg&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.round1.sg&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.farpnut.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.farpnut.net&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -146,6 +156,11 @@
        <width>341</width>
        <height>61</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
      </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://p.yusukekamiyamane.com/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Fugue Icons&lt;/span&gt;&lt;/a&gt; © 2013 Yusuke Kamiyamane. All rights reserved.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/pipacs/o2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;O2&lt;/span&gt;&lt;/a&gt; © 2012, Akos Polster. All rights reserved.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -197,10 +212,10 @@
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Oxygen-Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;Dodgepong - Initial Combobox implementation&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;ajclarke - Reload layout button/Challonge Widget/Settings Refactor&lt;br /&gt;c3r1c3 - OS X compatibility&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;MiggL - GNU/Linux compatibility&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;MiggL - GNU/Linux compatibility/smash.gg Widget&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </widget>
@@ -213,7 +228,7 @@ p, li { white-space: pre-wrap; }
       <rect>
        <x>150</x>
        <y>40</y>
-       <width>201</width>
+       <width>221</width>
        <height>16</height>
       </rect>
      </property>
@@ -224,10 +239,10 @@ p, li { white-space: pre-wrap; }
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>30</y>
-       <width>100</width>
-       <height>112</height>
+       <x>10</x>
+       <y>37</y>
+       <width>131</width>
+       <height>96</height>
       </rect>
      </property>
      <property name="text">
@@ -245,12 +260,18 @@ p, li { white-space: pre-wrap; }
       <rect>
        <x>150</x>
        <y>60</y>
-       <width>201</width>
+       <width>221</width>
        <height>40</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
      <property name="text">
-      <string>© 2015 Digia plc and/or its subsidiaries. </string>
+      <string>© 2018 The Qt Company Ltd
+and other contributors.</string>
      </property>
     </widget>
     <widget class="QPushButton" name="aboutQtButton">
@@ -293,8 +314,9 @@ p, li { white-space: pre-wrap; }
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Oxygen-Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;Copyright (c) 2012-2015, Tan Yu Sheng&lt;/span&gt;&lt;/p&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;Original work Copyright (c) 2012-2015, Tan Yu Sheng&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;Modified work Copyright (c) 2019, Miguel Müller&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;All rights reserved.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt;&quot;&gt;Redistribution and use in source and binary forms, with or without&lt;/span&gt;&lt;/p&gt;
@@ -316,6 +338,11 @@ p, li { white-space: pre-wrap; }
      <width>361</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Use CDATA (Useful if you want to use html tags in your SWFs.)
@@ -364,7 +391,7 @@ Do not check if you want to use with XSplit title plugin.</string>
   <widget class="QRadioButton" name="formatXML">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>120</x>
      <y>155</y>
      <width>50</width>
      <height>17</height>
@@ -380,9 +407,9 @@ Do not check if you want to use with XSplit title plugin.</string>
   <widget class="QRadioButton" name="formatJSON">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>180</x>
      <y>155</y>
-     <width>51</width>
+     <width>61</width>
      <height>17</height>
     </rect>
    </property>
@@ -396,9 +423,9 @@ Do not check if you want to use with XSplit title plugin.</string>
   <widget class="QRadioButton" name="formatBoth">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>250</x>
      <y>155</y>
-     <width>50</width>
+     <width>61</width>
      <height>17</height>
     </rect>
    </property>
@@ -414,7 +441,7 @@ Do not check if you want to use with XSplit title plugin.</string>
     <rect>
      <x>20</x>
      <y>155</y>
-     <width>81</width>
+     <width>101</width>
      <height>16</height>
     </rect>
    </property>
@@ -427,13 +454,18 @@ Do not check if you want to use with XSplit title plugin.</string>
     <rect>
      <x>20</x>
      <y>180</y>
-     <width>231</width>
+     <width>211</width>
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
-    <string>Use alternative hotkey handling in case the
-default doesn't work.</string>
+    <string>Use alternative hotkey handling
+in case the default doesn't work.</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="outputRelativePathCheckBox">
@@ -441,7 +473,7 @@ default doesn't work.</string>
     <rect>
      <x>220</x>
      <y>0</y>
-     <width>91</width>
+     <width>111</width>
      <height>31</height>
     </rect>
    </property>
@@ -454,7 +486,7 @@ default doesn't work.</string>
     <rect>
      <x>220</x>
      <y>50</y>
-     <width>91</width>
+     <width>111</width>
      <height>31</height>
     </rect>
    </property>
