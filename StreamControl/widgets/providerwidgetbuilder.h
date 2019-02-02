@@ -47,6 +47,7 @@ public:
                            const QMap<QString, QString>& settings);
 
     void setPlayerNameWidgets(QString playerOneWidget, QString playerTwoWidget);
+    void setPlayerCountryWidgets(QString playerOneCountryWidgetId, QString playerTwoCountryWidgetId);
     void setTournamentStageWidget(QString widgetId);
     void setBracketStageWidget(QString widgetId);
     void setOutputFileName(QString fileName);
@@ -61,6 +62,7 @@ private:
     QMap<QString, QObject*>& widgetList;
     const QMap<QString, QString>& settings;
     QString playerOneWidget, playerTwoWidget;
+    QString playerOneCountryWidget, playerTwoCountryWidget;
     QString tournamentStageWidget, bracketStageWidget;
     QMultiMap<QString, QStringList> matchWidgets;
     QString outputFileName;

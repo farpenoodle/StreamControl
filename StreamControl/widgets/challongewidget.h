@@ -50,14 +50,16 @@ class ChallongeWidget : public ProviderWidget
     Q_OBJECT
 public:
     explicit ChallongeWidget(QWidget *parent,
-                                 QMap<QString, QObject*>& widgets,
-                                 const QMap<QString, QString>& settings,
-                                 QString playerOneWidget,
-                                 QString playerTwoWidget,
-                                 QString tournamentStageWidget,
-                                 QString bracketWidgetId,
-                                 QString outputFileName,
-                                 QMap<QString, QStringList> bracketWidgets);
+                             QMap<QString, QObject*>& widgets,
+                             const QMap<QString, QString>& settings,
+                             QString playerOneWidget,
+                             QString playerTwoWidget,
+                             QString playerOneCountryWidget,
+                             QString playerTwoCountryWidget,
+                             QString tournamentStageWidget,
+                             QString bracketWidgetId,
+                             QString outputFileName,
+                             QMap<QString, QStringList> bracketWidgets);
 
 signals:
 

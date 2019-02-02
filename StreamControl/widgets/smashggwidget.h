@@ -49,14 +49,16 @@ class SmashggWidget : public ProviderWidget
     Q_OBJECT
 public:
     explicit SmashggWidget(QWidget *parent,
-                                 QMap<QString, QObject*>& widgets,
-                                 const QMap<QString, QString>& settings,
-                                 QString playerOneWidget,
-                                 QString playerTwoWidget,
-                                 QString tournamentStageWidget,
-                                 QString bracketWidgetId,
-                                 QString outputFileName,
-                                 QMap<QString, QStringList> bracketWidgets);
+                           QMap<QString, QObject*>& widgets,
+                           const QMap<QString, QString>& settings,
+                           QString playerOneWidget,
+                           QString playerTwoWidget,
+                           QString playerOneCountryWidget,
+                           QString playerTwoCountryWidget,
+                           QString tournamentStageWidget,
+                           QString bracketWidgetId,
+                           QString outputFileName,
+                           QMap<QString, QStringList> bracketWidgets);
 
 signals:
 
@@ -104,6 +106,13 @@ private:
                             slots {
                                 entrant {
                                     name
+                                    participants {
+                                        player {
+                                            gamerTag
+                                            prefix
+                                            country
+                                        }
+                                    }
                                 }
                             }
                         }

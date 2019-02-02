@@ -45,11 +45,13 @@ class ProviderWidget : public QWidget
     Q_OBJECT
 public:
     virtual ~ProviderWidget(){}
-    explicit ProviderWidget(QWidget *parent, QMap<QString, QObject*>& widgetList,
+    explicit ProviderWidget(QWidget *parent, QMap<QString, QObject*>& widgets,
                             const QMap<QString, QString>& settings,
-                            QString playerOneWidgetId,
-                            QString playerTwoWidgetId,
-                            QString tournamentStageWidgetId,
+                            QString playerOneWidget,
+                            QString playerTwoWidget,
+                            QString playerOneCountryWidget,
+                            QString playerTwoCountryWidget,
+                            QString tournamentStageWidget,
                             QString bracketWidgetId,
                             QString outputFileName,
                             QMap<QString, QStringList> bracketWidgets,
@@ -85,6 +87,7 @@ protected:
     void fillMatchWidgets(QString playerOne, QString playerTwo,
                           QString tournamentStage,
                           QString bracket);
+    void fillAdditionalMatchWidgets(QString playerOneCountry, QString playerTwoCountry);
     void fillBracketMatchWidget(QString matchId,
                                 QString playerOne, QString playerTwo,
                                 QString scoreOne, QString scoreTwo);
@@ -111,8 +114,9 @@ private:
     // So we can set the target widgets with the bracket data
     QMap<QString, QObject*>& widgetList;
 
-    const QString playerOneWidgetId, playerTwoWidgetId, tournamentStageWidgetId,
-      bracketWidgetId;
+    const QString playerOneWidgetId, playerTwoWidgetId,
+        playerOneCountryWidgetId, playerTwoCountryWidgetId,
+        tournamentStageWidgetId, bracketWidgetId;
 
     // ids of widgets to fill
     QMap<QString, QStringList> bracketWidgets;

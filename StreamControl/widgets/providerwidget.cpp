@@ -41,6 +41,8 @@ ProviderWidget::ProviderWidget(QWidget *parent,
                                const QMap<QString, QString>& settings,
                                QString playerOneWidgetId,
                                QString playerTwoWidgetId,
+                               QString playerOneCountryWidgetId,
+                               QString playerTwoCountryWidgetId,
                                QString tournamentStageWidgetId,
                                QString bracketWidgetId,
                                QString outputFileName,
@@ -48,7 +50,10 @@ ProviderWidget::ProviderWidget(QWidget *parent,
                                QString tournamentCustomLabelText) :
     QWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
-    tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId),
+    playerOneCountryWidgetId(playerOneCountryWidgetId),
+    playerTwoCountryWidgetId(playerTwoCountryWidgetId),
+    tournamentStageWidgetId(tournamentStageWidgetId),
+    bracketWidgetId(bracketWidgetId),
     bracketWidgets(bracketWidgets), outputFileName(outputFileName)
 {
     layout = new QGridLayout;
@@ -148,8 +153,7 @@ bool ProviderWidget::writeBracketToFile()
     return true;
 }
 
-void ProviderWidget::fillMatchWidgets(QString playerOne,
-                                      QString playerTwo,
+void ProviderWidget::fillMatchWidgets(QString playerOne, QString playerTwo,
                                       QString tournamentStage,
                                       QString bracket)
 {
@@ -165,6 +169,16 @@ void ProviderWidget::fillMatchWidgets(QString playerOne,
         tournamentStageWidget->setText(tournamentStage);
     if (bracketWidget)
         bracketWidget->setText(bracket);
+}
+
+void ProviderWidget::fillAdditionalMatchWidgets(QString playerOneCountry, QString playerTwoCountry)
+{
+    QLineEdit* p1CountryWidget = dynamic_cast<QLineEdit*>(widgetList[playerOneCountryWidgetId]);
+    QLineEdit* p2CountryWidget = dynamic_cast<QLineEdit*>(widgetList[playerTwoCountryWidgetId]);
+    if (p1CountryWidget && p2CountryWidget) {
+        p1CountryWidget->setText(playerOneCountry);
+        p2CountryWidget->setText(playerTwoCountry);
+    }
 }
 
 void ProviderWidget::updateCustomIdBoxState()

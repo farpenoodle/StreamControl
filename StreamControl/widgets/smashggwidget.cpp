@@ -41,17 +41,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "smashggwidget.h"
 
 SmashggWidget::SmashggWidget(QWidget *parent,
-                                 QMap<QString, QObject*>& widgetList,
-                                 const QMap<QString, QString>& settings,
-                                 QString playerOneWidgetId,
-                                 QString playerTwoWidgetId,
-                                 QString tournamentStageWidgetId,
-                                 QString bracketWidgetId,
-                                 QString outputFileName,
-                                 QMap<QString, QStringList> bracketWidgets) :
+                             QMap<QString, QObject*>& widgetList,
+                             const QMap<QString, QString>& settings,
+                             QString playerOneWidgetId,
+                             QString playerTwoWidgetId,
+                             QString playerOneCountryWidget,
+                             QString playerTwoCountryWidget,
+                             QString tournamentStageWidgetId,
+                             QString bracketWidgetId,
+                             QString outputFileName,
+                             QMap<QString, QStringList> bracketWidgets) :
     ProviderWidget(parent, widgetList, settings, playerOneWidgetId,
-                   playerTwoWidgetId, tournamentStageWidgetId, bracketWidgetId,
-                   outputFileName, bracketWidgets, "or Tournament Slug:")
+                   playerTwoWidgetId, playerOneCountryWidget,
+                   playerTwoCountryWidget,tournamentStageWidgetId,
+                   bracketWidgetId, outputFileName, bracketWidgets,
+                   "or Tournament Slug:")
 {
     manager = new QNetworkAccessManager;
 };
@@ -225,18 +229,31 @@ void SmashggWidget::processTournamentJson()
                  setIter != sets.constEnd(); setIter++)
             {
                 QJsonArray players = setIter->toObject()["slots"].toArray();
-                QJsonObject p1Json = players[0].toObject()["entrant"].toObject();
-                QJsonObject p2Json = players[1].toObject()["entrant"].toObject();
-                QString p1Name = p1Json["name"].toString();
-                QString p2Name = p2Json["name"].toString();
-                QString str = QString("%1 vs %2").arg(p1Name, p2Name);
+                QJsonObject entrant1 = players[0].toObject()["entrant"].toObject();
+                QJsonObject entrant2 = players[1].toObject()["entrant"].toObject();
+                QString e1Name = entrant1["name"].toString();
+                QString e2Name = entrant2["name"].toString();
+                QString e1Country = "";
+                QString e2Country = "";
                 QVariantList matchDetails;
                 matchDetails.append("double elimination");
                 matchDetails.append(tournamentName);
                 matchDetails.append(setIter->toObject()["fullRoundText"].toString());
-                matchDetails.append(p1Name);
-                matchDetails.append(p2Name);
-                QJsonObject match = setIter->toObject()["match"].toObject();
+                QJsonArray e1Members = entrant1["participants"].toArray();
+                QJsonArray e2Members = entrant2["participants"].toArray();
+                if (e1Members.size() == 1 && e2Members.size() == 1) { // 1vs1
+                    QJsonObject player1 = e1Members[0].toObject()["player"].toObject();
+                    QJsonObject player2 = e2Members[0].toObject()["player"].toObject();
+                    e1Name = player1["gamerTag"].toString();
+                    e2Name = player2["gamerTag"].toString();
+                    e1Country = player1["country"].toString();
+                    e2Country = player2["country"].toString();
+                }
+                matchDetails.append(e1Name);
+                matchDetails.append(e2Name);
+                matchDetails.append(e1Country);
+                matchDetails.append(e2Country);
+                QString str = QString("%1 vs %2").arg(e1Name, e2Name);
                 matchesBox->addItem(str, matchDetails);
             }
         }
@@ -258,5 +275,10 @@ void SmashggWidget::setMatchData()
                          matchDetails[4].toString(),
                          matchDetails[2].toString(),
                          matchDetails[1].toString());
+        QString c1 = matchDetails[5].toString();
+        QString c2 = matchDetails[6].toString();
+        if (!c1.isEmpty() && !c2.isEmpty()) {
+            fillAdditionalMatchWidgets(c1, c2);
+        }
     }
 }

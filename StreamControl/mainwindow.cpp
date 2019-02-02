@@ -1678,6 +1678,8 @@ void MainWindow::addProviderWidget(QDomElement element, QWidget *parent,
 
     builder.setPlayerNameWidgets(element.attribute("playerOneWidget"),
                                  element.attribute("playerTwoWidget"));
+    builder.setPlayerCountryWidgets(element.attribute("playerOneCountryWidget"),
+                                    element.attribute("playerTwoCountryWidget"));
 
     builder.setTournamentStageWidget(element.attribute("tournamentStageWidget"));
     builder.setBracketStageWidget(element.attribute("bracketWidget"));
@@ -1691,7 +1693,7 @@ void MainWindow::addProviderWidget(QDomElement element, QWidget *parent,
                                  element.attribute("height").toInt()));
 
     widgetList[newWidgetId] = newWidget;
-    widgetType[newWidgetId] = "challonge";
+    widgetType[newWidgetId] = "provider";
     layoutIterator++;
 }
 

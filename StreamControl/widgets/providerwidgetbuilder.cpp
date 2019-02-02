@@ -45,6 +45,13 @@ void ProviderWidgetBuilder::setPlayerNameWidgets(QString playerOneWidgetId,
     playerTwoWidget = playerTwoWidgetId;
 }
 
+void ProviderWidgetBuilder::setPlayerCountryWidgets(QString playerOneCountryWidgetId,
+                                                    QString playerTwoCountryWidgetId)
+{
+    playerOneCountryWidget = playerOneCountryWidgetId;
+    playerTwoCountryWidget = playerTwoCountryWidgetId;
+}
+
 void ProviderWidgetBuilder::setTournamentStageWidget(QString widgetId)
 {
     tournamentStageWidget = widgetId;
@@ -94,16 +101,18 @@ ProviderWidget* ProviderWidgetBuilder::build(ProviderWidgetBuilder::Provider pro
     if (provider == Provider::Challonge) {
         return new ChallongeWidget(parent, widgetList, settings,
                                    playerOneWidget, playerTwoWidget,
+                                   playerOneCountryWidget, playerTwoCountryWidget,
                                    tournamentStageWidget,
                                    bracketStageWidget,
                                    outputFileName,
                                    bracketWidgets);
     } else if (provider == Provider::Smashgg) {
         return new SmashggWidget(parent, widgetList, settings,
-                                   playerOneWidget, playerTwoWidget,
-                                   tournamentStageWidget,
-                                   bracketStageWidget,
-                                   outputFileName,
-                                   bracketWidgets);
+                                 playerOneWidget, playerTwoWidget,
+                                 playerOneCountryWidget, playerTwoCountryWidget,
+                                 tournamentStageWidget,
+                                 bracketStageWidget,
+                                 outputFileName,
+                                 bracketWidgets);
     }
 }
