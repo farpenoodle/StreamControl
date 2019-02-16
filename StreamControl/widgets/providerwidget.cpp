@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
+#include <QCheckBox>
 #include <QGridLayout>
 #include <QList>
 #include <QComboBox>
@@ -66,6 +67,7 @@ ProviderWidget::ProviderWidget(QWidget *parent,
     currentTournamentLabel = new QLabel();
     matchLabel = new QLabel();
     matchFetchButton = new QPushButton();
+    autoModeCheckBox = new QCheckBox();
     setMatchDataButton = new QPushButton();
     setBracketDataButton = new QPushButton();
     statusLabel = new QLabel();
@@ -76,6 +78,8 @@ ProviderWidget::ProviderWidget(QWidget *parent,
 
     tournamentFetchButton->setText("Fetch");
     matchFetchButton->setText("Load Tournament Data");
+    autoModeCheckBox->setText("Auto Mode");
+    autoModeCheckBox->setCheckState(Qt::CheckState::Unchecked);
     setMatchDataButton->setText("Set Match Details");
     setBracketDataButton->setText("Set Bracket Data");
     tournamentLabel->setText("Tournament");
@@ -102,7 +106,8 @@ ProviderWidget::ProviderWidget(QWidget *parent,
     frameLayout->addWidget(currentTournamentLabel, 0, 0, 1, -1);
     frameLayout->addWidget(matchLabel, 1, 0, 1, 1);
     frameLayout->addWidget(matchesBox, 1, 1, 1, 4);
-    frameLayout->addWidget(setMatchDataButton, 2, 0, 1, -1);
+    frameLayout->addWidget(autoModeCheckBox, 2, 0, 1, 1);
+    frameLayout->addWidget(setMatchDataButton, 2, 1, 1, 4);
     frameLayout->addWidget(setBracketDataButton, 3, 0, 1, -1);
     frame->setLayout(frameLayout);
 
@@ -110,6 +115,7 @@ ProviderWidget::ProviderWidget(QWidget *parent,
 
     connect(tournamentsBox, SIGNAL(currentIndexChanged(int)), dynamic_cast<QObject*>(this),
             SLOT(updateCustomIdBoxState()));
+    connect(autoModeCheckBox, SIGNAL(stateChanged(int)), dynamic_cast<QObject*>(this), SLOT(toggleAutoMode(int)));
 
     connect(tournamentFetchButton, SIGNAL(clicked()), dynamic_cast<QObject*>(this), SLOT(fetchTournaments()));
     connect(matchFetchButton, SIGNAL(clicked()), dynamic_cast<QObject*>(this), SLOT(fetchMatches()));
@@ -187,4 +193,11 @@ void ProviderWidget::updateCustomIdBoxState()
     bool boxEnabled = (tournamentsBox->currentIndex() == tournamentsBox->count() - 1);
 
     tournamentCustomLineEdit->setEnabled(boxEnabled);
+}
+
+void ProviderWidget::toggleAutoMode(int state) {
+    if (state == Qt::CheckState::Checked)
+        connect(matchesBox, SIGNAL(currentTextChanged(QString)), dynamic_cast<QObject*>(this), SLOT(setMatchData()));
+    else
+        disconnect(matchesBox, SIGNAL(currentTextChanged(QString)), dynamic_cast<QObject*>(this), SLOT(setMatchData()));
 }

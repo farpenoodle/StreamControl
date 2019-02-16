@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class QPushButton;
 class QLabel;
+class QCheckBox;
 class QComboBox;
 class QGridLayout;
 class QLineEdit;
@@ -67,6 +68,7 @@ public slots:
     virtual void setMatchData() = 0;
     virtual void setBracketData() = 0;
     void updateCustomIdBoxState();
+    void toggleAutoMode(int);
 
 protected:
     QComboBox       *tournamentsBox;
@@ -108,6 +110,7 @@ private:
     QLabel          *matchLabel;
     QPushButton     *matchFetchButton;
 
+    QCheckBox       *autoModeCheckBox;
     QPushButton     *setMatchDataButton;
     QPushButton     *setBracketDataButton;
 
