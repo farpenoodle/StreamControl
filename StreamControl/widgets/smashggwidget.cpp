@@ -231,6 +231,8 @@ void SmashggWidget::processTournamentJson()
                 QJsonArray players = setIter->toObject()["slots"].toArray();
                 QJsonObject entrant1 = players[0].toObject()["entrant"].toObject();
                 QJsonObject entrant2 = players[1].toObject()["entrant"].toObject();
+                if (entrant1.isEmpty() || entrant2.isEmpty())
+                    continue;
                 QString e1Name = entrant1["name"].toString();
                 QString e2Name = entrant2["name"].toString();
                 QString e1Country = "";
