@@ -235,10 +235,13 @@ void SmashggWidget::processTournamentJson()
                 QString e2Name = entrant2["name"].toString();
                 QString e1Country = "";
                 QString e2Country = "";
+                QString round = setIter->toObject()["fullRoundText"].toString()
+                        .replace("-Final", "s")
+                        .replace(" Final", " Finals");
                 QVariantList matchDetails;
                 matchDetails.append("double elimination");
                 matchDetails.append(tournamentName);
-                matchDetails.append(setIter->toObject()["fullRoundText"].toString());
+                matchDetails.append(round);
                 QJsonArray e1Members = entrant1["participants"].toArray();
                 QJsonArray e2Members = entrant2["participants"].toArray();
                 if (e1Members.size() == 1 && e2Members.size() == 1) { // 1vs1
