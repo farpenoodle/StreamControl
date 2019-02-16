@@ -101,7 +101,7 @@ ProviderWidget::ProviderWidget(QWidget *parent,
     QGridLayout* frameLayout = new QGridLayout;
     frameLayout->addWidget(currentTournamentLabel, 0, 0, 1, -1);
     frameLayout->addWidget(matchLabel, 1, 0, 1, 1);
-    frameLayout->addWidget(matchesBox, 1, 1, 1, 1);
+    frameLayout->addWidget(matchesBox, 1, 1, 1, 4);
     frameLayout->addWidget(setMatchDataButton, 2, 0, 1, -1);
     frameLayout->addWidget(setBracketDataButton, 3, 0, 1, -1);
     frame->setLayout(frameLayout);

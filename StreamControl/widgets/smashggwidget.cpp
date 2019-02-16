@@ -258,7 +258,7 @@ void SmashggWidget::processTournamentJson()
                 matchDetails.append(e2Name);
                 matchDetails.append(e1Country);
                 matchDetails.append(e2Country);
-                QString str = QString("%1 vs %2").arg(e1Name, e2Name);
+                QString str = QString("%3 - %1 vs %2").arg(e1Name, e2Name, round);
                 matchesBox->addItem(str, matchDetails);
             }
         }
