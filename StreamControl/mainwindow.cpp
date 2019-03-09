@@ -1684,6 +1684,8 @@ void MainWindow::addProviderWidget(QDomElement element, QWidget *parent,
     builder.setTournamentStageWidget(element.attribute("tournamentStageWidget"));
     builder.setBracketStageWidget(element.attribute("bracketWidget"));
 
+    builder.setClearWidgets(CSV::parseFromString(element.attribute("clearWidgets"))[0]);
+
     ProviderWidget* newWidget = builder.build(provider);
 
     newWidget->setObjectName(newWidgetId);

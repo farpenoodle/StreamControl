@@ -50,12 +50,13 @@ SmashggWidget::SmashggWidget(QWidget *parent,
                              QString tournamentStageWidgetId,
                              QString bracketWidgetId,
                              QString outputFileName,
-                             QMap<QString, QStringList> bracketWidgets) :
+                             QMap<QString, QStringList> bracketWidgets,
+                             QList<QString> clearWidgets) :
     ProviderWidget(parent, widgetList, settings, playerOneWidgetId,
                    playerTwoWidgetId, playerOneCountryWidget,
                    playerTwoCountryWidget,tournamentStageWidgetId,
                    bracketWidgetId, outputFileName, bracketWidgets,
-                   "or Tournament Slug:")
+                   clearWidgets, "or Tournament Slug:")
 {
     manager = new QNetworkAccessManager;
 };

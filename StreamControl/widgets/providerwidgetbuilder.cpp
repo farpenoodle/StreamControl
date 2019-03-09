@@ -62,6 +62,11 @@ void ProviderWidgetBuilder::setBracketStageWidget(QString widgetId)
     bracketStageWidget = widgetId;
 }
 
+void ProviderWidgetBuilder::setClearWidgets(QList<QString> widgetIds)
+{
+    clearWidgets = widgetIds;
+}
+
 void ProviderWidgetBuilder::setOutputFileName(QString fileName)
 {
     outputFileName = fileName;
@@ -105,7 +110,8 @@ ProviderWidget* ProviderWidgetBuilder::build(ProviderWidgetBuilder::Provider pro
                                    tournamentStageWidget,
                                    bracketStageWidget,
                                    outputFileName,
-                                   bracketWidgets);
+                                   bracketWidgets,
+                                   clearWidgets);
     } else if (provider == Provider::Smashgg) {
         return new SmashggWidget(parent, widgetList, settings,
                                  playerOneWidget, playerTwoWidget,
@@ -113,6 +119,7 @@ ProviderWidget* ProviderWidgetBuilder::build(ProviderWidgetBuilder::Provider pro
                                  tournamentStageWidget,
                                  bracketStageWidget,
                                  outputFileName,
-                                 bracketWidgets);
+                                 bracketWidgets,
+                                 clearWidgets);
     }
 }

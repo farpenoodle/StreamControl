@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QWidget>
 #include <QMap>
+#include <QList>
 #include <QJsonDocument>
 #include "tournamenttreenode.h"
 
@@ -56,6 +57,7 @@ public:
                             QString bracketWidgetId,
                             QString outputFileName,
                             QMap<QString, QStringList> bracketWidgets,
+                            QList<QString> clearWidgets,
                             QString tournamentCustomLabelText);
 
 signals:
@@ -120,6 +122,7 @@ private:
     const QString playerOneWidgetId, playerTwoWidgetId,
         playerOneCountryWidgetId, playerTwoCountryWidgetId,
         tournamentStageWidgetId, bracketWidgetId;
+    const QList<QString> clearWidgets;
 
     // ids of widgets to fill
     QMap<QString, QStringList> bracketWidgets;

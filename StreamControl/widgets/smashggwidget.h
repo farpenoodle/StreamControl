@@ -58,7 +58,8 @@ public:
                            QString tournamentStageWidget,
                            QString bracketWidgetId,
                            QString outputFileName,
-                           QMap<QString, QStringList> bracketWidgets);
+                           QMap<QString, QStringList> bracketWidgets,
+                           QList<QString> clearWidgets);
 
 signals:
 

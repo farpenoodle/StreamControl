@@ -50,6 +50,7 @@ public:
     void setPlayerCountryWidgets(QString playerOneCountryWidgetId, QString playerTwoCountryWidgetId);
     void setTournamentStageWidget(QString widgetId);
     void setBracketStageWidget(QString widgetId);
+    void setClearWidgets(QList<QString> widgetIds);
     void setOutputFileName(QString fileName);
 
     void addMatchWidget(QString tournamentStage,
@@ -64,6 +65,7 @@ private:
     QString playerOneWidget, playerTwoWidget;
     QString playerOneCountryWidget, playerTwoCountryWidget;
     QString tournamentStageWidget, bracketStageWidget;
+    QList<QString> clearWidgets;
     QMultiMap<QString, QStringList> matchWidgets;
     QString outputFileName;
 };

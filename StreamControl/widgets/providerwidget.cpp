@@ -34,6 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QList>
 #include <QComboBox>
 #include <QFile>
+#include <QCompleter>
+#include <QSpinBox>
 
 #include "providerwidget.h"
 
@@ -48,13 +50,14 @@ ProviderWidget::ProviderWidget(QWidget *parent,
                                QString bracketWidgetId,
                                QString outputFileName,
                                QMap<QString, QStringList> bracketWidgets,
+                               QList<QString> clearWidgets,
                                QString tournamentCustomLabelText) :
     QWidget(parent), widgetList(widgetList), settings(settings),
     playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
     playerOneCountryWidgetId(playerOneCountryWidgetId),
     playerTwoCountryWidgetId(playerTwoCountryWidgetId),
     tournamentStageWidgetId(tournamentStageWidgetId),
-    bracketWidgetId(bracketWidgetId),
+    bracketWidgetId(bracketWidgetId), clearWidgets(clearWidgets),
     bracketWidgets(bracketWidgets), outputFileName(outputFileName)
 {
     layout = new QGridLayout;
@@ -159,10 +162,30 @@ bool ProviderWidget::writeBracketToFile()
     return true;
 }
 
+void autoComplete(QCompleter* completer, QString completionText) {
+    if (completer) {
+        for (int i = 0; completer->setCurrentRow(i); i++) {
+            if (completionText == completer->currentCompletion())
+                emit(completer->activated(completionText));
+        }
+    }
+}
 void ProviderWidget::fillMatchWidgets(QString playerOne, QString playerTwo,
                                       QString tournamentStage,
                                       QString bracket)
 {
+    foreach (QString widgetToBeCleared, clearWidgets) {
+        QObject* widget = widgetList[widgetToBeCleared];
+        QSpinBox* spinBox = dynamic_cast<QSpinBox*>(widget);
+        QLineEdit* lineEdit = dynamic_cast<QLineEdit*>(widget);
+        QCheckBox* checkBox = dynamic_cast<QCheckBox*>(widget);
+        if (spinBox)
+            spinBox->setValue(0);
+        else if (lineEdit)
+            lineEdit->setText("");
+        else if (checkBox)
+            checkBox->setChecked(false);
+    }
     QLineEdit* playerOneWidget = dynamic_cast<QLineEdit*>(widgetList[playerOneWidgetId]);
     QLineEdit* playerTwoWidget = dynamic_cast<QLineEdit*>(widgetList[playerTwoWidgetId]);
     QLineEdit* tournamentStageWidget = dynamic_cast<QLineEdit*>(widgetList[tournamentStageWidgetId]);
@@ -170,6 +193,8 @@ void ProviderWidget::fillMatchWidgets(QString playerOne, QString playerTwo,
     if (playerOneWidget && playerTwoWidget) {
         playerOneWidget->setText(playerOne);
         playerTwoWidget->setText(playerTwo);
+        autoComplete(playerOneWidget->completer(), playerOne);
+        autoComplete(playerTwoWidget->completer(), playerTwo);
     }
     if (tournamentStageWidget)
         tournamentStageWidget->setText(tournamentStage);

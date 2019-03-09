@@ -50,12 +50,13 @@ ChallongeWidget::ChallongeWidget(QWidget *parent,
                                  QString tournamentStageWidgetId,
                                  QString bracketWidgetId,
                                  QString outputFileName,
-                                 QMap<QString, QStringList> bracketWidgets) :
+                                 QMap<QString, QStringList> bracketWidgets,
+                                 QList<QString> clearWidgets) :
     ProviderWidget(parent, widgetList, settings, playerOneWidgetId,
                    playerTwoWidgetId, playerOneCountryWidgetId,
                    playerTwoCountryWidgetId, tournamentStageWidgetId,
                    bracketWidgetId, outputFileName, bracketWidgets,
-                   "or Tournament ID:")
+                   clearWidgets, "or Tournament ID:")
 {
     manager = new QNetworkAccessManager;
     setUpTournamentNodes();
