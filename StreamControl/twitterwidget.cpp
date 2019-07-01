@@ -53,7 +53,7 @@ void TwitterWidget::fetchTweet()
             userName = rx.cap(1);
             tweetId = rx.cap(2);
 
-            QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId + "&include_entities=true";
+            QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId + "&include_entities=true&tweet_mode=extended";
 
             QNetworkRequest request;
 
@@ -100,7 +100,7 @@ void TwitterWidget::replyFinished() {
     QScriptValue urls = value.property("entities").property("urls");
     QScriptValue media = value.property("extended_entities").property("media");
 
-    tweetText = value.property("text").toString();
+    tweetText = value.property("full_text").toString();
     twitterName = value.property("user").property("name").toString();
     tweetCreated = value.property("created_at").toString();
     profilePicUrl = value.property("user").property("profile_image_url").toString().replace("_normal","");
