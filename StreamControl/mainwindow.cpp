@@ -1044,6 +1044,8 @@ void MainWindow::resetFields(QString widget)
             ((ScLineEdit*)widgetList[key])->setText("");
         } else if (widgetType[key] == "checkBox") {
             ((QCheckBox*)widgetList[key])->setChecked(false);
+        } else if (widgetType[key] == "comboBox") {
+            ((ScComboBox*)widgetList[key])->setCurrentIndex(0);
         }
     }
 }
@@ -1063,6 +1065,10 @@ void MainWindow::swapFields(QString widget)
         QString newField = swList2[i];
         QString tempData;
 
+        if (widgetType[currField] != widgetType[newField]){
+            return;
+        }
+
         if (widgetType[currField] == "lineEdit"){
             tempData = ((ScLineEdit*)widgetList[currField])->text();
             ((ScLineEdit*)widgetList[currField])->setText(((ScLineEdit*)widgetList[newField])->text());
@@ -1075,11 +1081,24 @@ void MainWindow::swapFields(QString widget)
             bool tempCheck = ((QCheckBox*)widgetList[currField])->isChecked();
             ((QCheckBox*)widgetList[currField])->setChecked(((QCheckBox*)widgetList[newField])->isChecked());
             ((QCheckBox*)widgetList[newField])->setChecked(tempCheck);
+        } else if (widgetType[currField] == "comboBox") {
+            ScComboBox *currComboBox = ((ScComboBox*)widgetList[currField]);
+            ScComboBox *newComboBox  = ((ScComboBox*)widgetList[newField]);
+            if (!currComboBox->isEditable()) {
+                if (currComboBox->findText(newComboBox->currentText()) == -1)
+                    return;
+            }
+            if (!newComboBox->isEditable()) {
+                if (newComboBox->findText(currComboBox->currentText()) == -1)
+                    return;
+            }
+            QString tempText = newComboBox->currentText();
+            newComboBox->setCurrentText(currComboBox->currentText());
+            currComboBox->setCurrentText(tempText);
         } else if (widgetType[currField] == "tsButton") {
             uint tempStamp = ((ScTSButton*)widgetList[currField])->getTimeStamp();
             ((ScTSButton*)widgetList[currField])->setTimeStamp(((ScTSButton*)widgetList[newField])->getTimeStamp());
             ((ScTSButton*)widgetList[newField])->setTimeStamp(tempStamp);
-
         }
      }
 
