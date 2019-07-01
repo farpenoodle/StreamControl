@@ -21,6 +21,7 @@ Added GNU/Linux Compatibility
 Added OSX Compatibility
 Added some basic HiDPI support on Windows
 smash.gg widget
+280 character Tweet support
 
 
 0.3 - July 3 2013
