@@ -225,11 +225,10 @@
 				if (!count)
 				count = iso.findCountryByCode(country);
 				if (!count) {
-					var count = new Array();
-					count['value'] = "unknown";
+          return "unknown";
 				}
 				
-				return count['value'];
+				return count['value'].toUpperCase();
 			}
 	</script>
 </head>

@@ -1,6 +1,7 @@
 /**********************************************************************************
 
 Copyright (c) 2015, Antony Clarke
+Copyright (c) 2019, Miguel Müller <miguel.muller@tutanota.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -26,9 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********************************************************************************/
 
 #include <QLineEdit>
-#include <QPushButton>
 #include <QLabel>
-#include <QGridLayout>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -38,107 +37,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QFile>
 
 #include "challongewidget.h"
 
-static QString GRAND_FINAL = "grandFinal";
-static QString GRAND_FINAL_RESET = "grandFinalReset";
-static QString WINNERS_FINAL = "winnersFinal";
-static QString WINNERS_SEMI_FINAL = "winnersSemiFinal";
-static QString WINNERS_QUARTER_FINAL = "winnersQuarterFinal";
-static QString LOSERS_FINAL = "losersFinal";
-static QString LOSERS_SEMI_FINAL = "losersSemiFinal";
-static QString TOP_6_LOSERS = "top6Losers";
-static QString TOP_8_LOSERS = "top8Losers";
-static QString TOP_12_LOSERS = "top12Losers";
-static QString TOP_16_LOSERS = "top16Losers";
-
-ChallongeWidget::ChallongeWidget(QWidget *parent) : QWidget(parent) {};
-
-ChallongeWidgetImpl::ChallongeWidgetImpl(QWidget *parent,
-                                           QMap<QString, QObject*>& widgetList,
-                                           const QMap<QString, QString>& settings,
-                                           QString playerOneWidgetId,
-                                           QString playerTwoWidgetId,
-                                           QString tournamentStageWidgetId,
-                                           QString bracketWidgetId,
-                                           QString outputFileName,
-                                           QMap<QString, QStringList> bracketWidgets) :
-    ChallongeWidget(parent), widgetList(widgetList), settings(settings),
-    playerOneWidgetId(playerOneWidgetId), playerTwoWidgetId(playerTwoWidgetId),
-    tournamentStageWidgetId(tournamentStageWidgetId), bracketWidgetId(bracketWidgetId),
-    bracketWidgets(bracketWidgets), outputFileName(outputFileName)
+ChallongeWidget::ChallongeWidget(QWidget *parent,
+                                 QMap<QString, QObject*>& widgetList,
+                                 const QMap<QString, QString>& settings,
+                                 QString playerOneWidgetId,
+                                 QString playerTwoWidgetId,
+                                 QString playerOneCountryWidgetId,
+                                 QString playerTwoCountryWidgetId,
+                                 QString tournamentStageWidgetId,
+                                 QString bracketWidgetId,
+                                 QString outputFileName,
+                                 QMap<QString, QStringList> bracketWidgets,
+                                 QList<QString> clearWidgets) :
+    ProviderWidget(parent, widgetList, settings, playerOneWidgetId,
+                   playerTwoWidgetId, playerOneCountryWidgetId,
+                   playerTwoCountryWidgetId, tournamentStageWidgetId,
+                   bracketWidgetId, outputFileName, bracketWidgets,
+                   clearWidgets, "or Tournament ID:")
 {
-    layout = new QGridLayout;
-    tournamentsBox = new QComboBox();
-    tournamentLabel = new QLabel();
-    tournamentCustomLabel = new QLabel();
-    tournamentCustomLineEdit = new QLineEdit();
-    tournamentFetchButton = new QPushButton();
-    matchesBox = new QComboBox();
-    currentTournamentLabel = new QLabel();
-    matchLabel = new QLabel();
-    matchFetchButton = new QPushButton();
-    setMatchDataButton = new QPushButton();
-    setBracketDataButton = new QPushButton();
-    statusLabel = new QLabel();
-
-    QFrame* frame = new QFrame();
-    frame->setFrameStyle(QFrame::Panel);
-    frame->setFrameShadow(QFrame::Sunken);
-
-    tournamentFetchButton->setText("Fetch");
-    matchFetchButton->setText("Load Tournament Data");
-    setMatchDataButton->setText("Set Match Details");
-    setBracketDataButton->setText("Set Bracket Data");
-    tournamentLabel->setText("Tournament");
-    currentTournamentLabel->setText("Current Tournament: (none)");
-    tournamentCustomLabel->setText("or Tournament ID:");
-    matchLabel->setText("Match");
-
-    statusLabel->setStyleSheet("QLabel { color : red; }");
-
-    tournamentsBox->addItem("Custom...", "custom"),
-
-    layout->addWidget(tournamentLabel, 0, 0, 1, 1);
-    layout->addWidget(tournamentsBox, 0, 1, 1, 2);
-    layout->addWidget(tournamentFetchButton, 0, 3, 1, 1);
-
-    layout->addWidget(tournamentCustomLabel, 1, 0, 1, 1);
-    layout->addWidget(tournamentCustomLineEdit, 1, 1, 1, 3);
-
-    layout->addWidget(matchFetchButton, 2, 0, 1, -1);
-
-    layout->addWidget(frame, 3, 0, 1, -1);
-
-    QGridLayout* frameLayout = new QGridLayout;
-    frameLayout->addWidget(currentTournamentLabel, 0, 0, 1, -1);
-    frameLayout->addWidget(matchLabel, 1, 0, 1, 1);
-    frameLayout->addWidget(matchesBox, 1, 1, 1, 1);
-    frameLayout->addWidget(setMatchDataButton, 2, 0, 1, -1);
-    frameLayout->addWidget(setBracketDataButton, 3, 0, 1, -1);
-    frame->setLayout(frameLayout);
-
-    layout->addWidget(statusLabel, 4, 0, 1, -1);
-
-
     manager = new QNetworkAccessManager;
-
-    connect(tournamentsBox, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(updateCustomIdBoxState()));
-
-    connect(tournamentFetchButton, SIGNAL(clicked()), this, SLOT(fetchTournaments()));
-    connect(matchFetchButton, SIGNAL(clicked()), this, SLOT(fetchMatches()));
-    connect(setMatchDataButton, SIGNAL(clicked()), this, SLOT(setMatchData()));
-    connect(setBracketDataButton, SIGNAL(clicked()), this, SLOT(setBracketData()));
-
-    this->setLayout(layout);
-
     setUpTournamentNodes();
-}
+};
 
-void ChallongeWidgetImpl::setUpTournamentNodes()
+void ChallongeWidget::setUpTournamentNodes()
 {
     // Set up top 16 structure for a double elimination tournament
     // Winners bracket prerequisite matches are commented out as there's no
@@ -175,7 +99,7 @@ void ChallongeWidgetImpl::setUpTournamentNodes()
     doubleElimNodes.insert("top16Losers4", TournamentTreeNode("", ""));
 }
 
-void ChallongeWidgetImpl::fetchTournaments()
+void ChallongeWidget::fetchTournaments()
 {
     QString urlString =
         QString("https://api.challonge.com/v1/tournaments.json?state=in_progress");
@@ -193,7 +117,7 @@ void ChallongeWidgetImpl::fetchTournaments()
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentListJson()));
 }
 
-void ChallongeWidgetImpl::fetchMatches()
+void ChallongeWidget::fetchMatches()
 {
     QString currentTournamentId;
     int currentIndex = tournamentsBox->currentIndex();
@@ -216,7 +140,7 @@ void ChallongeWidgetImpl::fetchMatches()
     connect(reply, SIGNAL(finished()), this, SLOT(processTournamentJson()));
 }
 
-QByteArray ChallongeWidgetImpl::getAuthHeader() const
+QByteArray ChallongeWidget::getAuthHeader() const
 {
     QString concatenated = settings["challonge>username"] + ":" +
                            settings["challonge>apiKey"];
@@ -225,7 +149,7 @@ QByteArray ChallongeWidgetImpl::getAuthHeader() const
     return headerData.toLocal8Bit();
 }
 
-void ChallongeWidgetImpl::processTournamentListJson()
+void ChallongeWidget::processTournamentListJson()
 {
     statusLabel->setText("");
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
@@ -282,7 +206,7 @@ void ChallongeWidgetImpl::processTournamentListJson()
     updateCustomIdBoxState();
 }
 
-void ChallongeWidgetImpl::processTournamentJson()
+void ChallongeWidget::processTournamentJson()
 {
     statusLabel->setText("");
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
@@ -377,7 +301,7 @@ QString getSingleEliminationMatchPhase(int currentRound, int tournamentEntrants)
             roundName = "Semi-Final";
             break;
         case 2:
-            roundName = "Quarter Final";
+            roundName = "Quarter-Final";
             break;
         case 3:
             roundName = "Last 16";
@@ -388,7 +312,6 @@ QString getSingleEliminationMatchPhase(int currentRound, int tournamentEntrants)
 
     return roundName;
 }
-
 
 // Returns how many rounds there will be in winners bracket in a DE tournament
 int getWinnersRounds(int numPlayers)
@@ -460,20 +383,19 @@ QString getDoubleEliminationMatchPhase(int currentRound, int tournamentEntrants)
         roundName = "Top 8 Losers";
     }
     if (realRound == roundLimit - 2)
-        roundName = "Quarter Final";
+        roundName = "Quarters";
     if (realRound == roundLimit - 1)
-        roundName = "Semi-Final";
+        roundName = "Semis";
     if (realRound == roundLimit)
-        roundName = "Final";
+        roundName = "Finals";
     if (currentRound == roundLimit + 1)
     {
         stage = "";
-        roundName = "Grand Final";
+        roundName = "Grand Finals";
     }
 
     return QString("%1%2").arg(stage, roundName).trimmed();
 }
-
 
 QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
 {
@@ -483,20 +405,15 @@ QString getPhase(TournamentType t, int currentRound, int tournamentEntrants)
         {
             QString templateString = "Round %1";
             return templateString.arg(currentRound);
-            break;
         }
         case SINGLE_ELIMINATION:
         {
             return getSingleEliminationMatchPhase(currentRound, tournamentEntrants);
-            break;
         }
         case DOUBLE_ELIMINATION:
         {
             return getDoubleEliminationMatchPhase(currentRound, tournamentEntrants);
-            break;
         }
-        default:
-            return "";
     }
 }
 
@@ -563,42 +480,27 @@ QJsonArray getPrerequisiteMatches(const QJsonArray& allMatches,
 }
 
 
-void fillBracketWithMatch(const QStringList boxes, const QJsonObject& match,
-                          const QMap<int, QString>& playerIdMap,
-                          QMap<QString, QObject*>& widgetList)
+void ChallongeWidget::fillBracketWithMatch(const QString matchId, const QJsonObject& match,
+                          const QMap<int, QString>& playerIdMap)
 {
-    const int playerOneId = match["player1_id"].toInt();
-    const int playerTwoId = match["player2_id"].toInt();
-
-    // Get competitor's names
-    ((QLineEdit*)widgetList[boxes[0]])->setText( playerIdMap[playerOneId] );
-    ((QLineEdit*)widgetList[boxes[2]])->setText( playerIdMap[playerTwoId] );
+    const QString playerOne = playerIdMap[match["player1_id"].toInt()];
+    const QString playerTwo = playerIdMap[match["player2_id"].toInt()];
+    QString scoreOne = "";
+    QString scoreTwo = "";
 
     const QStringList scores = match["scores_csv"].toString().split("-");
     if (scores.size() == 2)
     {
-        ((QLineEdit*)widgetList[boxes[1]])->setText(scores[0]);
-        ((QLineEdit*)widgetList[boxes[3]])->setText(scores[1]);
+        scoreOne = scores[0];
+        scoreTwo = scores[1];
     }
+    fillBracketMatchWidget(matchId, playerOne, playerTwo, scoreOne, scoreTwo);
 }
 
-void ChallongeWidgetImpl::clearBracketWidgets()
+void ChallongeWidget::fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match)
 {
-    foreach(const QStringList& widgets, bracketWidgets)
-    {
-        foreach(const QString& widgetId, widgets)
-        {
-            ((QLineEdit*)widgetList[widgetId])->setText( "" );
-        }
-    }
-}
-
-void ChallongeWidgetImpl::fillWidget(const QJsonArray& matches, QString matchId, const QJsonObject& match)
-{
-    if (!bracketWidgets.contains(matchId)) return;
-
     //fill match
-    fillBracketWithMatch(bracketWidgets[matchId], match, playerIdMap, widgetList);
+    fillBracketWithMatch(matchId, match, playerIdMap);
 
     //get tournament node
     const TournamentTreeNode& node = doubleElimNodes.value(matchId);
@@ -624,15 +526,7 @@ void ChallongeWidgetImpl::fillWidget(const QJsonArray& matches, QString matchId,
     }
 }
 
-void ChallongeWidgetImpl::writeBracketToFile()
-{
-    QFile bracketFile(settings["outputPath"] + outputFileName);
-    bracketFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
-    bracketFile.write(currentTournamentJson.toJson());
-    bracketFile.close();
-}
-
-void ChallongeWidgetImpl::fillBracketWidgets()
+void ChallongeWidget::fillBracketWidgets()
 {
     clearBracketWidgets();
 
@@ -652,70 +546,43 @@ void ChallongeWidgetImpl::fillBracketWidgets()
     if (grandFinalMatches.size() == 2)
     {
         const QJsonObject& grandFinalResetMatch = grandFinalMatches.last().toObject();
-        fillBracketWithMatch(bracketWidgets["grandFinalReset"], grandFinalResetMatch, playerIdMap, widgetList);
+        fillBracketWithMatch("grandFinalReset", grandFinalResetMatch, playerIdMap);
     }
 
     const QJsonObject& grandFinalMatch = grandFinalMatches.first().toObject();
     fillWidget(matches, "grandFinal", grandFinalMatch);
 }
 
-void ChallongeWidgetImpl::setBracketData()
+void ChallongeWidget::setBracketData()
 {
-    if (outputFileName.isEmpty())
+    if (!writeBracketToFile())
         fillBracketWidgets();
-    else
-        writeBracketToFile();
 }
 
-void ChallongeWidgetImpl::setMatchData()
+void ChallongeWidget::setMatchData()
 {
     QVariant var = (matchesBox->itemData(matchesBox->currentIndex()));
     QVariantList matchDetails = var.toList();
 
-    if (!matchDetails.empty())
-    {
-        if (widgetList[playerOneWidgetId] && widgetList[playerTwoWidgetId])
-        {
-            ///TODO: use a more generic set data method
-            ((QLineEdit*)widgetList[playerOneWidgetId])->setText(matchDetails[3].toString());
-            ((QLineEdit*)widgetList[playerTwoWidgetId])->setText(matchDetails[4].toString());
-        }
+    if (!matchDetails.empty()) {
+        //Also calculate the current tournament stage
+        int playerCount = matchDetails[1].toInt();
+        int roundNumber = matchDetails[2].toInt();
+        QString tournamentTypeString = matchDetails[0].toString();
+        TournamentType tournamentType = DOUBLE_ELIMINATION;
+        if (tournamentTypeString == "double elimination")
+            tournamentType = DOUBLE_ELIMINATION;
+        if (tournamentTypeString == "single elimination")
+            tournamentType = SINGLE_ELIMINATION;
+        if (tournamentTypeString == "round robin")
+            tournamentType = ROUND_ROBIN;
 
+        //TODO: Hard-coded for now - externalize the strings
+        QString phase = getPhase(tournamentType, roundNumber, playerCount);
 
-        QLineEdit* tournamentStageWidget = (QLineEdit*)widgetList[tournamentStageWidgetId];
-        if (tournamentStageWidget)
-        {
-            //Also calculate the current tournament stage
-            int playerCount = matchDetails[1].toInt();
-            int roundNumber = matchDetails[2].toInt();
-            QString tournamentTypeString = matchDetails[0].toString();
-
-            TournamentType tournamentType = DOUBLE_ELIMINATION;
-            if (tournamentTypeString == "double elimination")
-                tournamentType = DOUBLE_ELIMINATION;
-            if (tournamentTypeString == "single elimination")
-                tournamentType = SINGLE_ELIMINATION;
-            if (tournamentTypeString == "round robin")
-                tournamentType = ROUND_ROBIN;
-
-
-            //TODO: Hard-coded for now - externalize the strings
-            QString phase = getPhase(tournamentType, roundNumber, playerCount);
-            tournamentStageWidget->setText(phase);
-        }
-
-        QLineEdit* bracketWidget = (QLineEdit*)widgetList[bracketWidgetId];
-        if (bracketWidget)
-        {
-            bracketWidget->setText(currentTournamentJson.object()["tournament"].toObject()["url"].toString());
-        }
+        fillMatchWidgets(matchDetails[3].toString(),
+                         matchDetails[4].toString(),
+                         phase,
+                         currentTournamentJson.object()["tournament"].toObject()["url"].toString());
     }
-}
-
-void ChallongeWidgetImpl::updateCustomIdBoxState()
-{
-    // The last entry in the tournaments box should always be the custom option
-    bool boxEnabled = (tournamentsBox->currentIndex() == tournamentsBox->count() - 1);
-
-    tournamentCustomLineEdit->setEnabled(boxEnabled);
 }

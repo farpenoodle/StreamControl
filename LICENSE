@@ -1,6 +1,5 @@
-/**********************************************************************************
-
-Copyright (c) 2015, Antony Clarke
+Original work Copyright (c) 2012-2015, Tan Yu Sheng
+Modified work Copyright (c) 2019, Miguel Müller
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -18,48 +17,7 @@ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
 ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)  HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-**********************************************************************************/
-
-#ifndef DIALOG_WIDGETSETTINGSDIALOG_H
-#define DIALOG_WIDGETSETTINGSDIALOG_H
-
-#include <QDialog>
-#include <QTabWidget>
-#include <QDialogButtonBox>
-#include <QMap>
-#include <QString>
-
-class SmashggTab;
-class BracketTab;
-
-class WidgetSettingsDialog : public QDialog
-{
-    Q_OBJECT
-
-public:
-    explicit WidgetSettingsDialog(QWidget *parent = 0);
-
-    void setConfig(QMap<QString, QString> config);
-    QMap<QString, QString> getConfig() const;
-
-public slots:
-    void saveDetails();
-
-private:
-
-    QMap<QString, QString> settings;
-
-    SmashggTab* smashggTab;
-    BracketTab* bracketTab;
-
-    QTabWidget *tabWidget;
-    QDialogButtonBox *buttonBox;
-
-};
-
-#endif // DIALOG_WIDGETSETTINGSDIALOG_H

@@ -25,10 +25,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#include "challongewidgetbuilder.h"
+#include "providerwidgetbuilder.h"
+#include "providerwidget.h"
 #include "challongewidget.h"
+#include "smashggwidget.h"
 
-ChallongeWidgetBuilder::ChallongeWidgetBuilder(QWidget *parent,
+ProviderWidgetBuilder::ProviderWidgetBuilder(QWidget *parent,
                                                QMap<QString, QObject*>& widgetList,
                                                const QMap<QString, QString>& settings)
     : parent(parent), widgetList(widgetList), settings(settings)
@@ -36,29 +38,41 @@ ChallongeWidgetBuilder::ChallongeWidgetBuilder(QWidget *parent,
 
 }
 
-void ChallongeWidgetBuilder::setPlayerNameWidgets(QString playerOneWidgetId,
+void ProviderWidgetBuilder::setPlayerNameWidgets(QString playerOneWidgetId,
                                                   QString playerTwoWidgetId)
 {
     playerOneWidget = playerOneWidgetId;
     playerTwoWidget = playerTwoWidgetId;
 }
 
-void ChallongeWidgetBuilder::setTournamentStageWidget(QString widgetId)
+void ProviderWidgetBuilder::setPlayerCountryWidgets(QString playerOneCountryWidgetId,
+                                                    QString playerTwoCountryWidgetId)
+{
+    playerOneCountryWidget = playerOneCountryWidgetId;
+    playerTwoCountryWidget = playerTwoCountryWidgetId;
+}
+
+void ProviderWidgetBuilder::setTournamentStageWidget(QString widgetId)
 {
     tournamentStageWidget = widgetId;
 }
 
-void ChallongeWidgetBuilder::setBracketStageWidget(QString widgetId)
+void ProviderWidgetBuilder::setBracketStageWidget(QString widgetId)
 {
     bracketStageWidget = widgetId;
 }
 
-void ChallongeWidgetBuilder::setOutputFileName(QString fileName)
+void ProviderWidgetBuilder::setClearWidgets(QList<QString> widgetIds)
+{
+    clearWidgets = widgetIds;
+}
+
+void ProviderWidgetBuilder::setOutputFileName(QString fileName)
 {
     outputFileName = fileName;
 }
 
-void ChallongeWidgetBuilder::addMatchWidget(QString tournamentStage,
+void ProviderWidgetBuilder::addMatchWidget(QString tournamentStage,
                                             QString playerOneNameWidget,
                                             QString playerOneScoreWidget,
                                             QString playerTwoNameWidget,
@@ -73,7 +87,7 @@ void ChallongeWidgetBuilder::addMatchWidget(QString tournamentStage,
 }
 
 
-ChallongeWidget* ChallongeWidgetBuilder::build() const
+ProviderWidget* ProviderWidgetBuilder::build(ProviderWidgetBuilder::Provider provider) const
 {
     QMap<QString, QStringList> bracketWidgets;
 
@@ -89,12 +103,23 @@ ChallongeWidget* ChallongeWidgetBuilder::build() const
         }
     }
 
-    ChallongeWidget* widget =  new ChallongeWidgetImpl(parent, widgetList, settings,
-                                                       playerOneWidget, playerTwoWidget,
-                                                       tournamentStageWidget,
-                                                       bracketStageWidget,
-                                                       outputFileName,
-                                                       bracketWidgets);
-
-    return widget;
+    if (provider == Provider::Challonge) {
+        return new ChallongeWidget(parent, widgetList, settings,
+                                   playerOneWidget, playerTwoWidget,
+                                   playerOneCountryWidget, playerTwoCountryWidget,
+                                   tournamentStageWidget,
+                                   bracketStageWidget,
+                                   outputFileName,
+                                   bracketWidgets,
+                                   clearWidgets);
+    } else if (provider == Provider::Smashgg) {
+        return new SmashggWidget(parent, widgetList, settings,
+                                 playerOneWidget, playerTwoWidget,
+                                 playerOneCountryWidget, playerTwoCountryWidget,
+                                 tournamentStageWidget,
+                                 bracketStageWidget,
+                                 outputFileName,
+                                 bracketWidgets,
+                                 clearWidgets);
+    }
 }

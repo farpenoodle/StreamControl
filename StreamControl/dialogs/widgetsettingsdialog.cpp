@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QVBoxLayout>
 #include <QLineEdit>
 
+#include "smashggtab.h"
 #include "brackettab.h"
 #include "widgetsettingsdialog.h"
 
@@ -36,7 +37,9 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
     : QDialog(parent)
 {
     tabWidget = new QTabWidget;
+    smashggTab = new SmashggTab(settings);
     bracketTab = new BracketTab(settings);
+    tabWidget->addTab(smashggTab, tr("Smash.gg"));
     tabWidget->addTab(bracketTab, tr("Challonge"));
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
@@ -50,6 +53,9 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
+    connect(smashggTab->smashggOwnerIdEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
+    connect(smashggTab->smashggStreamNameEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
+    connect(smashggTab->smashggAuthenticationTokenEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
     connect(bracketTab->challongeUsernameEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
     connect(bracketTab->challongeApiKeyEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
     connect(bracketTab->challongeOrganizationEdit,SIGNAL( textEdited(QString) ),this, SLOT ( saveDetails() ));
@@ -61,6 +67,9 @@ WidgetSettingsDialog::WidgetSettingsDialog(QWidget *parent)
 
 void WidgetSettingsDialog::saveDetails()
 {
+    settings["smashgg>ownerId"] = smashggTab->smashggOwnerIdEdit->text();
+    settings["smashgg>streamName"] = smashggTab->smashggStreamNameEdit->text();
+    settings["smashgg>authenticationToken"] = smashggTab->smashggAuthenticationTokenEdit->text();
     settings["challonge>username"] = bracketTab->challongeUsernameEdit->text();
     settings["challonge>apiKey"] = bracketTab->challongeApiKeyEdit->text();
     settings["challonge>organization"] = bracketTab->challongeOrganizationEdit->text();
@@ -68,6 +77,9 @@ void WidgetSettingsDialog::saveDetails()
 
 void WidgetSettingsDialog::setConfig(QMap<QString, QString> newSettings) {
     settings = newSettings;
+    smashggTab->smashggOwnerIdEdit->setText(settings.value("smashgg>ownerId"));
+    smashggTab->smashggStreamNameEdit->setText(settings.value("smashgg>streamName"));
+    smashggTab->smashggAuthenticationTokenEdit->setText(settings.value("smashgg>authenticationToken"));
     bracketTab->challongeUsernameEdit->setText(settings.value("challonge>username"));
     bracketTab->challongeApiKeyEdit->setText(settings.value("challonge>apiKey"));
     bracketTab->challongeOrganizationEdit->setText(settings.value("challonge>organization"));

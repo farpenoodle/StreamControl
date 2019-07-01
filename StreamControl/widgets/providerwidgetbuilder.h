@@ -25,41 +25,49 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef DIALOG_WIDGETSETTINGSDIALOG_H
-#define DIALOG_WIDGETSETTINGSDIALOG_H
+#ifndef WIDGETS_PROVIDERWIDGETBUILDER_H
+#define WIDGETS_PROVIDERWIDGETBUILDER_H
 
-#include <QDialog>
-#include <QTabWidget>
-#include <QDialogButtonBox>
+#include <QWidget>
 #include <QMap>
-#include <QString>
+#include <QMultiMap>
 
-class SmashggTab;
-class BracketTab;
+class ProviderWidget;
 
-class WidgetSettingsDialog : public QDialog
+class ProviderWidgetBuilder
 {
-    Q_OBJECT
-
 public:
-    explicit WidgetSettingsDialog(QWidget *parent = 0);
+    enum class Provider
+    {
+        Smashgg,
+        Challonge
+    };
 
-    void setConfig(QMap<QString, QString> config);
-    QMap<QString, QString> getConfig() const;
+    ProviderWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
+                           const QMap<QString, QString>& settings);
 
-public slots:
-    void saveDetails();
+    void setPlayerNameWidgets(QString playerOneWidget, QString playerTwoWidget);
+    void setPlayerCountryWidgets(QString playerOneCountryWidgetId, QString playerTwoCountryWidgetId);
+    void setTournamentStageWidget(QString widgetId);
+    void setBracketStageWidget(QString widgetId);
+    void setClearWidgets(QList<QString> widgetIds);
+    void setOutputFileName(QString fileName);
+
+    void addMatchWidget(QString tournamentStage,
+        QString playerOneNameWidget, QString playerOneScoreWidget,
+        QString playerTwoNameWidget, QString playerTwoScoreWidget);
+    ProviderWidget* build(Provider provider) const;
 
 private:
-
-    QMap<QString, QString> settings;
-
-    SmashggTab* smashggTab;
-    BracketTab* bracketTab;
-
-    QTabWidget *tabWidget;
-    QDialogButtonBox *buttonBox;
-
+    QWidget *parent;
+    QMap<QString, QObject*>& widgetList;
+    const QMap<QString, QString>& settings;
+    QString playerOneWidget, playerTwoWidget;
+    QString playerOneCountryWidget, playerTwoCountryWidget;
+    QString tournamentStageWidget, bracketStageWidget;
+    QList<QString> clearWidgets;
+    QMultiMap<QString, QStringList> matchWidgets;
+    QString outputFileName;
 };
 
-#endif // DIALOG_WIDGETSETTINGSDIALOG_H
+#endif // WIDGETS_PROVIDERWIDGETBUILDER_H

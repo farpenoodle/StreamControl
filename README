@@ -11,7 +11,7 @@ Rough how-to:
 Report bugs at http://github.com/farpenoodle/StreamControl/issues
 
 
-GNU+Linux build instructions:
+GNU/Linux build instructions:
 
 Install QtCreator and Qt5-script.
 In the same directory as StreamControl.pro run "qmake && make".

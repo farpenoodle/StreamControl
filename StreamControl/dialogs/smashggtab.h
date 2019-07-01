@@ -25,39 +25,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **********************************************************************************/
 
-#ifndef WIDGETS_CHALLONGEWIDGETBUILDER_H
-#define WIDGETS_CHALLONGEWIDGETBUILDER_H
+#ifndef DIALOG_SMASHGGTAB_H
+#define DIALOG_SMASHGGTAB_H
 
 #include <QWidget>
-#include <QMap>
-#include <QMultiMap>
 
-class ChallongeWidget;
+class QLineEdit;
 
-class ChallongeWidgetBuilder
+class SmashggTab : public QWidget
 {
+    Q_OBJECT
+
 public:
-    ChallongeWidgetBuilder(QWidget *parent, QMap<QString, QObject*>& widgetList,
-                           const QMap<QString, QString>& settings);
+    explicit SmashggTab(QMap<QString, QString>& settings, QWidget *parent = 0);
 
-    void setPlayerNameWidgets(QString playerOneWidget, QString playerTwoWidget);
-    void setTournamentStageWidget(QString widgetId);
-    void setBracketStageWidget(QString widgetId);
-    void setOutputFileName(QString fileName);
-
-    void addMatchWidget(QString tournamentStage,
-        QString playerOneNameWidget, QString playerOneScoreWidget,
-        QString playerTwoNameWidget, QString playerTwoScoreWidget);
-    ChallongeWidget* build() const;
-
+    QLineEdit* smashggOwnerIdEdit;
+    QLineEdit* smashggStreamNameEdit;
+    QLineEdit* smashggAuthenticationTokenEdit;
 private:
-    QWidget *parent;
-    QMap<QString, QObject*>& widgetList;
-    const QMap<QString, QString>& settings;
-    QString playerOneWidget, playerTwoWidget;
-    QString tournamentStageWidget, bracketStageWidget;
-    QMultiMap<QString, QStringList> matchWidgets;
-    QString outputFileName;
+    QMap<QString, QString>& settings;
 };
 
-#endif // WIDGETS_CHALLONGEWIDGETBUILDER_H
+#endif //DIALOG_SMASHGGTAB_H
