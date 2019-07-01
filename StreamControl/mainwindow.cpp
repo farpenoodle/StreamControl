@@ -1095,6 +1095,10 @@ void MainWindow::swapFields(QString widget)
             QString tempText = newComboBox->currentText();
             newComboBox->setCurrentText(currComboBox->currentText());
             currComboBox->setCurrentText(tempText);
+        } else if (widgetType[currField] == "tsButton") {
+            uint tempStamp = ((ScTSButton*)widgetList[currField])->getTimeStamp();
+            ((ScTSButton*)widgetList[currField])->setTimeStamp(((ScTSButton*)widgetList[newField])->getTimeStamp());
+            ((ScTSButton*)widgetList[newField])->setTimeStamp(tempStamp);
         }
      }
 
