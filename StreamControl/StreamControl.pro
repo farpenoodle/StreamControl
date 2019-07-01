@@ -34,4 +34,9 @@ macx {
     LIBS += -framework Carbon
 }
 
+
+win32 {
+    LIBS += -luser32
+}
+
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
