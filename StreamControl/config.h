@@ -28,7 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SC_VERSION "0.4"
+#define SC_VERSION "0.5"
 
 #define SC_XML 1
 #define SC_JSON 2
