@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 {
     //If on Windows set Hi DPI support
     #ifdef Q_OS_WIN
-        qputenv("QT_DEVICE_PIXEL_RATIO",QByteArray("auto"));
+        qputenv("QT_AUTO_SCREEN_SCALE_FACTOR","1");
     #endif
 
     QApplication a(argc, argv);
