@@ -1,5 +1,6 @@
 0.5
 -----------------------------------------
+smash.gg widget
 280 character Tweet support
 Make JSON default output format
 
@@ -25,7 +26,6 @@ Added noSave option to datasets to prevent from overwriting existing data
 Added GNU/Linux Compatibility
 Added OSX Compatibility
 Added some basic HiDPI support on Windows
-smash.gg widget
 
 
 0.3 - July 3 2013
