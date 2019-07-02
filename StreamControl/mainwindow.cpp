@@ -272,7 +272,7 @@ void MainWindow::loadSettings() {
         saveFormat = settings["format"].toInt();
 
         if(saveFormat < 1 || saveFormat > 3) {
-            saveFormat = SC_XML;
+            saveFormat = SC_JSON;
         }
 
         settings["format"] = QString::number(saveFormat);
@@ -294,8 +294,8 @@ void MainWindow::loadSettings() {
         settings["outputPath"] = outputPath;
         settings["useCDATA"] = "0";
         useCDATA = false;
-        settings["format"] = QString::number(SC_XML);
-        saveFormat = SC_XML;
+        settings["format"] = QString::number(SC_JSON);
+        saveFormat = SC_JSON;
 
         saveSettings();
     }
@@ -387,10 +387,10 @@ void MainWindow::loadSettingsFromXml(const QDomNode& element,
 
 void MainWindow::loadData()
 {
-    if (saveFormat == SC_XML || saveFormat == SC_Both) {
+    if (saveFormat == SC_XML) {
         loadXML();
     }
-    if (saveFormat == SC_JSON) {
+    if (saveFormat == SC_JSON || saveFormat == SC_Both) {
         loadJSON();
     }
 
@@ -1116,7 +1116,7 @@ void MainWindow::openConfig() {
         saveFormat = settings["format"].toInt();
 
         if(saveFormat < 1 || saveFormat > 3)
-            saveFormat = SC_XML;
+            saveFormat = SC_JSON;
 
         saveSettings();
         loadLayout();
