@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QMap>
+#include <QJsonDocument>
+#include <QJsonValue>
 
 class TwitterHandler;
 class QNetworkAccessManager;
@@ -30,8 +32,10 @@ private:
     QString         profilePicPath;
     QString         profilePicFilename;
     QString         profilePicUrl;
+    QJsonValue     tweetJSON;
     bool            picDone;
     bool            mediaDone;
+    bool            embedJSON;
     QVector<QMap<QString,QString> > urlArray;
     QVector<QMap<QString,QString> > mediaArray;
 
@@ -49,6 +53,7 @@ public slots:
     void picFinished();
     void mediaFinished();
     void setPath(QString);
+    void setEmbed(bool);
 
     QString getUsername();
     QString getTwitterName();
@@ -56,6 +61,8 @@ public slots:
     QString getProfilePicFilename();
     QString getProfilePicPath();
     QString getDate();
+    QJsonValue getJSON();
+    bool isEmbed();
     QVector<QMap<QString,QString> > getURLs();
     QVector<QMap<QString,QString> > getMedia();
 

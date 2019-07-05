@@ -12,6 +12,9 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 #include "o2/o2globals.h"
 #include "twitterhandler.h"
 
@@ -20,6 +23,7 @@ TwitterWidget::TwitterWidget(TwitterHandler * th,QWidget *parent) :
 {
     picDone = false;
     mediaDone = false;
+    embedJSON = false;
     layout = new QGridLayout;
     urlBox = new QLineEdit();
     label = new QLabel();
@@ -94,6 +98,14 @@ void TwitterWidget::replyFinished() {
 
     QScriptValue value;
     QScriptEngine engine;
+
+    QJsonDocument jsonDoc;
+    jsonDoc = QJsonDocument::fromJson(QString(replyData).toUtf8());
+
+    QJsonObject jsonObj;
+    jsonObj = jsonDoc.object();
+
+    tweetJSON = jsonObj;
 
     value = engine.evaluate("(" + QString(replyData) + ")");
 
@@ -251,6 +263,11 @@ void TwitterWidget::setPath(QString path) {
     profilePicPath = path;
 
 }
+void TwitterWidget::setEmbed(bool embed) {
+
+    embedJSON = embed;
+
+}
 
 QString TwitterWidget::getDate() {
 
@@ -288,6 +305,11 @@ QString TwitterWidget::getUsername() {
 
 }
 
+QJsonValue TwitterWidget::getJSON() {
+
+    return tweetJSON;
+}
+
 QVector<QMap<QString,QString> > TwitterWidget::getURLs() {
 
     return urlArray;
@@ -298,4 +320,8 @@ QVector<QMap<QString,QString> > TwitterWidget::getMedia() {
 
     return mediaArray;
 
+}
+
+bool TwitterWidget::isEmbed() {
+    return embedJSON;
 }

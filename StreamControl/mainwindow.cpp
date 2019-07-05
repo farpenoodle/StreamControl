@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCheckBox>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 #include <QProcess>
 #include <QScrollArea>
 #include <QDir>
@@ -892,6 +893,15 @@ QString MainWindow::saveJSON() {
 
             tweet["media"] = mediaContainer;
 
+            if (((TwitterWidget*)widgetList[
+                 i.key()])->isEmbed() == true){
+                QJsonValue jsonValue;
+
+                jsonValue = ((TwitterWidget*)widgetList[i.key()])->getJSON();
+
+                tweet.insert(QString("tweetjson"),jsonValue);
+            }
+
             Obj[i.key()] = tweet;
 
         } else if (wType == "tsButton") {
@@ -1643,6 +1653,10 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
     }
 
     ((TwitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
+
+    if(element.attribute("embedJSON") == "1") {
+        ((TwitterWidget*)widgetList[newTweet])->setEmbed(true);
+    }
 
     layoutIterator++;
 }
