@@ -252,8 +252,8 @@ void SmashggWidget::processTournamentJson()
                     QJsonObject player2 = e2Members[0].toObject()["player"].toObject();
                     e1Name = player1["gamerTag"].toString();
                     e2Name = player2["gamerTag"].toString();
-                    e1Country = player1["country"].toString();
-                    e2Country = player2["country"].toString();
+                    e1Country = player1["user"].toObject()["location"].toObject()["country"].toString();
+                    e2Country = player2["user"].toObject()["location"].toObject()["country"].toString();
                 }
                 matchDetails.append(e1Name);
                 matchDetails.append(e2Name);
