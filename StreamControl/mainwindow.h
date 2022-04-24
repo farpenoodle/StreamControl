@@ -137,6 +137,7 @@ private:
                              QMap<QString, QString>& settings,
                              bool appendNodeName = false,
                              QStringList prefix = QStringList());
+    void setWidgetFontSize(QWidget *widget, int fontSize);
 
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;

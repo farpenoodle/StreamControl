@@ -111,7 +111,9 @@ ProviderWidget::ProviderWidget(QWidget *parent,
     frameLayout->addWidget(matchesBox, 1, 1, 1, 4);
     frameLayout->addWidget(autoModeCheckBox, 2, 0, 1, 1);
     frameLayout->addWidget(setMatchDataButton, 2, 1, 1, 4);
-    frameLayout->addWidget(setBracketDataButton, 3, 0, 1, -1);
+    if (!bracketWidgets.isEmpty() || !outputFileName.isEmpty()) {
+        frameLayout->addWidget(setBracketDataButton, 3, 0, 1, -1);
+    }
     frame->setLayout(frameLayout);
 
     layout->addWidget(statusLabel, 4, 0, 1, -1);

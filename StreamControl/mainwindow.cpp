@@ -1244,6 +1244,8 @@ void MainWindow::loadLayout() {
         centralWidget = new QWidget(this);
     }
 
+    setWidgetFontSize(centralWidget, layout.attribute("fontSize", 0).toInt());
+
     setCentralWidget(centralWidget);
 
     if(layout.attribute("tabbed") == "1"){
@@ -1287,6 +1289,14 @@ void MainWindow::loadLayout() {
 void MainWindow::reloadLayout() {
     loadLayout();
     loadData();
+}
+
+void MainWindow::setWidgetFontSize(QWidget *widget, int fontSize) {
+    if (fontSize > 0) {
+        QFont* font = new QFont(widget->font());
+        font->setPointSize(fontSize);
+        widget->setFont(*font);
+    }
 }
 
 void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
@@ -1618,6 +1628,7 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
+    setWidgetFontSize(visualList[newLabel], element.attribute("fontSize", 0).toInt());
     ((QLabel*)visualList[newLabel])->setText(element.text());
 
     layoutIterator++;
@@ -1633,6 +1644,7 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
+    setWidgetFontSize((TwitterWidget*)widgetList[newTweet], element.attribute("fontSize", 0).toInt());
 
     QString picPath = "twitter"; // default path to twitter so the output directory isn't filled with pictures
 
@@ -1726,6 +1738,7 @@ void MainWindow::addProviderWidget(QDomElement element, QWidget *parent,
                                  element.attribute("y").toInt(),
                                  element.attribute("width").toInt(),
                                  element.attribute("height").toInt()));
+    setWidgetFontSize(newWidget, element.attribute("fontSize", 0).toInt());
 
     widgetList[newWidgetId] = newWidget;
     widgetType[newWidgetId] = "provider";
@@ -1741,6 +1754,7 @@ void MainWindow::addLine(QDomElement element, QWidget *parent) {
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
+    setWidgetFontSize(visualList[newLine], element.attribute("fontSize", 0).toInt());
     ((QFrame*)visualList[newLine])->setFrameShape(QFrame::HLine);
     ((QFrame*)visualList[newLine])->setFrameShadow(QFrame::Sunken);
 
@@ -1757,6 +1771,7 @@ void MainWindow::addCheckBox(QDomElement element, QWidget *parent) {
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
+    setWidgetFontSize((QCheckBox*)widgetList[newCheckBox], element.attribute("fontSize", 0).toInt());
     ((QCheckBox*)widgetList[newCheckBox])->setText(element.text());
     if(!element.attribute("toggleHotkey").isEmpty()) {
         addHotkey(element.attribute("toggleHotkey"),newCheckBox,"Toggle");
@@ -1780,6 +1795,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
+    setWidgetFontSize((ScComboBox*)widgetList[newComboBox], element.attribute("fontSize", 0).toInt());
 
     if (element.attribute("editable") == "true" || element.attribute("editable") == "1") {
         ((ScComboBox*)widgetList[newComboBox])->setEditable(true);
@@ -1895,6 +1911,7 @@ void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
             QRadioButton *newRadioButton = new QRadioButton(text,parent);
             newRadioButton->setGeometry(QRect(x,y,width,height));
             newRadioButton->setObjectName(radioName);
+            setWidgetFontSize(newRadioButton, radioButton.attribute("fontSize", 0).toInt() || element.attribute("fontSize", 0).toInt());
             if(radioIterator == 0)
                 newRadioButton->setChecked(true);
             ((ScRadioGroup*)widgetList[newRadioGroup])->addButton(newRadioButton,radioIterator);
@@ -1924,6 +1941,7 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
                                            element.attribute("y").toInt(),
                                            element.attribute("width").toInt(),
                                            element.attribute("height").toInt()));
+        setWidgetFontSize(visualList[newButton], element.attribute("fontSize", 0).toInt());
         ((QPushButton*)visualList[newButton])->setText(element.text());
         if (!element.attribute("tooltip").isEmpty()) {
             ((QPushButton*)visualList[newButton])->setToolTip(element.attribute("tooltip"));
@@ -1961,6 +1979,7 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
                                                  element.attribute("y").toInt(),
                                                  element.attribute("width").toInt(),
                                                  element.attribute("height").toInt()));
+        setWidgetFontSize(visualList[newButton], element.attribute("fontSize", 0).toInt());
         ((QPushButton*)visualList[newButton])->setText(element.text());
         if (!element.attribute("tooltip").isEmpty()) {
             ((QPushButton*)visualList[newButton])->setToolTip(element.attribute("tooltip"));
@@ -1987,6 +2006,7 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
                                            element.attribute("y").toInt(),
                                            element.attribute("width").toInt(),
                                            element.attribute("height").toInt()));
+        setWidgetFontSize((ScTSButton*)widgetList[newButton], element.attribute("fontSize", 0).toInt());
 
         ((ScTSButton*)widgetList[newButton])->setText(element.text());
 
@@ -2016,6 +2036,7 @@ void MainWindow::addButton(QDomElement element, QWidget *parent) {
                                            element.attribute("y").toInt(),
                                            element.attribute("width").toInt(),
                                            element.attribute("height").toInt()));
+        setWidgetFontSize(visualList[newButton], element.attribute("fontSize", 0).toInt());
 
         ((ScSetButton*)visualList[newButton])->setText(element.text());
 
@@ -2080,6 +2101,7 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
                                              element.attribute("y").toInt(),
                                              element.attribute("width").toInt(),
                                              element.attribute("height").toInt()));
+    setWidgetFontSize((ScLineEdit*)widgetList[newLineEdit], element.attribute("fontSize", 0).toInt());
     widgetType[newLineEdit] = "lineEdit";
 
     if (element.text() != "") {
@@ -2513,6 +2535,7 @@ void MainWindow::addSpinBox(QDomElement element, QWidget *parent) {
                                               element.attribute("y").toInt(),
                                               element.attribute("width").toInt(),
                                               element.attribute("height").toInt()));
+    setWidgetFontSize((QSpinBox*)widgetList[newSpinBox], element.attribute("fontSize", 0).toInt());
     if(!element.attribute("maximum").isEmpty()) {
         ((QSpinBox*)widgetList[newSpinBox])->setMaximum(element.attribute("maximum").toInt());
     }
@@ -2535,6 +2558,7 @@ QString MainWindow::addTabWidget(QDomElement element, QWidget *parent) {
                                                           element.attribute("y").toInt(),
                                                           element.attribute("width").toInt(),
                                                           element.attribute("height").toInt()));
+    setWidgetFontSize(visualList[tabSet], element.attribute("fontSize", 0).toInt());
 
     layoutIterator++;
     return tabSet;
