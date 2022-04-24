@@ -1862,6 +1862,13 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
         connect(completerList[newComboBox], SIGNAL(activated(QString)), this, SLOT(completerActivate(QString)));
 
     }
+
+    if(!element.attribute("nextHotkey").isEmpty()) {
+        addHotkey(element.attribute("nextHotkey"),newComboBox,"Next");
+    }
+    if(!element.attribute("previousHotkey").isEmpty()) {
+        addHotkey(element.attribute("previousHotkey"),newComboBox,"Previous");
+    }
 }
 
 void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {
@@ -2654,6 +2661,16 @@ void MainWindow::performHotkey(int hotkeyIndex) {
                 ((QCheckBox*)widgetList[widget])->setChecked(true);
             } else if (action == "Uncheck") {
                 ((QCheckBox*)widgetList[widget])->setChecked(false);
+            }
+        } else if (wType == "comboBox") {
+            int currentIndex = ((ScComboBox*)widgetList[widget])->currentIndex();
+            int length = ((ScComboBox*)widgetList[widget])->count();
+            if (action == "Next") {
+                int nextIndex = (currentIndex + 1 == length) ? 0 : currentIndex + 1;
+                ((ScComboBox*)widgetList[widget])->setCurrentIndex(nextIndex);
+            } else if (action == "Previous") {
+                int previousIndex = (currentIndex - 1 == -1) ? length - 1 : currentIndex - 1;
+                ((ScComboBox*)widgetList[widget])->setCurrentIndex(previousIndex);
             }
         }
     }
