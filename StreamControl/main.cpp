@@ -27,6 +27,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QApplication>
 #include "mainwindow.h"
+#include <QPalette>
+#include <QFile>
+#include <QDomDocument>
 
 int main(int argc, char *argv[])
 {
@@ -34,9 +37,57 @@ int main(int argc, char *argv[])
     #ifdef Q_OS_WIN
         qputenv("QT_AUTO_SCREEN_SCALE_FACTOR","1");
     #endif
-
-    QApplication a(argc, argv);
+    QApplication a(argc, argv);    
     a.setStyle("fusion");
+
+
+
+    QFile file("settings.xml");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QDomDocument doc;
+        doc.setContent(&file);
+        file.close();
+
+        QDomNode settings = doc.namedItem("settings");
+        QDomNode darkMode = settings.namedItem("darkMode");
+        if (!darkMode.isNull()) {
+            if (darkMode.firstChild().nodeValue() == "1") {
+
+                QPalette darkPalette;
+                darkPalette.setColor(QPalette::Window, QColor(53,53,53));
+                darkPalette.setColor(QPalette::WindowText, Qt::white);
+                darkPalette.setColor(QPalette::Base, QColor(25,25,25));
+                darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+                darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+                darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+                darkPalette.setColor(QPalette::Text, Qt::white);
+                darkPalette.setColor(QPalette::Button, QColor(53,53,53));
+                darkPalette.setColor(QPalette::ButtonText, Qt::white);
+                darkPalette.setColor(QPalette::BrightText, Qt::red);
+                darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+
+                darkPalette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
+                darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
+
+                darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+                darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+                a.setPalette(darkPalette);
+
+                a.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+            }
+
+        }
+
+    }
+
+
+
+
+
+
+
+
     MainWindow mainWindow;
     mainWindow.show();
     return a.exec();

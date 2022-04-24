@@ -56,6 +56,7 @@ public slots:
     void layoutRelativeToggle( int state );
     void CDATAToggle( int state );
     void altHotkeyToggle( int state );
+    void darkModeToggle( int state );
     void formatChange( int state );
     
 private:

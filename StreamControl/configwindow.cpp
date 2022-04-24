@@ -48,6 +48,7 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->layoutRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( layoutRelativeToggle( int ) ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
     connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
+    connect(ui->darkModeCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( darkModeToggle( int ) ));
     connect(ui->formatGroup,SIGNAL( buttonClicked(int) ),this, SLOT ( formatChange( int ) ));
 
     ui->outputPathTB->setDisabled(true);
@@ -104,6 +105,11 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
         ui->altHotkeyCheckbox->setCheckState(Qt::Checked);
     } else {
         ui->altHotkeyCheckbox->setCheckState(Qt::Unchecked);
+    }
+    if (configsettings["darkMode"] == "1") {
+        ui->darkModeCheckbox->setCheckState(Qt::Checked);
+    } else {
+        ui->darkModeCheckbox->setCheckState(Qt::Unchecked);
     }
 }
 
@@ -203,6 +209,14 @@ void ConfigWindow::altHotkeyToggle( int state ) {
         configsettings["altHotkeyHandling"] = "1";
     } else {
         configsettings["altHotkeyHandling"] = "0";
+    }
+}
+
+void ConfigWindow::darkModeToggle( int state ) {
+    if (state == Qt::Checked) {
+        configsettings["darkMode"] = "1";
+    } else {
+        configsettings["darkMode"] = "0";
     }
 }
 
