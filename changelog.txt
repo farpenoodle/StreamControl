@@ -1,8 +1,11 @@
 0.5
 -----------------------------------------
-smash.gg widget
+smash.gg widget (MiggL)
 280 character Tweet support
 Make JSON default output format
+Add hotkey support for navigating comboboxes (hperrin)
+Add font size configuration (MiggL)
+Add Dark Mode
 
 0.4
 -----------------------------------------
