@@ -1,7 +1,6 @@
 #include "twitterhandler.h"
 #include "twitterOauth.h"
 #include "o2twitter.h"
-#include "o2/o2globals.h"
 
 TwitterHandler::TwitterHandler(QObject *parent) :
     QObject(parent)

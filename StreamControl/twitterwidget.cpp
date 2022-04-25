@@ -15,7 +15,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
-#include "o2/o2globals.h"
+#include "o2/o0globals.h"
 #include "twitterhandler.h"
 
 TwitterWidget::TwitterWidget(TwitterHandler * th,QWidget *parent) :
