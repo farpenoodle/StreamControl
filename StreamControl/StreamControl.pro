@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml widgets network script
+QT       += core gui xml widgets network
 
 TARGET = StreamControl
 TEMPLATE = app

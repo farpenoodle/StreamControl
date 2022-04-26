@@ -7,7 +7,6 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QFile>
-#include <QScriptEngine>
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QLabel>
@@ -15,6 +14,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonArray>
 #include "o2/o0globals.h"
 #include "twitterhandler.h"
 
@@ -96,9 +96,6 @@ void TwitterWidget::replyFinished() {
 
     //qDebug() << QString(replyData);
 
-    QScriptValue value;
-    QScriptEngine engine;
-
     QJsonDocument jsonDoc;
     jsonDoc = QJsonDocument::fromJson(QString(replyData).toUtf8());
 
@@ -107,42 +104,41 @@ void TwitterWidget::replyFinished() {
 
     tweetJSON = jsonObj;
 
-    value = engine.evaluate("(" + QString(replyData) + ")");
+    QJsonObject entities = jsonObj["entities"].toObject();
+    QJsonObject extendedEntities = jsonObj["extended_entities"].toObject();
+    QJsonObject user = jsonObj["user"].toObject();
 
-    QScriptValue urls = value.property("entities").property("urls");
-    QScriptValue media = value.property("extended_entities").property("media");
+    QJsonArray urls = entities["urls"].toArray();
+    QJsonArray media = extendedEntities["media"].toArray();
 
-    tweetText = value.property("full_text").toString();
-    twitterName = value.property("user").property("name").toString();
-    tweetCreated = value.property("created_at").toString();
-    profilePicUrl = value.property("user").property("profile_image_url").toString().replace("_normal","");
+    tweetText = jsonObj["full_text"].toString();
+    twitterName = user["name"].toString();
+    tweetCreated = jsonObj["created_at"].toString();
+    profilePicUrl = user["profile_image_url"].toString().replace("_normal","");
 
-    int urlIterator = 0;
-
-    while (urls.property(urlIterator).isValid()) {
+    int urli;
+    for (urli = 0; urli != urls.count(); urli++) {
         QMap<QString,QString> urlE;
+        QJsonObject urliE = urls.at(urli).toObject();
+        urlE["url"] = urliE["url"].toString();
+        urlE["display_url"] = urliE["display_url"].toString();
+        urlE["expanded_url"] = urliE["expanded_url"].toString();
 
-        urlE["url"] = urls.property(urlIterator).property("url").toString();
-        urlE["display_url"] = urls.property(urlIterator).property("display_url").toString();
-        urlE["expanded_url"] = urls.property(urlIterator).property("expanded_url").toString();
-
-        urlArray.insert(urlIterator,urlE);
-
-        urlIterator++;
+        urlArray.insert(urli,urlE);
     }
 
-    int mediaIterator = 0;
-    mediaDone = true;
-    while (media.property(mediaIterator).isValid()) {
+    int mediai;
+    for (mediai = 0; mediai != media.count(); mediai++) {
         QMap<QString,QString> mediaE;
+        QJsonObject mediaiE = media.at(mediai).toObject();
 
-        mediaE["url"] = media.property(mediaIterator).property("url").toString();
-        mediaE["display_url"] = media.property(mediaIterator).property("display_url").toString();
-        mediaE["expanded_url"] = media.property(mediaIterator).property("expanded_url").toString();
-        mediaE["type"] = media.property(mediaIterator).property("type").toString();
-        mediaE["media_url"] = media.property(mediaIterator).property("media_url").toString();
+        mediaE["url"] = mediaiE["url"].toString();
+        mediaE["display_url"] = mediaiE["display_url"].toString();
+        mediaE["expanded_url"] = mediaiE["expanded_url"].toString();
+        mediaE["type"] = mediaiE["type"].toString();
+        mediaE["media_url"] = mediaiE["media_url"].toString();
 
-        if(mediaIterator == 0 && mediaE["type"] == "photo") {
+        if(mediai == 0 && mediaE["type"] == "photo") {
             mediaDone = false;
             QUrl mediaUrl(mediaE["media_url"]);
             QFileInfo mediaInfo(mediaUrl.path());
@@ -167,10 +163,9 @@ void TwitterWidget::replyFinished() {
             mediaDone = true;
         }
 
-        mediaArray.insert(mediaIterator,mediaE);
-
-        mediaIterator++;
+        mediaArray.insert(mediai,mediaE);
     }
+
 
     //qDebug() << tweetText;
 
