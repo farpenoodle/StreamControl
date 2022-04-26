@@ -354,7 +354,7 @@ void MainWindow::saveSettings() {
     }
 
     QTextStream out(&file);
-    out.setCodec("UTF-8");
+    out.setEncoding(QStringConverter::Utf8);
     out << doc.toString();
     file.close();
 }
@@ -482,7 +482,7 @@ void MainWindow::saveData()
         dataOutput = saveXML();
 
         QTextStream out(&file);
-        out.setCodec("UTF-8");
+        out.setEncoding(QStringConverter::Utf8);
         out << dataOutput;
         file.close();
     }
@@ -494,7 +494,7 @@ void MainWindow::saveData()
         dataOutput = saveJSON();
 
         QTextStream out(&file);
-        out.setCodec("UTF-8");
+        out.setEncoding(QStringConverter::Utf8);
         out << dataOutput;
         file.close();
     }
@@ -518,7 +518,7 @@ QString MainWindow::saveXML() {
 
 
     QDateTime current = QDateTime::currentDateTime();
-    uint timestamp_t = current.toTime_t();
+    uint timestamp_t = current.toSecsSinceEpoch();
 
     QDomElement timestamp = doc.createElement("timestamp");
     items.appendChild(timestamp);
@@ -801,7 +801,7 @@ QString MainWindow::saveJSON() {
     QJsonObject Obj;
 
     QDateTime current = QDateTime::currentDateTime();
-    uint timestamp_t = current.toTime_t();
+    uint timestamp_t = current.toSecsSinceEpoch();
 
     Obj["timestamp"] = QString::number(timestamp_t);
 
@@ -1026,15 +1026,24 @@ void MainWindow::execCmdQueue(QList<int> cmdQueue) {
 }
 
 QString MainWindow::parseCmd(QString cmdStr) {
-    QRegExp rx("(\\[\\$[\\w\\.]+\\])");
+    QRegularExpression rx("(\\[\\$[\\w\\.]+\\])");
     int pos = 0;
     QStringList vars;
-    while ((pos = rx.indexIn(cmdStr, pos)) != -1) {
+
+    /*while ((pos = rx.indexIn(cmdStr, pos)) != -1) {
         QString var = rx.cap(0).remove(0,2);
         var.chop(1);
         vars << var;
         pos += rx.matchedLength();
+    }*/
+
+    while (rx.match(cmdStr,pos).hasMatch()) {
+        QString var = rx.match(cmdStr,pos).captured(0).remove(0,2);
+        var.chop(1);
+        vars << var;
+        pos = rx.match(cmdStr,pos).capturedEnd(0);
     }
+
     QString var;
     foreach(var, vars) {
         cmdStr.replace("[$"+var+"]",cmdOldValues[var]);
@@ -1274,10 +1283,10 @@ void MainWindow::loadLayout() {
 
     //connect signal mappers
 
-    connect (resetMapper, SIGNAL(mapped(QString)), this, SLOT(resetFields(QString))) ;
-    connect (swapMapper, SIGNAL(mapped(QString)), this, SLOT(swapFields(QString))) ;
-    connect (tsMapper, SIGNAL(mapped(QString)), this, SLOT(tsClick(QString))) ;
-    connect (setButtonMapper, SIGNAL(mapped(QString)), this, SLOT(setButtonClick(QString))) ;
+    connect (resetMapper, SIGNAL(mappedString(QString)), this, SLOT(resetFields(QString))) ;
+    connect (swapMapper, SIGNAL(mappedString(QString)), this, SLOT(swapFields(QString))) ;
+    connect (tsMapper, SIGNAL(mappedString(QString)), this, SLOT(tsClick(QString))) ;
+    connect (setButtonMapper, SIGNAL(mappedString(QString)), this, SLOT(setButtonClick(QString))) ;
 
     //start the keyPoller
     if (altHotkeyHandling) {
@@ -1567,7 +1576,7 @@ void MainWindow::parseCLI(QDomNode cliNode) {
 
     QDomNode child = cliNode.firstChildElement();
 
-    QRegExp rx("(\\[\\$[\\w\\.]+\\])");
+    QRegularExpression rx("(\\[\\$[\\w\\.]+\\])");
 
     while (!child.isNull()) {
         if (child.toElement().tagName() == "cmd") {
@@ -1577,12 +1586,20 @@ void MainWindow::parseCLI(QDomNode cliNode) {
             QStringList ignoreList = CSV::parseFromString(ignore)[0];
             int pos = 0;
             QStringList vars;
-            while ((pos = rx.indexIn(cmd, pos)) != -1) {
+            /*while ((pos = rx.indexIn(cmd, pos)) != -1) {
                 QString var = rx.cap(0).remove(0,2);
                 var.chop(1);
                 vars << var;
                 pos += rx.matchedLength();
+            }*/
+
+            while (rx.match(cmd,pos).hasMatch()) {
+                QString var = rx.match(cmd,pos).captured(0).remove(0,2);
+                var.chop(1);
+                vars << var;
+                pos = rx.match(cmd,pos).capturedEnd(0);
             }
+
 
             int cmdIndex = cmdList.length();
 
@@ -1660,8 +1677,10 @@ void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     }
 
+    qDebug() << "path:" + newPath.path();
+
     if(!newPath.exists()) {
-        newPath.mkpath(newPath.path()+"/media");
+        newPath.mkpath("media");
     }
 
     ((TwitterWidget*)widgetList[newTweet])->setPath(newPath.path() + "/");
@@ -2348,7 +2367,8 @@ QList<QStringList> MainWindow::condenseDataSet(QList<QStringList> oldSet) {
 
     int sets = oldSet.length() - 1;
     for (int i = 0; i <= sets; i++){
-        QStringList newList = oldSet[i].toSet().toList();
+        //QStringList newList = oldSet[i].toSet().toList();
+        QStringList newList(oldSet[i].begin(),oldSet[i].end());
         newSet.append(newList);
     }
 

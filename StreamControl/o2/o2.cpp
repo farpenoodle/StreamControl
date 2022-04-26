@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QVariantMap>
 #include <QUuid>
+#include <QRegularExpression>
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
@@ -187,7 +188,7 @@ void O2::link() {
 
     if (grantFlow_ == GrantFlowAuthorizationCode || grantFlow_ == GrantFlowImplicit) {
 
-        QString uniqueState = QUuid::createUuid().toString().remove(QRegExp("([^a-zA-Z0-9]|[-])"));
+        QString uniqueState = QUuid::createUuid().toString().remove(QRegularExpression("([^a-zA-Z0-9]|[-])"));
         if (useExternalWebInterceptor_) {
             // Save redirect URI, as we have to reuse it when requesting the access token
             redirectUri_ = localhostPolicy_.arg(localPort());

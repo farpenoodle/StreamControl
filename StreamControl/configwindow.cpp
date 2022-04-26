@@ -49,7 +49,7 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
     connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
     connect(ui->darkModeCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( darkModeToggle( int ) ));
-    connect(ui->formatGroup,SIGNAL( buttonClicked(int) ),this, SLOT ( formatChange( int ) ));
+    connect(ui->formatGroup,SIGNAL( idClicked(int) ),this, SLOT ( formatChange( int ) ));
 
     ui->outputPathTB->setDisabled(true);
     ui->layoutPathTB->setDisabled(true);

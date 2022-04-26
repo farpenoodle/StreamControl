@@ -1,7 +1,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QTextCodec>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDebug>
 
 #include "csv.h"
@@ -86,7 +86,7 @@ QList<QStringList> CSV::parseFromFile(const QString &filename, const QString &co
     QFile file(filename);
     if (file.open(QIODevice::ReadOnly)) {
         QTextStream in(&file);
-        in.setCodec(QTextCodec::codecForName(codec.toUtf8()));
+        in.setEncoding(QStringConverter::Utf8);
         string = in.readAll();
         file.close();
     }
@@ -101,12 +101,12 @@ bool CSV::write(const QList<QStringList> data, const QString &filename, const QS
     }
 
     QTextStream out(&file);
-    out.setCodec(codec.toUtf8());
+    out.setEncoding(QStringConverter::Utf8);
 
     foreach (const QStringList &line, data) {
         QStringList output;
         foreach (QString value, line) {
-            if (value.contains(QRegExp(",|\r\n"))) {
+            if (value.contains(QRegularExpression(",|\r\n"))) {
                 output << ("\"" + value + "\"");
             } else if (value.contains("\"")) {
                 output << value.replace("\"", "”");

@@ -146,6 +146,7 @@ void TwitterWidget::replyFinished() {
 
             QString mediaOutFile = profilePicPath + "media/" +mediaE["filename"];
             qDebug() << mediaOutFile;
+            qDebug() << mediaE["media_url"];
             QFile mediaFile(mediaOutFile);
 
             if (!mediaFile.exists()) {
@@ -211,7 +212,7 @@ void TwitterWidget::picFinished() {
 
     QFile* file = new QFile;
     file->setFileName(outFile);
-    file->open(QIODevice::WriteOnly);
+    file->open(QIODevice::ReadWrite);
     file->write(replyData);
     file->close();
 
@@ -235,11 +236,12 @@ void TwitterWidget::mediaFinished() {
     QFileInfo fileInfo(picUrl.path());
 
     QString profilePicFilename = fileInfo.fileName();*/
-    QString outFile = profilePicPath + + "media/" + mediaArray[0]["filename"];
+    QString outFile = profilePicPath + "media/" + mediaArray[0]["filename"];
+
 qDebug() << outFile;
     QFile* file = new QFile;
     file->setFileName(outFile);
-    file->open(QIODevice::WriteOnly);
+    file->open(QIODevice::ReadWrite);
     file->write(replyData);
     file->close();
 
