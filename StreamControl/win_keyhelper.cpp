@@ -4,7 +4,7 @@
     #include "windows.h"
 #endif
 #ifndef Q_OS_WIN
-    #ifdef Q_OS_MAC
+    #ifdef Q_OS_MACOS
         #include <Carbon/Carbon.h>
     #endif
     #define MOD_ALT 0x0001

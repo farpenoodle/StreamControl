@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QPalette>
 #include <QFile>
 #include <QDomDocument>
+#include <QStandardPaths>
 
 int main(int argc, char *argv[])
 {
@@ -40,9 +41,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);    
     a.setStyle("fusion");
 
-
-
-    QFile file("settings.xml");
+    #ifdef Q_OS_MACOS
+        QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/settings.xml");
+    #else
+        QFile file("settings.xml");
+    #endif
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QDomDocument doc;
         doc.setContent(&file);

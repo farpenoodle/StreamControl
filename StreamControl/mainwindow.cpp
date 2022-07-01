@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QLabel>
 #include <QNoDebug>
 #include <QDateTime>
+#include <QStandardPaths>
 
 
 #include "configwindow.h"
@@ -65,7 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef Q_OS_WIN
     #include "windows.h"
 #endif
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     #include <Carbon/Carbon.h>
 #endif
 #include "win_keyhelper.h"
@@ -234,7 +235,7 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     }
     #endif
     //osx
-    #ifdef Q_OS_MAC
+    #ifdef Q_OS_MACOS
     if (eventType=="mac_generic_NSEvent")
     {
         //cast message
@@ -246,7 +247,11 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 }
 
 void MainWindow::loadSettings() {
-    QFile file("settings.xml");
+    #ifdef Q_OS_MACOS
+        QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/settings.xml");
+    #else
+        QFile file("settings.xml");
+    #endif
     QString outputPath;
     QString layoutPath;
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -307,7 +312,11 @@ void MainWindow::loadSettings() {
     Saves the complete contents of the settings map to the settings xml file.
 */
 void MainWindow::saveSettings() {
-    QFile file("settings.xml");
+    #ifdef Q_OS_MACOS
+        QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/settings.xml");
+    #else
+        QFile file("settings.xml");
+    #endif
     file.open(QIODevice::WriteOnly | QIODevice::Text);
 
     QDomDocument doc ("StreamControl");
