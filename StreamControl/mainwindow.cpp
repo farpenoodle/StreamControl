@@ -85,7 +85,7 @@ MainWindow::MainWindow()
     setFixedSize(50, 50);
 
     QIcon icon;
-    icon.addFile(QStringLiteral(":/StreamControl/icons/r1logo2trans-crop.png"), QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QStringLiteral(":/StreamControl/icons/sclogo.png"), QSize(), QIcon::Normal, QIcon::Off);
     setWindowIcon(icon);
     setAnimated(true);
     setWindowFlags(windowFlags()^Qt::WindowMaximizeButtonHint);

@@ -9,5 +9,6 @@
         <file>images/Qt-logo.png</file>
         <file>icons/fugue/bonus/icons-24/plus.png</file>
         <file>icons/fugue/bonus/icons-24/minus.png</file>
+        <file>icons/sclogo.png</file>
     </qresource>
 </RCC>

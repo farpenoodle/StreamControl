@@ -110,7 +110,7 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>201</width>
+       <width>101</width>
        <height>101</height>
       </rect>
      </property>
@@ -118,13 +118,16 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="resources.qrc">:/StreamControl/images/r1logo.png</pixmap>
+      <pixmap resource="resources.qrc">:/StreamControl/icons/sclogo.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>130</x>
        <y>30</y>
        <width>151</width>
        <height>80</height>
@@ -136,7 +139,7 @@
       </font>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copyright © 2012-2022&lt;br/&gt;Yu Sheng &amp;quot;Farpenoodle&amp;quot; Tan &lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;http://www.round1.sg&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.round1.sg&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;a href=&quot;http://www.farpnut.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.farpnut.net&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copyright © 2012-2022&lt;br/&gt;Yu Sheng &amp;quot;Farpenoodle&amp;quot; Tan &lt;/p&gt;&lt;p&gt;&lt;a href=&quot;http://www.farpnut.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.farpnut.net&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -178,7 +181,7 @@
     <widget class="QLabel" name="streamControlLabel">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>130</x>
        <y>10</y>
        <width>141</width>
        <height>21</height>
