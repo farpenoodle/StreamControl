@@ -3,7 +3,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QtDebug>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QUrl>
 #include <QFileInfo>
 #include <QFile>
@@ -47,15 +47,15 @@ void TwitterWidget::fetchTweet()
 {
     if (th->linked()){
 
-        QRegExp rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
+        QRegularExpression rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
         QString tweetURL = urlBox->text();
-        int pos = rx.indexIn(tweetURL);
+        QRegularExpressionMatch rxmatch = rx.match(tweetURL);
 
-        if (pos != -1) {
+        if (rxmatch.hasMatch()) {
             label->setText("Fetching tweet");
 
-            userName = rx.cap(1);
-            tweetId = rx.cap(2);
+            userName = rxmatch.captured(1);
+            tweetId = rxmatch.captured(2);
 
             QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId + "&include_entities=true&tweet_mode=extended";
 

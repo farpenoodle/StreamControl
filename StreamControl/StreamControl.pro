@@ -6,8 +6,6 @@
 
 QT       += core gui xml widgets network
 
-greaterThan(QT_MAJOR_VERSION,5): QT += core5compat
-
 TARGET = StreamControl
 TEMPLATE = app
 

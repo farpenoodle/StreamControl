@@ -1,6 +1,5 @@
 #include <QFile>
 #include <QTextStream>
-#include <QTextCodec>
 #include <QRegularExpression>
 #include <QDebug>
 
