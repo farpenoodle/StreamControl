@@ -68,8 +68,14 @@ QString initString(const QString &string)
 {
     QString result = string;
     result.replace("\r\n", "\n");
-    if (result.at(result.size()-1) != '\n') {
-        result += '\n';
+    int last = result.size()-1;
+    if (last <= -1) {
+        //last = 0;
+        result = '\n';
+    } else {
+        if (result.at(last) != '\n') {
+            result += '\n';
+        }
     }
     return result;
 }
