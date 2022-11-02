@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScCompleter.h"
 #include "ScLineEdit.h"
 #include "ScComboBox.h"
+#include "scimageselect.h"
 #include "scradiogroup.h"
 #include "sctsbutton.h"
 #include "scsetbutton.h"
@@ -573,6 +574,15 @@ QString MainWindow::saveXML() {
 
             QDomText newItemt = doc.createTextNode(value);
             newItem.appendChild(newItemt);
+        } else if (wType == "imageSelect") {
+            QString imagePath = ((ScImageSelect*)widgetList[i.key()])->getSelectedImagePath();
+            if (QDir::isRelativePath(imagePath)) { // Changes imagePath to be relative to outputPath instead of StreamControl path
+                QDir outputDir = QDir(settings["outputPath"]);
+                QString absImagePath = QDir(imagePath).absolutePath();
+                imagePath = outputDir.relativeFilePath(absImagePath);
+            }
+            QDomText newItemt = doc.createTextNode(imagePath);
+            newItem.appendChild(newItemt);
         } else if (wType == "tweet") {
             QVector<QMap<QString,QString> > urlArray = ((TwitterWidget*)widgetList[
                 i.key()])->getURLs();
@@ -839,6 +849,15 @@ QString MainWindow::saveJSON() {
         } else if (wType == "radioGroup") {
             QString value = ((ScRadioGroup*)widgetList[i.key()])->getCurrentRadio();
             Obj[i.key()] = value;
+        } else if (wType == "imageSelect") {
+            QString imagePath = ((ScImageSelect*)widgetList[i.key()])->getSelectedImagePath();
+            if (QDir::isRelativePath(imagePath)) {
+                QDir outputDir = QDir(settings["outputPath"]);
+                QString absImagePath = QDir(imagePath).absolutePath();
+                Obj[i.key()] = outputDir.relativeFilePath(absImagePath);
+            } else {
+                Obj[i.key()] = imagePath;
+            }
         } else if (wType == "tweet") {
             QVector<QMap<QString,QString> > urlArray = ((TwitterWidget*)widgetList[
                 i.key()])->getURLs();
@@ -1319,6 +1338,8 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addRadioGroup(child.toElement(), parent);
         } else if (tagName == "comboBox") {
             addComboBox(child.toElement(), parent);
+        } else if (tagName == "imageSelect") {
+            addImageSelect(child.toElement(), parent);
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
             needLink = true;
@@ -1885,6 +1906,24 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
     if(!element.attribute("previousHotkey").isEmpty()) {
         addHotkey(element.attribute("previousHotkey"),newComboBox,"Previous");
     }
+}
+
+void MainWindow::addImageSelect(QDomElement element, QWidget *parent) {
+    QString newImageSelect = element.attribute("id");
+    widgetType[newImageSelect] = "imageSelect";
+    widgetList[newImageSelect] = new ScImageSelect(parent,
+                                                   element.attribute("path"),
+                                                   element.attribute("defaultValue"),
+                                                   element.attribute("optionWidth").toInt(),
+                                                   element.attribute("optionHeight").toInt(),
+                                                   element.attribute("optionsColumns").toInt());
+    widgetList[newImageSelect]->setObjectName(newImageSelect);
+    ((ScImageSelect*)widgetList[newImageSelect])->setGeometry(QRect(element.attribute("x").toInt(),
+                                                                    element.attribute("y").toInt(),
+                                                                    element.attribute("width").toInt(),
+                                                                    element.attribute("height").toInt()));
+    setWidgetFontSize((ScImageSelect*)widgetList[newImageSelect], element.attribute("fontSize", 0).toInt());
+    ((ScImageSelect*)widgetList[newImageSelect])->setIconSize(((ScImageSelect*)widgetList[newImageSelect])->size());
 }
 
 void MainWindow::addRadioGroup(QDomElement element, QWidget *parent) {

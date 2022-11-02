@@ -76,6 +76,7 @@ public slots:
     void addCheckBox(QDomElement, QWidget*);
     void addComboBox(QDomElement, QWidget*);
     void addRadioGroup(QDomElement, QWidget*);
+    void addImageSelect(QDomElement, QWidget*);
     void addTweetWidget(QDomElement, QWidget*);
     void addProviderWidget(QDomElement, QWidget*, QMap<QString, QObject*> widgetList, ProviderWidgetBuilder::Provider);
     QString addTabWidget(QDomElement, QWidget*);
