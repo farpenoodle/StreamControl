@@ -162,6 +162,10 @@ MainWindow::MainWindow()
     loadSettings();
     loadLayout();
     loadData();
+
+    if (wsServer) {
+        wsServer->setLastMessage(saveJSON());
+    }
 }
 
 MainWindow::~MainWindow()
@@ -277,7 +281,7 @@ void MainWindow::loadSettings() {
 
         saveFormat = settings["format"].toInt();
 
-        if(saveFormat < 1 || saveFormat > 3) {
+        if(saveFormat < 1 || saveFormat > 4) {
             saveFormat = SC_JSON;
         }
 
@@ -288,6 +292,15 @@ void MainWindow::loadSettings() {
         } else {
             altHotkeyHandling = false;
             settings["altHotkeyHandling"] = "0";
+        }
+        int socketport = settings["websocketPort"].toInt();
+        if (socketport <= 0 || socketport > 65535){
+            socketport = 41236;
+        }
+        settings["websocketPort"] = QString::number(socketport);
+
+        if (settings["websocketEnable"] == "1" && wsServer == nullptr) {
+            wsServer = new WebSocketServer(static_cast<quint16>(socketport), this);
         }
     } else {
 
@@ -302,6 +315,7 @@ void MainWindow::loadSettings() {
         useCDATA = false;
         settings["format"] = QString::number(SC_JSON);
         saveFormat = SC_JSON;
+        settings["websocketPort"] = QString::number(41236);
 
         saveSettings();
     }
@@ -516,6 +530,10 @@ void MainWindow::saveData()
     //datasets
 
     saveDataSets();
+
+    if (wsServer) {
+        wsServer->broadcast(saveJSON());
+    }
 }
 
 

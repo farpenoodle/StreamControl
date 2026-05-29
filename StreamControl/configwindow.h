@@ -55,6 +55,7 @@ public slots:
     void outputRelativeToggle( int state );
     void layoutRelativeToggle( int state );
     void CDATAToggle( int state );
+    void websocketToggle( int state );
     void altHotkeyToggle( int state );
     void darkModeToggle( int state );
     void formatChange( int state );

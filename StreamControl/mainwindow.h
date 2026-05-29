@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "config.h"
 #include "ScCompleter.h"
 #include "widgets/providerwidgetbuilder.h"
+#include "websocketserver.h"
 
 class TwitterHandler;
 
@@ -177,6 +178,8 @@ private:
     bool hotkeyDown;
 
     QAction *actionReloadLayout;
+
+    WebSocketServer *wsServer = nullptr;
 };
 
 #endif // MAINWINDOW_H

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml widgets network
+QT       += core gui xml widgets network websockets
 
 TARGET = StreamControl
 TEMPLATE = app
@@ -12,12 +12,14 @@ TEMPLATE = app
 SOURCES += *.cpp \
     $$files(o2/*.cpp) \
     $$files(dialogs/*.cpp) \
-    $$files(widgets/*.cpp)
+    $$files(widgets/*.cpp) \
+    websocketserver.cpp
 
 HEADERS  += *.h \
     $$files(o2/*.h) \
     $$files(dialogs/*.h) \
-    $$files(widgets/*.h)
+    $$files(widgets/*.h) \
+    websocketserver.h
 
 FORMS    += \
     configwindow.ui

@@ -47,6 +47,7 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->outputRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( outputRelativeToggle( int ) ));
     connect(ui->layoutRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( layoutRelativeToggle( int ) ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
+    connect(ui->websocketCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( websocketToggle( int ) ));
     connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
     connect(ui->darkModeCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( darkModeToggle( int ) ));
     connect(ui->formatGroup,SIGNAL( idClicked(int) ),this, SLOT ( formatChange( int ) ));
@@ -72,6 +73,7 @@ ConfigWindow::~ConfigWindow()
 void ConfigWindow::setConfig(QMap<QString, QString> settings) {
 
     configsettings = settings;
+
     QDir outputPath = QDir(configsettings["outputPath"]);
     QDir layoutPath = QDir(configsettings["layoutPath"]);
 
@@ -96,11 +98,20 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
 
     if (configsettings["format"] == QString::number(SC_Both)) {
         ui->formatBoth->setChecked(true);
-    } else if (configsettings["format"] == QString::number(SC_JSON)) {
-        ui->formatJSON->setChecked(true);
-    } else {
+    }  else if (configsettings["format"] == QString::number(SC_XML)) {
         ui->formatXML->setChecked(true);
+    } else {
+        ui->formatJSON->setChecked(true);
     }
+
+    if(configsettings["websocketEnable"] == "1") {
+        ui->websocketCheckbox->setCheckState(Qt::Checked);
+    } else {
+        ui->websocketCheckbox->setCheckState(Qt::Unchecked);
+    }
+
+    ui->websocketPortSB->setValue(configsettings["websocketPort"].toInt());
+
     if (configsettings["altHotkeyHandling"] == "1") {
         ui->altHotkeyCheckbox->setCheckState(Qt::Checked);
     } else {
@@ -201,6 +212,14 @@ void ConfigWindow::CDATAToggle( int state ) {
         configsettings["useCDATA"] = "1";
     } else {
         configsettings["useCDATA"] = "0";
+    }
+}
+
+void ConfigWindow::websocketToggle( int state ) {
+    if (state == Qt::Checked) {
+        configsettings["websocketEnable"] = "1";
+    } else {
+        configsettings["websocketEnable"] = "0";
     }
 }
 
