@@ -1918,6 +1918,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
         completerList[newComboBox]->setName(newComboBox,dataSetName,dataField,hasMaster);
         completerList[newComboBox]->setCaseSensitivity(Qt::CaseInsensitive);
         completerList[newComboBox]->setCompletionMode(QCompleter::PopupCompletion);
+        completerList[newComboBox]->setFilterMode(Qt::MatchContains);
 
         ((ScComboBox*)widgetList[newComboBox])->setCompleter(completerList[newComboBox]);
 
@@ -2206,6 +2207,7 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
         completerList[newLineEdit]->setName(newLineEdit,dataSetName,dataField,hasMaster);
         completerList[newLineEdit]->setCaseSensitivity(Qt::CaseInsensitive);
         completerList[newLineEdit]->setCompletionMode(QCompleter::PopupCompletion);
+        completerList[newLineEdit]->setFilterMode(Qt::MatchContains);
 
         ((ScLineEdit*)widgetList[newLineEdit])->setCompleter(completerList[newLineEdit]);
 
