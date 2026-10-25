@@ -488,7 +488,7 @@ void MainWindow::loadJSON() {
         if (wType == "lineEdit") {
             ((ScLineEdit*)widgetList[i.key()])->setText(Obj[i.key()].toString());
         } else if (wType == "spinBox") {
-            ((QSpinBox*)widgetList[i.key()])->setValue(Obj[i.key()].toInt());
+            ((QSpinBox*)widgetList[i.key()])->setValue(Obj[i.key()].toVariant().toInt());
         } else if (wType == "tsButton") {
             ((ScTSButton*)widgetList[i.key()])->setTimeStamp(Obj[i.key()].toInt());
         } else if (wType == "checkBox") {
