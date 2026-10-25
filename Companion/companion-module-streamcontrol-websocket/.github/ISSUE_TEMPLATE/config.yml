@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: BUG OR FEATURE REQUEST FOR COMPANION ITSELF
+    url: https://github.com/bitfocus/companion/issues
+    about: Report it against the companion itself, to get the relevant people notified.

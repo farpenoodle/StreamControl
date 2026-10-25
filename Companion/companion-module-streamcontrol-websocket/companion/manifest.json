@@ -1,0 +1,26 @@
+{
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+	"id": "streamcontrol-websocket",
+	"name": "StreamControl",
+	"shortname": "streamcontrol-websocket",
+	"description": "Control StreamControl over its WebSocket server: set fields, press buttons, save, and read values.",
+	"version": "0.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/farpenoodle/StreamControl.git",
+	"bugs": "https://github.com/farpenoodle/StreamControl/issues",
+	"maintainers": [
+		{
+			"name": "Tan Yu Sheng"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../main.js"
+	},
+	"manufacturer": "StreamControl",
+	"products": ["StreamControl"],
+	"keywords": ["StreamControl", "Scoreboard", "Overlay", "WebSocket"]
+}

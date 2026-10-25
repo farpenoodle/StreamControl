@@ -1,0 +1,30 @@
+{
+	"name": "streamcontrol-websocket",
+	"version": "1.0.0",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"format": "prettier -w .",
+		"package": "companion-module-build"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@companion-module/base": "~1.12.0",
+		"ws": "^8.21.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/farpenoodle/StreamControl.git"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^2.8.0",
+		"prettier": "^3.7.4"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json",
+	"packageManager": "yarn@4.18.1",
+	"engines": {
+		"node": "^22.20",
+		"yarn": "^4"
+	}
+}
