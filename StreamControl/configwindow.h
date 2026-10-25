@@ -59,7 +59,10 @@ public slots:
     void altHotkeyToggle( int state );
     void darkModeToggle( int state );
     void formatChange( int state );
-    
+    void websocketPortChange( int port );
+    void websocketPasswordChange( QString password );
+    void websocketControlDisableToggle( int state );
+
 private:
     QMap<QString, QString> configsettings;
     Ui::ConfigWindow *ui;

@@ -299,8 +299,18 @@ void MainWindow::loadSettings() {
         }
         settings["websocketPort"] = QString::number(socketport);
 
+        // superseded by websocketPassword
+        settings.remove("websocketSalt");
+        settings.remove("websocketSecret");
+
         if (settings["websocketEnable"] == "1" && wsServer == nullptr) {
             wsServer = new WebSocketServer(static_cast<quint16>(socketport), this);
+            wsServer->setBatchHandler([this](const QJsonArray &actions) {
+                return runRemoteActions(actions);
+            });
+        }
+        if (wsServer) {
+            wsServer->setAuth(settings["websocketPassword"], settings["websocketControlDisable"] != "1");
         }
     } else {
 
@@ -1163,6 +1173,10 @@ void MainWindow::openConfig() {
 
         if(saveFormat < 1 || saveFormat > 3)
             saveFormat = SC_JSON;
+
+        if (wsServer) {
+            wsServer->setAuth(settings["websocketPassword"], settings["websocketControlDisable"] != "1");
+        }
 
         saveSettings();
         loadLayout();
@@ -2118,17 +2132,7 @@ void MainWindow::setButtonClick(QString setButton) {
     wType = widgetType[widget];
 
     if (wType == "comboBox") {
-        QVariant data(value);
-        bool editable = ((ScComboBox*)widgetList[widget])->isEditable();
-        int valueIndex = ((ScComboBox*)widgetList[widget])->findData(data);
-        if (valueIndex == -1) {
-            valueIndex = ((ScComboBox*)widgetList[widget])->findText(value);
-        }
-        if (valueIndex != -1) {
-            ((ScComboBox*)widgetList[widget])->setCurrentIndex(valueIndex);
-        } else if (editable) {
-            ((ScComboBox*)widgetList[widget])->setCurrentText(value);
-        }
+        setComboValue(widget, value);
     }
 
     //ADD MORE WIDGETS TYPES
@@ -2136,6 +2140,140 @@ void MainWindow::setButtonClick(QString setButton) {
     if (((ScSetButton*)visualList[setButton])->isSaveOnClick()) {
         saveData();
     }
+}
+
+/*
+    Selects the combo item whose value (or text) matches. Editable combos fall
+    back to setting the text directly. Returns false if nothing could be set.
+*/
+bool MainWindow::setComboValue(QString widget, QString value) {
+    ScComboBox *comboBox = (ScComboBox*)widgetList[widget];
+    QVariant data(value);
+    int valueIndex = comboBox->findData(data);
+    if (valueIndex == -1) {
+        valueIndex = comboBox->findText(value);
+    }
+    if (valueIndex != -1) {
+        comboBox->setCurrentIndex(valueIndex);
+    } else if (comboBox->isEditable()) {
+        comboBox->setCurrentText(value);
+    } else {
+        return false;
+    }
+    return true;
+}
+
+/*
+    Runs a batch of actions sent by an authenticated websocket client, in order.
+    Returns one {ok, error} result per action.
+*/
+QJsonArray MainWindow::runRemoteActions(const QJsonArray &actions) {
+    QJsonArray results;
+    for (const QJsonValue &actionValue : actions) {
+        QJsonObject result;
+        QString error;
+        if (actionValue.isObject()) {
+            error = applyRemoteAction(actionValue.toObject());
+        } else {
+            error = "action must be an object";
+        }
+        result["ok"] = error.isEmpty();
+        if (!error.isEmpty())
+            result["error"] = error;
+        results.append(result);
+    }
+    return results;
+}
+
+/*
+    Applies one remote action. Returns an empty string on success, otherwise the error.
+*/
+QString MainWindow::applyRemoteAction(const QJsonObject &action) {
+    QString actionName = action["action"].toString();
+
+    if (actionName == "save") {
+        saveData();
+        return "";
+    }
+
+    QString id = action["id"].toString();
+    if (id.isEmpty())
+        return "missing 'id'";
+
+    // value() so unknown ids don't get inserted into the map
+    QString wType = widgetType.value(id);
+    if (wType.isEmpty())
+        return "unknown widget '" + id + "'";
+
+    if (actionName == "press") {
+        if (wType == "resetButton") {
+            resetFields(id);
+        } else if (wType == "swapButton") {
+            swapFields(id);
+        } else if (wType == "tsButton") {
+            tsClick(id);
+        } else if (wType == "setButton") {
+            setButtonClick(id);
+        } else {
+            return "'" + id + "' is not a button";
+        }
+        return "";
+    }
+
+    if (actionName != "set")
+        return "unknown action '" + actionName + "'";
+
+    if (!action.contains("value"))
+        return "missing 'value'";
+
+    QJsonValue value = action["value"];
+    // strings stay as-is, numbers become "2" rather than "2.0"
+    QString valueStr = value.isString() ? value.toString() : value.toVariant().toString();
+
+    if (wType == "lineEdit") {
+        if (value.isArray() || value.isObject() || value.isNull())
+            return "value for '" + id + "' must be a string";
+        ((ScLineEdit*)widgetList[id])->setText(valueStr);
+    } else if (wType == "spinBox") {
+        QSpinBox *spinBox = (QSpinBox*)widgetList[id];
+        bool ok = false;
+        int intValue = 0;
+        if (value.isDouble()) {
+            double d = value.toDouble();
+            intValue = static_cast<int>(d);
+            ok = (d == intValue);
+        } else if (value.isString()) {
+            intValue = valueStr.trimmed().toInt(&ok);
+        }
+        if (!ok)
+            return "value for '" + id + "' must be an integer";
+        if (intValue < spinBox->minimum() || intValue > spinBox->maximum())
+            return "value for '" + id + "' is out of range (" + QString::number(spinBox->minimum())
+                    + "-" + QString::number(spinBox->maximum()) + ")";
+        spinBox->setValue(intValue);
+    } else if (wType == "checkBox") {
+        bool checked;
+        if (value.isBool()) {
+            checked = value.toBool();
+        } else if (valueStr == "1" || valueStr == "true") {
+            checked = true;
+        } else if (valueStr == "0" || valueStr == "false") {
+            checked = false;
+        } else {
+            return "value for '" + id + "' must be true/false or 1/0";
+        }
+        ((QCheckBox*)widgetList[id])->setChecked(checked);
+    } else if (wType == "comboBox") {
+        if (!setComboValue(id, valueStr))
+            return "'" + valueStr + "' is not an item of '" + id + "'";
+    } else if (wType == "radioGroup") {
+        if (!((ScRadioGroup*)widgetList[id])->checkFromValue(valueStr))
+            return "'" + valueStr + "' is not a value of '" + id + "'";
+    } else {
+        return "'" + id + "' (" + wType + ") cannot be set";
+    }
+
+    return "";
 }
 
 void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {

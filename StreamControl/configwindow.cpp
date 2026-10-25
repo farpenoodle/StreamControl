@@ -48,6 +48,9 @@ ConfigWindow::ConfigWindow(QWidget *parent) :
     connect(ui->layoutRelativePathCheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( layoutRelativeToggle( int ) ));
     connect(ui->CDATACheckBox,SIGNAL( stateChanged(int) ),this, SLOT ( CDATAToggle( int ) ));
     connect(ui->websocketCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( websocketToggle( int ) ));
+    connect(ui->websocketPortSB,SIGNAL( valueChanged(int) ),this, SLOT ( websocketPortChange( int ) ));
+    connect(ui->websocketPasswordLE,SIGNAL( textChanged(QString) ),this, SLOT ( websocketPasswordChange( QString ) ));
+    connect(ui->websocketControlDisable,SIGNAL( stateChanged(int) ),this, SLOT ( websocketControlDisableToggle( int ) ));
     connect(ui->altHotkeyCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( altHotkeyToggle( int ) ));
     connect(ui->darkModeCheckbox,SIGNAL( stateChanged(int) ),this, SLOT ( darkModeToggle( int ) ));
     connect(ui->formatGroup,SIGNAL( idClicked(int) ),this, SLOT ( formatChange( int ) ));
@@ -111,6 +114,15 @@ void ConfigWindow::setConfig(QMap<QString, QString> settings) {
     }
 
     ui->websocketPortSB->setValue(configsettings["websocketPort"].toInt());
+
+    ui->websocketPasswordLE->setText(configsettings["websocketPassword"]);
+    ui->websocketPasswordLE->setPlaceholderText("Not set (control disabled)");
+    if (configsettings["websocketControlDisable"] == "1") {
+        ui->websocketControlDisable->setCheckState(Qt::Checked);
+    } else {
+        ui->websocketControlDisable->setCheckState(Qt::Unchecked);
+    }
+    ui->websocketPasswordLE->setDisabled(ui->websocketControlDisable->checkState() == Qt::Checked);
 
     if (configsettings["altHotkeyHandling"] == "1") {
         ui->altHotkeyCheckbox->setCheckState(Qt::Checked);
@@ -221,6 +233,23 @@ void ConfigWindow::websocketToggle( int state ) {
     } else {
         configsettings["websocketEnable"] = "0";
     }
+}
+
+void ConfigWindow::websocketPortChange( int port ) {
+    configsettings["websocketPort"] = QString::number(port);
+}
+
+void ConfigWindow::websocketPasswordChange( QString password ) {
+    configsettings["websocketPassword"] = password;
+}
+
+void ConfigWindow::websocketControlDisableToggle( int state ) {
+    if (state == Qt::Checked) {
+        configsettings["websocketControlDisable"] = "1";
+    } else {
+        configsettings["websocketControlDisable"] = "0";
+    }
+    ui->websocketPasswordLE->setDisabled(state == Qt::Checked);
 }
 
 void ConfigWindow::altHotkeyToggle( int state ) {

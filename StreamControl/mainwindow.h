@@ -139,6 +139,9 @@ private:
                              bool appendNodeName = false,
                              QStringList prefix = QStringList());
     void setWidgetFontSize(QWidget *widget, int fontSize);
+    bool setComboValue(QString widget, QString value);
+    QJsonArray runRemoteActions(const QJsonArray &actions);
+    QString applyRemoteAction(const QJsonObject &action);
 
     QSignalMapper *resetMapper;
     QSignalMapper *swapMapper;
