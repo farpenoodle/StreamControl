@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamControl Documentation</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #59636e;
+    --accent: #0969da;
+    --border: #d0d7de;
+    --code-bg: #f6f8fa;
+    --code-fg: #24292f;
+    --table-stripe: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --fg: #e6edf3;
+      --muted: #8d96a0;
+      --accent: #4493f8;
+      --border: #30363d;
+      --code-bg: #161b22;
+      --code-fg: #e6edf3;
+      --table-stripe: #161b22;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+                 Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 96px;
+  }
+  header.top {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+  }
+  header.top h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+  header.top p {
+    margin: 6px 0 0;
+    color: var(--muted);
+  }
+  nav.toc {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 24px 0 40px;
+  }
+  nav.toc h2 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  nav.toc ul { margin: 0; padding-left: 18px; }
+  nav.toc ul ul { padding-left: 18px; }
+  nav.toc li { margin: 2px 0; }
+  h1, h2, h3, h4 {
+    line-height: 1.25;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+  h1 { font-size: 1.9rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h2 { font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  h3 { font-size: 1.2rem; }
+  h4 { font-size: 1rem; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p, ul, ol { margin: 0.6em 0; }
+  ul, ol { padding-left: 1.6em; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 0.15em 0.35em;
+    border-radius: 4px;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 14px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+  }
+  pre code { background: none; padding: 0; font-size: 0.88em; }
+  table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+    font-size: 0.94em;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--code-bg); }
+  tbody tr:nth-child(even) { background: var(--table-stripe); }
+  blockquote {
+    border-left: 4px solid var(--border);
+    margin: 1em 0;
+    padding: 0.1em 1em;
+    color: var(--muted);
+  }
+  .anchor {
+    color: var(--muted);
+    margin-left: 6px;
+    opacity: 0;
+    transition: opacity 0.1s;
+    text-decoration: none;
+    font-weight: normal;
+  }
+  h1:hover .anchor, h2:hover .anchor,
+  h3:hover .anchor, h4:hover .anchor { opacity: 1; }
+  footer {
+    margin-top: 64px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>StreamControl</h1>
+  <p>Operator-driven scoreboard and lower-third manager for live streams.</p>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#overview">Overview</a>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#building">Building</a></li>
+        <li><a href="#running">Running</a></li>
+        <li><a href="#websocket-protocol">WebSocket protocol</a></li>
+        <li><a href="#remote-control">Remote control</a></li>
+        <li><a href="#example-overlays">Example overlays</a></li>
+        <li><a href="#project-layout">Project layout</a></li>
+      </ul>
+    </li>
+    <li><a href="#layout-xml">Layout XML reference</a>
+      <ul>
+        <li><a href="#document-structure">Document structure</a></li>
+        <li><a href="#geometry">Geometry</a></li>
+        <li><a href="#widgets">Top-level widgets</a></li>
+        <li><a href="#tabs">Tabs</a></li>
+        <li><a href="#toolbar">Toolbar</a></li>
+        <li><a href="#cli">CLI</a></li>
+        <li><a href="#output-mapping">Output mapping</a></li>
+        <li><a href="#tips">Tips</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<h1 id="overview">Overview <a class="anchor" href="#overview">#</a></h1>
+
+<p>StreamControl is a Qt 6 desktop app for managing the dynamic text and graphics that appear on a live stream — scores, player names, country flags, commentator credits, tournament round labels, etc. You fill in fields in the app; StreamControl writes the values to disk as XML and/or JSON, and (optionally) broadcasts them over WebSocket. Your stream overlay reads the file or listens on the socket and updates itself.</p>
+
+<p>It was originally built for fighting-game tournaments but the layout is fully data-driven, so it works for any stream that needs an operator-driven scoreboard or lower-third.</p>
+
+<h2 id="features">Features <a class="anchor" href="#features">#</a></h2>
+<ul>
+  <li><strong>Custom layouts</strong> defined in XML — labels, line edits, spin boxes, checkboxes, comboboxes, radio groups, tabbed sections.</li>
+  <li><strong>Outputs</strong> <code>streamcontrol.xml</code> and/or <code>streamcontrol.json</code> to a configurable directory every time you hit Save.</li>
+  <li><strong>WebSocket server</strong> (built-in) that pushes the JSON payload to every connected overlay the moment you save, plus a fresh snapshot to each client at connect time.</li>
+  <li><strong>Datasets</strong> with autocomplete — reuse player names, sponsors, characters, etc. across sessions.</li>
+  <li><strong>Toolbar</strong> with configurable labels and comboboxes for global state.</li>
+  <li><strong>Reset / swap / timestamp buttons</strong> for one-click match resets, side switches, and time tracking.</li>
+  <li><strong>CLI hooks</strong> — invoke external commands with field values substituted in.</li>
+  <li><strong>Global hotkeys</strong> (Windows) for triggering buttons without focusing the app.</li>
+  <li><strong>Tweet widget</strong> with media download and URL expansion.</li>
+  <li><strong>Challonge widget</strong> for pulling bracket data.</li>
+  <li><strong>Dark mode</strong>, configurable font sizes, optional always-on-top.</li>
+</ul>
+
+<h2 id="requirements">Requirements <a class="anchor" href="#requirements">#</a></h2>
+<ul>
+  <li><strong>Qt 6</strong> (tested against 6.3 – 6.11) with the modules: <code>core</code>, <code>gui</code>, <code>widgets</code>, <code>xml</code>, <code>network</code>, <code>websockets</code>.</li>
+  <li>A C++17 compiler. On Windows, MSVC 2019/2022; on Linux, gcc/clang; on macOS, the Xcode toolchain.</li>
+</ul>
+
+<h2 id="building">Building <a class="anchor" href="#building">#</a></h2>
+
+<h3>Windows (Qt Creator)</h3>
+<ol>
+  <li>Install Qt 6 and Qt Creator with the MSVC kit.</li>
+  <li>Open <code>StreamControl/StreamControl.pro</code> in Qt Creator.</li>
+  <li>Configure with an MSVC 64-bit kit and build.</li>
+</ol>
+
+<h3>Linux / macOS</h3>
+<pre><code>cd StreamControl
+qmake
+make</code></pre>
+
+<h2 id="running">Running <a class="anchor" href="#running">#</a></h2>
+<ol>
+  <li>Launch <code>StreamControl</code>.</li>
+  <li>On first run you'll be prompted to configure. Open <strong>Configuration</strong> and set:
+    <ul>
+      <li><strong>Output path</strong> — where <code>streamcontrol.xml</code> / <code>streamcontrol.json</code> get written.</li>
+      <li><strong>Layout XML</strong> — the file describing the form layout.</li>
+      <li><strong>Output format</strong> — XML, JSON, or both.</li>
+      <li><strong>WebSocket</strong> — enable and pick a port (default <code>41236</code>) if you want overlays to receive live pushes instead of polling a file.</li>
+    </ul>
+  </li>
+  <li>Fill in the fields, hit <strong>Save</strong>, and your overlay updates.</li>
+</ol>
+
+<h2 id="websocket-protocol">WebSocket protocol <a class="anchor" href="#websocket-protocol">#</a></h2>
+
+<p>When WebSocket is enabled, StreamControl listens on the configured port (default <code>41236</code>) on all interfaces.</p>
+
+<ul>
+  <li><strong>On connect:</strong> the server sends a single text frame containing the current StreamControl JSON snapshot to the new client.</li>
+  <li><strong>On save:</strong> the server broadcasts the latest JSON snapshot to every connected client as a text frame.</li>
+</ul>
+
+<p>The payload is identical to what <code>streamcontrol.json</code> would contain on disk — a flat JSON object whose keys are the widget IDs from your layout, plus a <code>timestamp</code> field. Example client:</p>
+
+<pre><code>const ws = new WebSocket("ws://localhost:41236");
+ws.onmessage = (e) =&gt; {
+  const data = JSON.parse(e.data);
+  console.log(data.pName1, data.pScore1, "-", data.pScore2, data.pName2);
+};</code></pre>
+
+<h3 id="remote-control">Remote control</h3>
+
+<p>A client can escalate its connection with the <strong>Control Password</strong> from Configuration. An escalated client can set widget values and press buttons. Control is off while the password is empty. Tick <strong>Disable</strong> to turn it off and keep the password.</p>
+
+<p>The password is saved in plain text in <code>settings.xml</code> (<code>websocketPassword</code>), so protect that file. It never travels over the socket. Authentication is a challenge–response using the same scheme as obs-websocket v5, with a salt that changes every time StreamControl starts or the password changes:</p>
+
+<pre><code>secret = base64(sha256(password + salt))
+auth   = base64(sha256(secret + challenge))</code></pre>
+
+<p>Control messages are JSON text frames with an <code>op</code> field. Replies go only to the client that sent the request, so overlays that just listen never see them.</p>
+
+<pre><code>→ {"op":"authRequest"}
+← {"op":"authChallenge","salt":"…","challenge":"…"}
+→ {"op":"auth","auth":"&lt;base64&gt;"}
+← {"op":"authResult","ok":true}</code></pre>
+
+<p>Each challenge works for one attempt only, so send a fresh <code>authRequest</code> before each try. After 5 failed attempts the server closes the socket (code 1008). Changing the password logs out every escalated client.</p>
+
+<p>Once authenticated, send actions in a batch. They run in order. A failing action is reported, and the rest of the batch still runs.</p>
+
+<pre><code>{"op":"batch","id":"any-id","actions":[
+  {"action":"set",   "id":"pName1",  "value":"Daigo"},
+  {"action":"set",   "id":"pScore1", "value":2},
+  {"action":"set",   "id":"finals",  "value":true},
+  {"action":"set",   "id":"game",    "value":"sf6"},
+  {"action":"set",   "id":"side",    "value":"right"},
+  {"action":"press", "id":"swap1"},
+  {"action":"save"}
+]}</code></pre>
+
+<table>
+  <thead><tr><th>Action</th><th>Applies to</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>set</code></td><td><code>lineEdit</code></td><td>Any string. Numbers are converted to text.</td></tr>
+    <tr><td><code>set</code></td><td><code>spinBox</code></td><td>An integer or numeric string. Values outside the box's min/max are rejected.</td></tr>
+    <tr><td><code>set</code></td><td><code>checkBox</code></td><td><code>true</code>/<code>false</code>, <code>1</code>/<code>0</code> or <code>"1"</code>/<code>"0"</code>.</td></tr>
+    <tr><td><code>set</code></td><td><code>comboBox</code></td><td>Matches an item's <code>value</code>, then its text. Editable combos accept any text.</td></tr>
+    <tr><td><code>set</code></td><td><code>radioGroup</code></td><td>A radio button's <code>value</code>.</td></tr>
+    <tr><td><code>press</code></td><td><code>reset</code>, <code>swap</code>, <code>timestamp</code>, <code>setButton</code> buttons</td><td>Same as clicking the button. A button with <code>saveonclick</code> still saves.</td></tr>
+    <tr><td><code>save</code></td><td>—</td><td>Same as the toolbar Save button: writes the output files and broadcasts.</td></tr>
+  </tbody>
+</table>
+
+<p>A batch does not save on its own. End it with <code>{"action":"save"}</code> when the overlay should update. The reply echoes your <code>id</code> and has one result per action:</p>
+
+<pre><code>{"op":"batchResult","id":"any-id","results":[{"ok":true},{"ok":false,"error":"unknown widget 'x'"}]}</code></pre>
+
+<p>If the batch saves, the snapshot broadcast reaches you before the <code>batchResult</code>. Messages with an <code>op</code> field are control replies, and the rest are snapshots. Errors outside a batch come back as <code>{"op":"error","error":"…"}</code>: invalid JSON, an unknown <code>op</code>, or <code>batch</code> before authenticating.</p>
+
+<p>The socket is plain <code>ws://</code>. The password is protected, but values sent after authenticating are not encrypted, so only expose the port on networks you trust. <code>examples/ws_control/control.html</code> is a small test client. Browsers only allow the hashing it uses (<code>crypto.subtle</code>) on <code>http://localhost</code> or <code>https://</code>, so serve the page from localhost rather than opening it as a <code>file://</code>.</p>
+
+<h2 id="example-overlays">Example overlays <a class="anchor" href="#example-overlays">#</a></h2>
+<p>Located under <code>examples/</code>:</p>
+<ul>
+  <li><strong><code>Basic/</code></strong> — Minimal HTML overlays demonstrating field readout.</li>
+  <li><strong><code>scoreflags/</code></strong> — Fighting-game scoreboard with player names, scores, country flags, and a center text label. Two versions: a CreateJS canvas renderer and a jQuery + jsTween DOM renderer. Polls <code>streamcontrol.xml</code> every 250 ms.</li>
+  <li><strong><code>scoreflags_ws/</code></strong> — Same scoreboard, but connects to the WebSocket server and receives pushes on save. Edit the <code>WS_URL</code> constant if StreamControl is on a different host.</li>
+  <li><strong><code>ws_control/</code></strong> — Test client for <a href="#remote-control">remote control</a>: authenticate with the control password and send batch JSON.</li>
+</ul>
+
+<h2 id="project-layout">Project layout <a class="anchor" href="#project-layout">#</a></h2>
+<pre><code>StreamControl/        Qt project — source for the desktop app
+  *.cpp / *.h         Main app, config window, widgets, websocket server
+  dialogs/            Modal dialogs
+  widgets/            Custom Qt widgets
+  StreamControl.pro   qmake project file
+examples/             Sample layouts and HTML/JS overlays
+changelog.txt         Release notes
+LICENSE               License terms</code></pre>
+
+
+<h1 id="layout-xml">Layout XML reference <a class="anchor" href="#layout-xml">#</a></h1>
+
+<p>StreamControl's UI is defined by a layout XML file that you point at via <strong>Configuration → Layout XML</strong>. The file describes the size of the main window, the form widgets you want, an optional toolbar, optional tabs, and an optional CLI hook section. Each interactive widget has an <code>id</code> that becomes a key in <code>streamcontrol.xml</code> / <code>streamcontrol.json</code> / the WebSocket payload.</p>
+
+<h2 id="document-structure">Document structure <a class="anchor" href="#document-structure">#</a></h2>
+
+<pre><code>&lt;!DOCTYPE StreamControlLayout&gt;
+&lt;layout width="390" height="140" [tabbed="1"] [fontSize="12"]&gt;
+  &lt;toolBar&gt; ... &lt;/toolBar&gt;            &lt;!-- optional --&gt;
+  &lt;!-- widgets, or &lt;tab&gt;s if tabbed="1" --&gt;
+  &lt;cli&gt; ... &lt;/cli&gt;                    &lt;!-- optional --&gt;
+&lt;/layout&gt;</code></pre>
+
+<h3><code>&lt;layout&gt;</code> attributes</h3>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>width</code></td><td>yes</td><td>Window width in pixels.</td></tr>
+    <tr><td><code>height</code></td><td>yes</td><td>Window height in pixels.</td></tr>
+    <tr><td><code>tabbed</code></td><td>no</td><td>If <code>"1"</code>, the top-level children must be <code>&lt;tab&gt;</code> elements.</td></tr>
+    <tr><td><code>fontSize</code></td><td>no</td><td>Base font size used as the default for child widgets.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="geometry">Geometry <a class="anchor" href="#geometry">#</a></h2>
+<p>Every interactive element accepts:</p>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>x</code>, <code>y</code></td><td>yes</td><td>Position in pixels relative to the containing tab / panel.</td></tr>
+    <tr><td><code>width</code>, <code>height</code></td><td>yes</td><td>Size in pixels.</td></tr>
+    <tr><td><code>fontSize</code></td><td>no</td><td>Overrides the layout's base size. <code>0</code> (or omitted) inherits.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="widgets">Top-level widgets <a class="anchor" href="#widgets">#</a></h2>
+
+<h3><code>&lt;label&gt;</code></h3>
+<p>Static text on the form. No <code>id</code>.</p>
+<pre><code>&lt;label x="10" y="14" width="46" height="13"&gt;Title 1&lt;/label&gt;</code></pre>
+
+<h3><code>&lt;line&gt;</code></h3>
+<p>Separator. No content, no <code>id</code>.</p>
+<pre><code>&lt;line x="10" y="30" width="370" height="2"/&gt;</code></pre>
+
+<h3><code>&lt;lineEdit&gt;</code></h3>
+<p>Single-line text input.</p>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>Output key.</td></tr>
+    <tr><td><code>dataSet</code></td><td>no</td><td>CSV file (relative to the layout) used for autocomplete.</td></tr>
+    <tr><td><code>dataField</code></td><td>no</td><td>1-indexed column to pull from <code>dataSet</code>. Default <code>1</code>.</td></tr>
+    <tr><td><code>master</code></td><td>no</td><td>Another widget's <code>id</code>; selecting a value there auto-fills this field from the same row.</td></tr>
+    <tr><td><code>noSave</code></td><td>no</td><td><code>"1"</code> to keep this field out of the dataset's saved entries.</td></tr>
+  </tbody>
+</table>
+<pre><code>&lt;lineEdit id="pName1" x="10" y="10" width="160" height="20"
+          dataSet="players.csv"&gt;Player 1&lt;/lineEdit&gt;
+&lt;lineEdit id="pCountry1" x="180" y="10" width="50" height="20"
+          dataSet="players.csv" dataField="2" master="pName1"&gt;Country&lt;/lineEdit&gt;</code></pre>
+
+<h3><code>&lt;spinBox&gt;</code></h3>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>Output key.</td></tr>
+    <tr><td><code>maximum</code></td><td>no</td><td>Upper bound.</td></tr>
+    <tr><td><code>increaseHotkey</code></td><td>no</td><td>Global hotkey string to increment.</td></tr>
+    <tr><td><code>decreaseHotkey</code></td><td>no</td><td>Global hotkey string to decrement.</td></tr>
+  </tbody>
+</table>
+<pre><code>&lt;spinBox id="pScore1" x="240" y="10" width="40" height="22" maximum="999"/&gt;</code></pre>
+
+<h3><code>&lt;checkBox&gt;</code></h3>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>Output key (<code>"1"</code> / <code>"0"</code>).</td></tr>
+    <tr><td><code>toggleHotkey</code></td><td>no</td><td>Hotkey to flip state.</td></tr>
+    <tr><td><code>checkHotkey</code></td><td>no</td><td>Hotkey that forces checked.</td></tr>
+    <tr><td><code>uncheckHotkey</code></td><td>no</td><td>Hotkey that forces unchecked.</td></tr>
+  </tbody>
+</table>
+
+<h3><code>&lt;comboBox&gt;</code></h3>
+<p>Drop-down. Children are <code>&lt;comboItem&gt;</code> elements.</p>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>Output key.</td></tr>
+    <tr><td><code>editable</code></td><td>no</td><td><code>"1"</code> allows free-text entry.</td></tr>
+    <tr><td><code>dataSet</code> / <code>dataField</code> / <code>master</code></td><td>no</td><td>Same as <code>&lt;lineEdit&gt;</code>.</td></tr>
+    <tr><td><code>nextHotkey</code></td><td>no</td><td>Hotkey to cycle to next item.</td></tr>
+    <tr><td><code>previousHotkey</code></td><td>no</td><td>Hotkey to cycle to previous item.</td></tr>
+  </tbody>
+</table>
+<p><code>&lt;comboItem&gt;</code> children:</p>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>value</code></td><td>no</td><td>Stored value. Defaults to the text content.</td></tr>
+    <tr><td><code>selected</code></td><td>no</td><td><code>"true"</code> to make this the default item.</td></tr>
+  </tbody>
+</table>
+<pre><code>&lt;comboBox id="round" x="10" y="10" width="120" height="22"&gt;
+  &lt;comboItem value="WF"&gt;Winners Final&lt;/comboItem&gt;
+  &lt;comboItem value="LF" selected="true"&gt;Losers Final&lt;/comboItem&gt;
+  &lt;comboItem value="GF"&gt;Grand Final&lt;/comboItem&gt;
+&lt;/comboBox&gt;</code></pre>
+
+<h3><code>&lt;radioGroup&gt;</code></h3>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>Output key — set to the selected <code>&lt;radioButton&gt;</code>'s <code>value</code>.</td></tr>
+  </tbody>
+</table>
+<pre><code>&lt;radioGroup id="side"&gt;
+  &lt;radioButton x="10" y="10" width="60" height="20" value="P1"&gt;Player 1&lt;/radioButton&gt;
+  &lt;radioButton x="80" y="10" width="60" height="20" value="P2"&gt;Player 2&lt;/radioButton&gt;
+&lt;/radioGroup&gt;</code></pre>
+
+<h3><code>&lt;button&gt;</code></h3>
+<p>Buttons don't write a value to the output; they perform an action. The action depends on <code>type</code>.</p>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>type</code></td><td>yes</td><td><code>reset</code>, <code>swap</code>, <code>timestamp</code>, or <code>setButton</code>.</td></tr>
+    <tr><td><code>id</code></td><td>yes</td><td>Internal identifier.</td></tr>
+    <tr><td><code>tooltip</code></td><td>no</td><td>Hover text.</td></tr>
+    <tr><td><code>hotkey</code></td><td>no</td><td>Global hotkey to trigger the click.</td></tr>
+    <tr><td><code>saveonclick</code></td><td>no</td><td><code>"1"</code> saves immediately after the click.</td></tr>
+  </tbody>
+</table>
+<ul>
+  <li><strong><code>type="reset"</code></strong> — clears one or more fields. Required: <code>reset="id1,id2,..."</code>.</li>
+  <li><strong><code>type="swap"</code></strong> — swaps values between two field sets. Required: <code>swapSet1="..."</code> and <code>swapSet2="..."</code>.</li>
+  <li><strong><code>type="timestamp"</code></strong> — writes the current time to a paired widget identified by the button's <code>id</code>.</li>
+  <li><strong><code>type="setButton"</code></strong> — forces a widget to a value. Required: <code>widget="targetId"</code>, <code>value="..."</code>.</li>
+</ul>
+<pre><code>&lt;button type="reset" x="290" y="10" width="40" height="23"
+        id="clear1" tooltip="Clear Player 1" reset="pName1,pCountry1"&gt;Clear&lt;/button&gt;
+
+&lt;button type="swap" x="330" y="40" width="40" height="23"
+        id="swap" swapSet1="pName1,pScore1,pCountry1"
+        swapSet2="pName2,pScore2,pCountry2"&gt;Swap&lt;/button&gt;</code></pre>
+
+<h3><code>&lt;tweet&gt;</code></h3>
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>yes</td><td>Output key prefix.</td></tr>
+    <tr><td><code>picPath</code></td><td>no</td><td>Subfolder for downloaded media. Defaults to <code>twitter</code>.</td></tr>
+    <tr><td><code>embedJSON</code></td><td>no</td><td><code>"1"</code> embeds the raw tweet JSON in the output.</td></tr>
+  </tbody>
+</table>
+
+<h3><code>&lt;challonge&gt;</code> and <code>&lt;smashgg&gt;</code></h3>
+<p>Bracket-provider widgets that pull match data. Common required attributes: <code>id</code>, <code>playerOneWidget</code>, <code>playerTwoWidget</code>, <code>tournamentStageWidget</code>, <code>bracketWidget</code>, <code>outputType</code>, <code>outputFileName</code>. Optional: <code>playerOneCountryWidget</code>, <code>playerTwoCountryWidget</code>, <code>clearWidgets</code>. Nested stage elements (<code>&lt;grandFinal&gt;</code>, <code>&lt;winnersFinal&gt;</code>, <code>&lt;losersFinal&gt;</code>, …) configure label overrides per bracket stage.</p>
+
+<h2 id="tabs">Tabs <a class="anchor" href="#tabs">#</a></h2>
+<p>Two ways to use tabs:</p>
+
+<p><strong>1. Whole layout is tabbed.</strong> Set <code>tabbed="1"</code> on <code>&lt;layout&gt;</code> and make every child a <code>&lt;tab&gt;</code>:</p>
+<pre><code>&lt;layout width="390" height="140" tabbed="1"&gt;
+  &lt;tab name="Match Info"&gt; ... widgets ... &lt;/tab&gt;
+  &lt;tab name="Commentary"&gt; ... &lt;/tab&gt;
+&lt;/layout&gt;</code></pre>
+
+<p><strong>2. A tabbed panel inside a non-tabbed layout.</strong> Use a <code>&lt;tabSet&gt;</code> with its own geometry:</p>
+<pre><code>&lt;tabSet x="10" y="50" width="370" height="80"&gt;
+  &lt;tab name="Page 1"&gt; ... &lt;/tab&gt;
+  &lt;tab name="Page 2"&gt; ... &lt;/tab&gt;
+&lt;/tabSet&gt;</code></pre>
+
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>yes</td><td>Tab label.</td></tr>
+    <tr><td><code>scrollable</code></td><td>no</td><td><code>"1"</code> wraps the tab in a scroll area.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="toolbar">Toolbar <a class="anchor" href="#toolbar">#</a></h2>
+<p>A horizontal bar across the top, useful for stream-wide state (event name, round selector). Children are laid out left-to-right; no geometry attributes on the children. Allowed children: <code>&lt;label&gt;</code>, <code>&lt;comboBox&gt;</code>, and <code>&lt;button type="setButton" ...&gt;</code>.</p>
+
+<pre><code>&lt;toolBar&gt;
+  &lt;label&gt;Event:&lt;/label&gt;
+  &lt;comboBox id="eventName" editable="1"&gt;
+    &lt;comboItem&gt;Weekly #1&lt;/comboItem&gt;
+    &lt;comboItem&gt;Majors&lt;/comboItem&gt;
+  &lt;/comboBox&gt;
+&lt;/toolBar&gt;</code></pre>
+
+<h2 id="cli">CLI <a class="anchor" href="#cli">#</a></h2>
+<p>Run external commands when you hit Save. Variables from any widget can be interpolated with <code>[$id]</code> or <code>[$id.field]</code>.</p>
+
+<pre><code>&lt;cli&gt;
+  &lt;cmd&gt;notify-send "Match" "[$pName1] vs [$pName2]"&lt;/cmd&gt;
+  &lt;cmd ignore="pScore1,pScore2"&gt;obs-cli scene "MainCam"&lt;/cmd&gt;
+&lt;/cli&gt;</code></pre>
+
+<table>
+  <thead><tr><th>Attribute</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>ignore</code></td><td>no</td><td>CSV of widget IDs whose changes should <em>not</em> trigger this command.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="output-mapping">Output mapping <a class="anchor" href="#output-mapping">#</a></h2>
+<p>When you Save, every widget with an <code>id</code> becomes a key in the output:</p>
+<table>
+  <thead><tr><th>Widget</th><th>JSON value</th></tr></thead>
+  <tbody>
+    <tr><td><code>lineEdit</code></td><td>string</td></tr>
+    <tr><td><code>spinBox</code></td><td>string (the number)</td></tr>
+    <tr><td><code>checkBox</code></td><td><code>"1"</code> or <code>"0"</code></td></tr>
+    <tr><td><code>comboBox</code></td><td>selected item's <code>value</code> (or its text)</td></tr>
+    <tr><td><code>radioGroup</code></td><td>selected <code>&lt;radioButton&gt;</code>'s <code>value</code></td></tr>
+    <tr><td><code>tweet</code></td><td>tweet text (and JSON if <code>embedJSON="1"</code>)</td></tr>
+    <tr><td><code>timestamp</code> button</td><td>writes to a paired field of the same <code>id</code></td></tr>
+  </tbody>
+</table>
+<p>A top-level <code>timestamp</code> key is always added (seconds since epoch of the save). Static <code>&lt;label&gt;</code>, <code>&lt;line&gt;</code>, and button widgets do not contribute output.</p>
+
+<h2 id="tips">Tips <a class="anchor" href="#tips">#</a></h2>
+<ul>
+  <li>Keep dataset CSVs next to the layout file so relative paths work.</li>
+  <li>IDs are also what the WebSocket payload uses — design them so overlay code can consume them directly (<code>pName1</code>, <code>pScore1</code>, etc.).</li>
+  <li>Hotkeys are Windows-only. The string format is whatever Qt's <code>QKeySequence</code> accepts (e.g. <code>"Ctrl+Shift+R"</code>).</li>
+  <li>When validating your file, StreamControl will pop up specific error messages — the validators are exhaustive (see <code>MainWindow::checkLayout</code>).</li>
+</ul>
+
+<footer>
+  <p>Source: <a href="https://github.com/farpenoodle/StreamControl">github.com/farpenoodle/StreamControl</a> · Report bugs at <a href="https://github.com/farpenoodle/StreamControl/issues">issues</a>.</p>
+</footer>
+
+</div>
+</body>
+</html>
