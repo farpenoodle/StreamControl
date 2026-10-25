@@ -1,0 +1,33 @@
+<!DOCTYPE StreamControlLayout>
+<layout width="390" height="140" tabbed="1">
+ <tab name="Match Info">
+  <lineEdit id="pName1" x="10" y="10" width="160" height="20" dataSet="players.csv" >Player 1</lineEdit>
+  <lineEdit id="pCountry1" x="180" y="10" width="50" height="20" dataSet="players.csv" dataField="2" master="pName1" >Country</lineEdit>
+  <lineEdit id="pName2" x="10" y="40" width="160" height="20" dataSet="players.csv" >Player 2</lineEdit>
+  <lineEdit id="pCountry2" x="180" y="40" width="50" height="20" dataSet="players.csv" dataField="2" master="pName2" >Country</lineEdit>
+  <spinBox id="pScore1" x="240" y="10" width="40" height="22" maximum="999" />
+  <spinBox id="pScore2" x="240" y="40" width="40" height="22" maximum="999" />
+  <button type="reset" x="290" y="10" width="40" height="23" tooltip="Clear Player 1 fields" id="clear1" reset="pName1,pCountry1">Clear</button>
+  <button type="reset" x="330" y="10" width="40" height="23" tooltip="Reset the Scores" id="reset" reset="pScore1,pScore2">Reset</button>
+  <button type="reset" x="290" y="40" width="40" height="23" tooltip="Clear Player 2 fields" id="clear2" reset="pName2,pCountry2">Clear</button>
+  <button type="swap" x="330" y="40" width="40" height="23" tooltip="Swap the Scores" id="swap" swapSet1="pName1,pScore1,pCountry1" swapSet2="pName2,pScore2,pCountry2">Swap</button>
+ </tab>
+ <tab name="Commentary">
+  <label x="10" y="14" width="46" height="13">Title 1</label>
+  <label x="10" y="44" width="46" height="13">Title 2</label>
+  <lineEdit id="cTitle1" x="60" y="10" width="321" height="20" />
+  <lineEdit id="cTitle2" x="60" y="40" width="321" height="20" />
+ </tab>
+ <tab name="Misc 1">
+  <label x="10" y="14" width="46" height="13">mText 1</label>
+  <label x="10" y="44" width="46" height="13">mText 2</label>
+  <lineEdit id="mText1" x="60" y="10" width="321" height="20" />
+  <lineEdit id="mText2" x="60" y="40" width="321" height="20" />
+ </tab>
+ <tab name="Misc 2">
+  <label x="10" y="14" width="46" height="13">mText 3</label>
+  <label x="10" y="44" width="46" height="13">mText 4</label>
+  <lineEdit id="mText3" x="60" y="10" width="321" height="20" />
+  <lineEdit id="mText4" x="60" y="40" width="321" height="20" />
+ </tab>
+</layout>

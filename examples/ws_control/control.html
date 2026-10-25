@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>StreamControl Remote</title>
+<style>
+	body { font-family: sans-serif; margin: 16px; max-width: 720px; }
+	input, textarea, button { font: inherit; }
+	textarea { width: 100%; height: 220px; font-family: monospace; }
+	#log { white-space: pre-wrap; font-family: monospace; font-size: 12px; background: #f3f3f3; padding: 8px; max-height: 300px; overflow-y: auto; }
+	.row { margin: 8px 0; }
+</style>
+</head>
+<body>
+<!--
+	Minimal StreamControl remote-control client.
+	Serve this page from http://localhost (e.g. "python -m http.server") - browsers
+	only expose crypto.subtle in secure contexts, which excludes file:// pages.
+-->
+<h2>StreamControl Remote</h2>
+<div class="row">
+	<input id="url" size="28" value="ws://localhost:41236">
+	<input id="password" type="password" placeholder="Control password">
+	<button id="connect">Connect</button>
+	<span id="status">disconnected</span>
+</div>
+<div class="row">
+	<textarea id="batch">[
+  {"action": "set", "id": "pName1", "value": "Player One"},
+  {"action": "set", "id": "pScore1", "value": 1},
+  {"action": "save"}
+]</textarea>
+	<button id="send" disabled>Send batch</button>
+</div>
+<div id="log"></div>
+
+<script>
+	var ws = null;
+	var batchCounter = 0;
+
+	function log(text) {
+		var el = document.getElementById("log");
+		el.textContent = text + "\n" + el.textContent;
+	}
+
+	function setStatus(text, authed) {
+		document.getElementById("status").textContent = text;
+		document.getElementById("send").disabled = !authed;
+	}
+
+	// base64(sha256(text)) - the same derivation StreamControl uses
+	async function sha256Base64(text) {
+		var digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+		return btoa(String.fromCharCode.apply(null, new Uint8Array(digest)));
+	}
+
+	function connect() {
+		if (ws) ws.close();
+		if (!window.crypto || !crypto.subtle) {
+			log("crypto.subtle unavailable - serve this page from http://localhost or https");
+			return;
+		}
+		ws = new WebSocket(document.getElementById("url").value);
+		setStatus("connecting", false);
+
+		ws.onopen = function () {
+			setStatus("authenticating", false);
+			ws.send(JSON.stringify({op: "authRequest"}));
+		};
+
+		ws.onmessage = async function (e) {
+			var msg = JSON.parse(e.data);
+			if (msg.op === "authChallenge") {
+				var password = document.getElementById("password").value;
+				var secret = await sha256Base64(password + msg.salt);
+				var auth = await sha256Base64(secret + msg.challenge);
+				ws.send(JSON.stringify({op: "auth", auth: auth}));
+			} else if (msg.op === "authResult") {
+				setStatus(msg.ok ? "authenticated" : "auth failed", msg.ok);
+				log("authResult: " + JSON.stringify(msg));
+			} else if (msg.op) {
+				log(msg.op + ": " + JSON.stringify(msg));
+			} else {
+				log("snapshot: " + e.data);
+			}
+		};
+
+		ws.onclose = function (e) {
+			setStatus("disconnected" + (e.reason ? " (" + e.reason + ")" : ""), false);
+		};
+	}
+
+	function sendBatch() {
+		var actions;
+		try {
+			actions = JSON.parse(document.getElementById("batch").value);
+		} catch (err) {
+			log("batch is not valid JSON: " + err.message);
+			return;
+		}
+		ws.send(JSON.stringify({op: "batch", id: "batch" + (++batchCounter), actions: actions}));
+	}
+
+	document.getElementById("connect").onclick = connect;
+	document.getElementById("send").onclick = sendBatch;
+</script>
+</body>
+</html>

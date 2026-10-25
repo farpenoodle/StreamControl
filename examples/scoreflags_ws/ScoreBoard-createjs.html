@@ -1,0 +1,249 @@
+<html>
+<head>
+	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" charset="utf-8">
+	<script src="js/createjs-2013.05.14.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/countries.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+
+			var WS_URL = "ws://localhost:41236";
+
+			var timestampOld;
+			var timestamp;
+			var pName1;
+			var pScore1;
+			var pName2;
+			var pScore2;
+			var pCountry1;
+			var pCountry2;
+			var oldCountry1 = "";
+			var oldCountry2 = "";
+			var mText3;
+
+			var animating = false;
+			var doUpdate = false;
+			var pendingData = null;
+
+			var stage,board,pName1t,pName2t,pScore1t,pScore2t,pCountry1b,pCountry2b,mText3t,pFlag1,pFlag2;
+
+			var ws;
+
+			function connect() {
+				ws = new WebSocket(WS_URL);
+				ws.onmessage = function(evt) {
+					try {
+						pendingData = JSON.parse(evt.data);
+					} catch (e) {
+						console.error("Bad JSON from server:", e);
+					}
+				};
+				ws.onclose = function() {
+					setTimeout(connect, 1000);
+				};
+				ws.onerror = function() {
+					ws.close();
+				};
+			}
+
+			function init() {
+
+				connect();
+
+				this.window.setInterval(function() {
+					pollHandler();
+				}, 100);
+
+				stage = new createjs.Stage("myCanvas");
+
+				board = new createjs.Container();
+
+
+				scoreboard = new createjs.Bitmap("images/game.png");
+				scoreboard.regX = 0;
+				scoreboard.regY = 0;
+
+				board.addChild(scoreboard);
+
+				pFlag1 = new createjs.Container();
+				pFlag1.x = 126;
+				pFlag1.alpha=0;
+
+				board.addChild(pFlag1);
+
+				pFlag2 = new createjs.Container()
+				pFlag2.x = 1112;
+				pFlag2.alpha=0;
+
+				board.addChild(pFlag2);
+
+				pName1t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pName1t.x = 175;
+				pName1t.y = 3;
+				pName1t.textAlign = "left";
+
+				board.addChild(pName1t);
+
+				pName2t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pName2t.x = 1105;
+				pName2t.y = 3;
+				pName2t.textAlign = "right";
+
+				board.addChild(pName2t);
+
+				pScore1t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pScore1t.x = 534;
+				pScore1t.y = 3;
+				pScore1t.textAlign = "center";
+
+				board.addChild(pScore1t);
+
+				pScore2t = new createjs.Text("", "20px SansationRegular", "#ffffff");
+				pScore2t.x = 744;
+				pScore2t.y = 3;
+				pScore2t.textAlign = "center";
+
+				board.addChild(pScore2t);
+
+				mText3t = new createjs.Text("", "11px SansationRegular", "#333333");
+				mText3t.x = 640;
+				mText3t.y = 1;
+				mText3t.textAlign = "center";
+
+				board.addChild(mText3t);
+
+				stage.addChild(board);
+
+				board.y = -100;
+
+				createjs.Tween.get(board).to({y:0},800, createjs.Ease.quintOut);
+
+				createjs.Ticker.addEventListener("tick", enterFrame);
+				createjs.Ticker.setFPS(60);
+
+
+				stage.update();
+			}
+
+
+			function enterFrame(event) {
+				stage.update(event);
+			}
+
+			function pollHandler()
+			{
+			  if (pendingData) {
+				  loadData(pendingData);
+				  pendingData = null;
+			  }
+			  if (timestamp != timestampOld) {
+				  doUpdate = true;
+			  }
+			  if (!animating && doUpdate) {
+				  updateBoard();
+			  }
+			}
+
+			function loadData(data) {
+				pName1 = getValue(data, 'pName1');
+				pName2 = getValue(data, 'pName2');
+				pScore1 = getValue(data, 'pScore1');
+				pScore2 = getValue(data, 'pScore2');
+				pCountry1 = getCountry(getValue(data, 'pCountry1'));
+				pCountry2 = getCountry(getValue(data, 'pCountry2'));
+				mText3 = getValue(data, 'mText3');
+				timestampOld = timestamp;
+				timestamp = getValue(data, 'timestamp');
+			}
+
+			function updateBoard() {
+
+				if (pName1t.text != pName1) {
+					animating = true;
+					createjs.Tween.get(pName1t).to({x:275,alpha:0},500, createjs.Ease.quintIn).call(function() {pName1t.text = pName1;})
+					.to({x:175,alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				if (pName2t.text != pName2) {
+					animating = true;
+					createjs.Tween.get(pName2t).to({x:1005,alpha:0},500, createjs.Ease.quintIn).call(function() {pName2t.text = pName2;})
+					.to({x:1105,alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				if (pScore1t.text != pScore1) {
+					animating = true;
+					createjs.Tween.get(pScore1t).to({alpha:0},500, createjs.Ease.quintIn).call(function() {pScore1t.text = pScore1;})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				if (pScore2t.text != pScore2) {
+					animating = true;
+					createjs.Tween.get(pScore2t).to({alpha:0},500, createjs.Ease.quintIn).call(function() {pScore2t.text = pScore2;})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				if (oldCountry1 != pCountry1 || pFlag1.alpha == 0) {
+					animating = true;
+					var pFlag1n = new createjs.Bitmap("GoSquared/cropped/iso/64shiny/" + pCountry1 + ".png");
+
+					createjs.Tween.get(pFlag1).to({alpha:0},500, createjs.Ease.quintIn).call(function() {
+						pFlag1.removeAllChildren();
+
+						pFlag1n.scaleX = 43 / pFlag1n.image.width;
+						pFlag1n.scaleY = 28 / pFlag1n.image.height;
+
+						pFlag1.addChild(pFlag1n);
+						oldCountry1 = pCountry1;
+					})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				if (oldCountry2 != pCountry2 || pFlag2.alpha == 0) {
+					animating = true;
+					var pFlag2n = new createjs.Bitmap("GoSquared/cropped/iso/64shiny/" + pCountry2 + ".png");
+
+					createjs.Tween.get(pFlag2).to({alpha:0},500, createjs.Ease.quintIn).call(function() {
+						pFlag2.removeAllChildren();
+
+						pFlag2n.scaleX = 43 / pFlag2n.image.width;
+						pFlag2n.scaleY = 28 / pFlag2n.image.height;
+
+						pFlag2.addChild(pFlag2n);
+						oldCountry2 = pCountry2;
+					})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				if (mText3t.text != mText3) {
+					animating = true;
+					createjs.Tween.get(mText3t).to({alpha:0},500, createjs.Ease.quintIn).call(function() {mText3t.text = mText3;})
+					.to({alpha:1},500, createjs.Ease.quintOut).call(function() {animating = false;});
+				}
+
+				doUpdate = false;
+			}
+
+			function getValue(data, key) {
+				if (data && data[key] !== undefined && data[key] !== null) {
+					return String(data[key]);
+				}
+				return '';
+			}
+
+			function getCountry (country) {
+
+				var count = iso.findCountryByName(country);
+				if (!count)
+				count = iso.findCountryByCode(country);
+				if (!count) {
+        return "unknown";
+				}
+
+				return count['value'].toUpperCase();
+			}
+	</script>
+</head>
+<body onLoad="init()">
+	<canvas id="myCanvas" width="1280" height="720">
+        canvas
+    </canvas>
+</body>
+</html>
