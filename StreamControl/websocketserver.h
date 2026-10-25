@@ -7,6 +7,7 @@
 #include <QByteArray>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QDateTime>
 #include <QWebSocketServer>
 #include <QWebSocket>
 #include <functional>
@@ -29,8 +30,25 @@ public:
     static QString makeSecret(const QString &password, const QString &salt);
     static QString makeSalt();
 
+    struct ConnectionInfo {
+        QWebSocket *socket = nullptr;
+        QString address;
+        quint16 port = 0;
+        QString origin;
+        QString resource;
+        QDateTime connectedAt;
+        bool authed = false;
+        int messages = 0;
+    };
+
+    QList<ConnectionInfo> connections() const;
+    quint16 port() const;
+    bool isListening() const;
+    void disconnectClient(QWebSocket *socket);
+
 signals:
     void closed();
+    void connectionsChanged();
 
 private slots:
     void onNewConnection();
@@ -43,6 +61,8 @@ private:
         QByteArray challenge;
         bool authed = false;
         int failures = 0;
+        QDateTime connectedAt;
+        int messages = 0;
     };
 
     void sendJson(QWebSocket *client, const QJsonObject &obj);

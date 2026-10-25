@@ -92,6 +92,7 @@ MainWindow::MainWindow()
 
     cWindow = new ConfigWindow(this);
     widgetSettingsDialog = new WidgetSettingsDialog(this);
+    wsConnectionsDialog = new WebSocketConnectionsDialog(this);
 
     toolBar = new QToolBar(this);
     toolBar->setObjectName(QStringLiteral("toolBar"));
@@ -121,6 +122,8 @@ MainWindow::MainWindow()
     configMenu->addAction(actionConfig);
     QAction *actionWidgetSettings = new QAction("Widget Settings", this);
     configMenu->addAction(actionWidgetSettings);
+    QAction *actionWsConnections = new QAction("WebSocket Connections", this);
+    configMenu->addAction(actionWsConnections);
     QAction *hideReloadLayout = new QAction("Hide Reload Layout Button", this);
     hideReloadLayout->setCheckable(true);
     configMenu->addAction(hideReloadLayout);
@@ -137,6 +140,7 @@ MainWindow::MainWindow()
     configButton->setIcon(configIcon);
     connect(actionConfig,SIGNAL( triggered() ),this,SLOT( openConfig() ));
     connect(actionWidgetSettings,SIGNAL( triggered() ),this,SLOT( openWidgetSettings() ));
+    connect(actionWsConnections,SIGNAL( triggered() ),this,SLOT( openWebSocketConnections() ));
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
     connect(hideReloadLayout,SIGNAL(toggled(bool)),this,SLOT( toggleHideReloadLayout(bool) ));
 
@@ -1192,6 +1196,13 @@ void MainWindow::openWidgetSettings() {
         settings = widgetSettingsDialog->getConfig();
         saveSettings();
     }
+}
+
+void MainWindow::openWebSocketConnections() {
+    wsConnectionsDialog->setServer(wsServer);
+    wsConnectionsDialog->show();
+    wsConnectionsDialog->raise();
+    wsConnectionsDialog->activateWindow();
 }
 
 void MainWindow::toggleAlwaysOnTop(bool on_top) {

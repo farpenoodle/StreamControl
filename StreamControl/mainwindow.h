@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "configwindow.h"
 #include "dialogs/widgetsettingsdialog.h"
+#include "dialogs/websocketconnectionsdialog.h"
 #include "config.h"
 #include "ScCompleter.h"
 #include "widgets/providerwidgetbuilder.h"
@@ -96,6 +97,7 @@ public slots:
     void setButtonClick(QString);
     void openConfig();
     void openWidgetSettings();
+    void openWebSocketConnections();
     void toggleAlwaysOnTop(bool);
     void toggleHideReloadLayout(bool);
     void completerActivate(QString);
@@ -150,6 +152,7 @@ private:
     int layoutIterator;
     ConfigWindow *cWindow;
     WidgetSettingsDialog *widgetSettingsDialog;
+    WebSocketConnectionsDialog *wsConnectionsDialog;
     QMap<QString, QString> settings;
     QMap<QString, QObject*> widgetList;
     QMap<QString, QWidget*> visualList;

@@ -12,14 +12,12 @@ TEMPLATE = app
 SOURCES += *.cpp \
     $$files(o2/*.cpp) \
     $$files(dialogs/*.cpp) \
-    $$files(widgets/*.cpp) \
-    websocketserver.cpp
+    $$files(widgets/*.cpp)
 
 HEADERS  += *.h \
     $$files(o2/*.h) \
     $$files(dialogs/*.h) \
-    $$files(widgets/*.h) \
-    websocketserver.h
+    $$files(widgets/*.h)
 
 FORMS    += \
     configwindow.ui

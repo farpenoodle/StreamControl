@@ -76,6 +76,43 @@ void WebSocketServer::setAuth(const QString &password, bool enabled)
         state.authed = false;
         state.challenge.clear();
     }
+    emit connectionsChanged();
+}
+
+QList<WebSocketServer::ConnectionInfo> WebSocketServer::connections() const
+{
+    QList<ConnectionInfo> list;
+    for (QWebSocket *pClient : m_clients) {
+        const ClientState state = m_clientStates.value(pClient);
+        ConnectionInfo info;
+        info.socket = pClient;
+        info.address = pClient->peerAddress().toString();
+        info.port = pClient->peerPort();
+        info.origin = pClient->origin();
+        info.resource = pClient->requestUrl().path();
+        info.connectedAt = state.connectedAt;
+        info.authed = state.authed;
+        info.messages = state.messages;
+        list << info;
+    }
+    return list;
+}
+
+quint16 WebSocketServer::port() const
+{
+    return m_pWebSocketServer->serverPort();
+}
+
+bool WebSocketServer::isListening() const
+{
+    return m_pWebSocketServer->isListening();
+}
+
+void WebSocketServer::disconnectClient(QWebSocket *socket)
+{
+    if (m_clients.contains(socket)) {
+        socket->close(QWebSocketProtocol::CloseCodeNormal, "disconnected by StreamControl");
+    }
 }
 
 void WebSocketServer::setBatchHandler(std::function<QJsonArray(const QJsonArray&)> handler)
@@ -91,13 +128,16 @@ void WebSocketServer::onNewConnection()
     connect(pSocket, &QWebSocket::disconnected, this, &WebSocketServer::socketDisconnected);
 
     m_clients << pSocket;
-    m_clientStates.insert(pSocket, ClientState());
+    ClientState state;
+    state.connectedAt = QDateTime::currentDateTime();
+    m_clientStates.insert(pSocket, state);
 
     if (!m_lastMessage.isEmpty()) {
         pSocket->sendTextMessage(m_lastMessage);
     }
 
     qDebug() << "Client connected";
+    emit connectionsChanged();
 }
 
 void WebSocketServer::processTextMessage(QString message)
@@ -105,6 +145,9 @@ void WebSocketServer::processTextMessage(QString message)
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (!pClient || !m_clientStates.contains(pClient))
         return;
+
+    m_clientStates[pClient].messages++;
+    emit connectionsChanged();
 
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &parseError);
@@ -152,12 +195,14 @@ void WebSocketServer::processTextMessage(QString message)
             reply["ok"] = true;
             sendJson(pClient, reply);
             qDebug() << "Client authenticated";
+            emit connectionsChanged();
         } else {
             state.authed = false;
             state.failures++;
             reply["ok"] = false;
             reply["error"] = "authentication failed";
             sendJson(pClient, reply);
+            emit connectionsChanged();
             if (state.failures >= maxAuthFailures) {
                 qDebug() << "Closing client after too many auth failures";
                 pClient->close(QWebSocketProtocol::CloseCodePolicyViolated, "too many authentication failures");
@@ -229,5 +274,6 @@ void WebSocketServer::socketDisconnected()
         m_clientStates.remove(pClient);
         pClient->deleteLater();
         qDebug() << "Client disconnected";
+        emit connectionsChanged();
     }
 }
