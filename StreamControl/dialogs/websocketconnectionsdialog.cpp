@@ -32,7 +32,7 @@ WebSocketConnectionsDialog::WebSocketConnectionsDialog(QWidget *parent)
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->verticalHeader()->setVisible(false);
-    table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     table->horizontalHeader()->setStretchLastSection(true);
 
     disconnectButton = new QPushButton(tr("Disconnect"));
@@ -128,6 +128,12 @@ void WebSocketConnectionsDialog::refresh()
 
         if (info.socket == selected)
             table->selectRow(row);
+    }
+
+    // fit columns to the first real data, then leave widths to the user
+    if (!columnsSized && !connections.isEmpty()) {
+        table->resizeColumnsToContents();
+        columnsSized = true;
     }
 
     selectionChanged();

@@ -32,6 +32,8 @@ private:
     QLabel *statusLabel;
     QTableWidget *table;
     QPushButton *disconnectButton;
+
+    bool columnsSized = false;
 };
 
 #endif // DIALOG_WEBSOCKETCONNECTIONSDIALOG_H
