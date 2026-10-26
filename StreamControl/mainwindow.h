@@ -39,8 +39,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "widgets/providerwidgetbuilder.h"
 #include "websocketserver.h"
 
-class TwitterHandler;
-
 class QWidget;
 class QSignalMapper;
 class QToolBar;
@@ -177,8 +175,6 @@ private:
     bool useCDATA;
     bool altHotkeyHandling;
     int saveFormat;
-    TwitterHandler *th;
-    bool needLink;
 
     QTimer *keyPoller;
     bool hotkeyDown;

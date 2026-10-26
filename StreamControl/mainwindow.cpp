@@ -58,7 +58,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "scsetbutton.h"
 #include "widgets/providerwidget.h"
 #include "widgets/providerwidgetbuilder.h"
-#include "twitterhandler.h"
 #include "twitterwidget.h"
 #include "mainwindow.h"
 #include <QTimer>
@@ -143,9 +142,6 @@ MainWindow::MainWindow()
     connect(actionWsConnections,SIGNAL( triggered() ),this,SLOT( openWebSocketConnections() ));
     connect(actionAlwaysOnTop,SIGNAL(toggled(bool)),this,SLOT( toggleAlwaysOnTop(bool) ));
     connect(hideReloadLayout,SIGNAL(toggled(bool)),this,SLOT( toggleHideReloadLayout(bool) ));
-
-    needLink = false;
-    th = new TwitterHandler();
 
     //code to add non buttons to toolbar
     QLabel* spaceLabel = new QLabel("   ");
@@ -1328,11 +1324,6 @@ void MainWindow::loadLayout() {
         parseCLI(cliNode);
     }
 
-    //link o2 if needed
-    if (needLink) {
-        th->link();
-    }
-
     //connect signal mappers
 
     connect (resetMapper, SIGNAL(mappedString(QString)), this, SLOT(resetFields(QString))) ;
@@ -1382,7 +1373,6 @@ void MainWindow::parseLayout(QDomElement element, QWidget *parent) {
             addComboBox(child.toElement(), parent);
         } else if (tagName == "tweet") {
             addTweetWidget(child.toElement(), parent);
-            needLink = true;
         } else if (tagName == "challonge") {
             addProviderWidget(child.toElement(), parent, widgetList, ProviderWidgetBuilder::Provider::Challonge);
         } else if (tagName == "smashgg") {
@@ -1706,7 +1696,7 @@ void MainWindow::addLabel(QDomElement element, QWidget *parent) {
 void MainWindow::addTweetWidget(QDomElement element, QWidget *parent) {
 
     QString newTweet = element.attribute("id");
-    widgetList[newTweet] = new TwitterWidget(th, parent);
+    widgetList[newTweet] = new TwitterWidget(parent);
     widgetType[newTweet] = "tweet";
     widgetList[newTweet]->setObjectName(newTweet);
     ((TwitterWidget*)widgetList[newTweet])->setGeometry(QRect(element.attribute("x").toInt(),

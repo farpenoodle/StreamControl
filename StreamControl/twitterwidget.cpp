@@ -15,11 +15,68 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-#include "o2/o0globals.h"
-#include "twitterhandler.h"
+#include <QDateTime>
+#include <QLocale>
+#include <QtMath>
+#include <cmath>
 
-TwitterWidget::TwitterWidget(TwitterHandler * th,QWidget *parent) :
-    QWidget(parent), th(th)
+// Token the syndication endpoint expects: ((id / 1e15) * pi).toString(36) with
+// zeros and the radix point stripped. Mirrors V8's DoubleToRadixCString so the
+// result matches what twitter's embed JS sends.
+static QString syndicationToken(const QString &id)
+{
+    const char chars[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    const int radix = 36;
+
+    double value = id.toDouble() / 1e15 * M_PI;
+    double integer = std::floor(value);
+    double fraction = value - integer;
+    double delta = 0.5 * (std::nextafter(value, INFINITY) - value);
+    delta = std::max(std::nextafter(0.0, 1.0), delta);
+
+    QString fractionDigits;
+    if (fraction >= delta) {
+        do {
+            fraction *= radix;
+            delta *= radix;
+            int digit = static_cast<int>(fraction);
+            fractionDigits += chars[digit];
+            fraction -= digit;
+            if (fraction > 0.5 || (fraction == 0.5 && (digit & 1))) {
+                if (fraction + delta > 1) {
+                    // round up, propagating carries back through the digits
+                    while (true) {
+                        if (fractionDigits.isEmpty()) {
+                            integer += 1;
+                            break;
+                        }
+                        QChar c = fractionDigits.back();
+                        fractionDigits.chop(1);
+                        int d = c > '9' ? (c.toLatin1() - 'a' + 10) : (c.toLatin1() - '0');
+                        if (d + 1 < radix) {
+                            fractionDigits += chars[d + 1];
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        } while (fraction >= delta);
+    }
+
+    QString integerDigits;
+    do {
+        double rem = std::fmod(integer, radix);
+        integerDigits.prepend(chars[static_cast<int>(rem)]);
+        integer = (integer - rem) / radix;
+    } while (integer > 0);
+
+    QString token = integerDigits + fractionDigits;
+    return token.remove('0');
+}
+
+TwitterWidget::TwitterWidget(QWidget *parent) :
+    QWidget(parent)
 {
     picDone = false;
     mediaDone = false;
@@ -45,40 +102,25 @@ TwitterWidget::TwitterWidget(TwitterHandler * th,QWidget *parent) :
 
 void TwitterWidget::fetchTweet()
 {
-    if (th->linked()){
+    QRegularExpression rx("(?:^|[/.])(?:twitter|x)\\.com\\/(\\w+)\\/status(?:es)?\\/(\\d+)");
+    QString tweetURL = urlBox->text();
+    QRegularExpressionMatch rxmatch = rx.match(tweetURL);
 
-        QRegularExpression rx("/twitter\\.com\\/(\\w*)\\/status\\/(\\d*)");
-        QString tweetURL = urlBox->text();
-        QRegularExpressionMatch rxmatch = rx.match(tweetURL);
+    if (rxmatch.hasMatch()) {
+        label->setText("Fetching tweet");
 
-        if (rxmatch.hasMatch()) {
-            label->setText("Fetching tweet");
+        userName = rxmatch.captured(1);
+        tweetId = rxmatch.captured(2);
 
-            userName = rxmatch.captured(1);
-            tweetId = rxmatch.captured(2);
+        QString tweetUrl = "https://cdn.syndication.twimg.com/tweet-result?id=" + tweetId + "&token=" + syndicationToken(tweetId) + "&lang=en";
 
-            QString tweetUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId + "&include_entities=true&tweet_mode=extended";
+        QNetworkReply *reply = manager->get(QNetworkRequest(QUrl(tweetUrl)));
 
-            QNetworkRequest request;
+        connect(reply, SIGNAL(finished()), this, SLOT(replyFinished()));
 
-            request.setUrl(QUrl(tweetUrl));
-
-            QString authString = "Bearer " + th->getToken();
-            request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER,authString.toUtf8());
-
-            QNetworkReply *reply = manager->get(request);
-
-            connect(reply, SIGNAL(finished()), this, SLOT(replyFinished()));
-
-
-        } else {
-            label->setText("<font color=red>Invalid Tweet URL</font>");
-        }
     } else {
-        th->link();
-        label->setText("<font color=red>Getting Auth Token/Failed to get Auth Token</font>");
+        label->setText("<font color=red>Invalid Tweet URL</font>");
     }
-
 
 }
 
@@ -102,19 +144,34 @@ void TwitterWidget::replyFinished() {
     QJsonObject jsonObj;
     jsonObj = jsonDoc.object();
 
+    // deleted/protected/nonexistent tweets come back as an error or an empty object
+    if (reply->error() != QNetworkReply::NoError || !jsonObj.contains("id_str")) {
+        label->setText("<font color=red>Tweet not found or unavailable</font>");
+        reply->deleteLater();
+        return;
+    }
+
     tweetJSON = jsonObj;
 
     QJsonObject entities = jsonObj["entities"].toObject();
-    QJsonObject extendedEntities = jsonObj["extended_entities"].toObject();
     QJsonObject user = jsonObj["user"].toObject();
 
     QJsonArray urls = entities["urls"].toArray();
-    QJsonArray media = extendedEntities["media"].toArray();
+    QJsonArray media = jsonObj["mediaDetails"].toArray();
 
-    tweetText = jsonObj["full_text"].toString();
+    tweetText = jsonObj["text"].toString();
     twitterName = user["name"].toString();
-    tweetCreated = jsonObj["created_at"].toString();
-    profilePicUrl = user["profile_image_url"].toString().replace("_normal","");
+    if (user.contains("screen_name")) {
+        userName = user["screen_name"].toString();
+    }
+    // syndication returns ISO 8601; keep the old v1.1 format so existing layouts still parse it
+    QDateTime created = QDateTime::fromString(jsonObj["created_at"].toString(), Qt::ISODateWithMs);
+    if (created.isValid()) {
+        tweetCreated = QLocale::c().toString(created.toUTC(), "ddd MMM dd HH:mm:ss +0000 yyyy");
+    } else {
+        tweetCreated = jsonObj["created_at"].toString();
+    }
+    profilePicUrl = user["profile_image_url_https"].toString().replace("_normal","");
 
     int urli;
     for (urli = 0; urli != urls.count(); urli++) {
@@ -136,7 +193,7 @@ void TwitterWidget::replyFinished() {
         mediaE["display_url"] = mediaiE["display_url"].toString();
         mediaE["expanded_url"] = mediaiE["expanded_url"].toString();
         mediaE["type"] = mediaiE["type"].toString();
-        mediaE["media_url"] = mediaiE["media_url"].toString();
+        mediaE["media_url"] = mediaiE["media_url_https"].toString();
 
         if(mediai == 0 && mediaE["type"] == "photo") {
             mediaDone = false;

@@ -10,12 +10,10 @@ TARGET = StreamControl
 TEMPLATE = app
 
 SOURCES += *.cpp \
-    $$files(o2/*.cpp) \
     $$files(dialogs/*.cpp) \
     $$files(widgets/*.cpp)
 
 HEADERS  += *.h \
-    $$files(o2/*.h) \
     $$files(dialogs/*.h) \
     $$files(widgets/*.h)
 
@@ -26,9 +24,6 @@ RESOURCES += \
     resources.qrc
 
 RC_FILE = streamcontrol.rc
-
-OTHER_FILES += \
-    o2/o2.pri
 
 macx {
     LIBS += -framework Carbon

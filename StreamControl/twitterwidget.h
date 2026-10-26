@@ -6,7 +6,6 @@
 #include <QJsonDocument>
 #include <QJsonValue>
 
-class TwitterHandler;
 class QNetworkAccessManager;
 class QLineEdit;
 class QLabel;
@@ -17,7 +16,7 @@ class TwitterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit TwitterWidget(TwitterHandler *th, QWidget *parent = 0);
+    explicit TwitterWidget(QWidget *parent = 0);
 
 private:
     QGridLayout     *layout;
@@ -42,8 +41,6 @@ private:
     QNetworkAccessManager   *manager;
     QNetworkAccessManager   *picManager;
     QNetworkAccessManager   *mediaManager;
-
-    TwitterHandler *th;
 
 signals:
 
