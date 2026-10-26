@@ -38,8 +38,10 @@ int main(int argc, char *argv[])
     #ifdef Q_OS_WIN
         qputenv("QT_AUTO_SCREEN_SCALE_FACTOR","1");
     #endif
-    QApplication a(argc, argv);    
+    QApplication a(argc, argv);
     a.setStyle("fusion");
+
+    bool darkModeEnabled = false;
 
     #ifdef Q_OS_MACOS
         QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/settings.xml");
@@ -55,6 +57,7 @@ int main(int argc, char *argv[])
         QDomNode darkMode = settings.namedItem("darkMode");
         if (!darkMode.isNull()) {
             if (darkMode.firstChild().nodeValue() == "1") {
+                darkModeEnabled = true;
 
                 QPalette darkPalette;
                 darkPalette.setColor(QPalette::Window, QColor(53,53,53));
@@ -84,12 +87,48 @@ int main(int argc, char *argv[])
 
     }
 
+    if (!darkModeEnabled) {
+        //Default Fusion light palette, so the OS colour scheme doesn't leak in
+        const QColor windowText = Qt::black;
+        const QColor backGround = QColor(239, 239, 239);
+        const QColor light = backGround.lighter(150);
+        const QColor mid = backGround.darker(130);
+        const QColor midLight = mid.lighter(110);
+        const QColor base = Qt::white;
+        const QColor disabledBase(backGround);
+        const QColor dark = backGround.darker(150);
+        const QColor darkDisabled = QColor(209, 209, 209).darker(110);
+        const QColor text = Qt::black;
+        const QColor highlight = QColor(48, 140, 198);
+        const QColor highlightedText = Qt::white;
+        const QColor disabledText = QColor(190, 190, 190);
+        const QColor button = backGround;
+        const QColor shadow = dark.darker(135);
+        const QColor disabledShadow = shadow.lighter(150);
+        const QColor disabledHighlight(145, 145, 145);
+        QColor placeholder = text;
+        placeholder.setAlpha(128);
 
+        QPalette lightPalette(windowText, backGround, light, dark, mid, text, base);
+        lightPalette.setBrush(QPalette::Midlight, midLight);
+        lightPalette.setBrush(QPalette::Button, button);
+        lightPalette.setBrush(QPalette::Shadow, shadow);
+        lightPalette.setBrush(QPalette::HighlightedText, highlightedText);
 
+        lightPalette.setBrush(QPalette::Disabled, QPalette::Text, disabledText);
+        lightPalette.setBrush(QPalette::Disabled, QPalette::WindowText, disabledText);
+        lightPalette.setBrush(QPalette::Disabled, QPalette::ButtonText, disabledText);
+        lightPalette.setBrush(QPalette::Disabled, QPalette::Base, disabledBase);
+        lightPalette.setBrush(QPalette::Disabled, QPalette::Dark, darkDisabled);
+        lightPalette.setBrush(QPalette::Disabled, QPalette::Shadow, disabledShadow);
 
+        lightPalette.setBrush(QPalette::Active, QPalette::Highlight, highlight);
+        lightPalette.setBrush(QPalette::Inactive, QPalette::Highlight, highlight);
+        lightPalette.setBrush(QPalette::Disabled, QPalette::Highlight, disabledHighlight);
+        lightPalette.setBrush(QPalette::PlaceholderText, placeholder);
 
-
-
+        a.setPalette(lightPalette);
+    }
 
     MainWindow mainWindow;
     mainWindow.show();
