@@ -127,7 +127,8 @@ void TwitterWidget::fetchTweet()
 void TwitterWidget::replyFinished() {
 
     picDone = false;
-    mediaDone = false;
+    // only cleared while a media download is pending; text-only tweets have nothing to wait for
+    mediaDone = true;
 
     urlArray.clear();
     mediaArray.clear();
@@ -196,7 +197,6 @@ void TwitterWidget::replyFinished() {
         mediaE["media_url"] = mediaiE["media_url_https"].toString();
 
         if(mediai == 0 && mediaE["type"] == "photo") {
-            mediaDone = false;
             QUrl mediaUrl(mediaE["media_url"]);
             QFileInfo mediaInfo(mediaUrl.path());
             mediaE["filename"] = mediaInfo.fileName();
@@ -207,18 +207,13 @@ void TwitterWidget::replyFinished() {
             QFile mediaFile(mediaOutFile);
 
             if (!mediaFile.exists()) {
+                mediaDone = false;
 
                 QNetworkReply *mediaReply = mediaManager->get(QNetworkRequest(QUrl(mediaE["media_url"])));
 
                 connect(mediaReply, SIGNAL(finished()), this, SLOT(mediaFinished()));
 
-
-            } else {
-                mediaDone = true;
-                //label->setText("<font color=green>Ok</font>");
             }
-        } else {
-            mediaDone = true;
         }
 
         mediaArray.insert(mediai,mediaE);
