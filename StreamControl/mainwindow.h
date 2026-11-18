@@ -103,6 +103,7 @@ public slots:
     void removeComboFromDataSet();
     void checkLineDataSet(QString);
     void checkComboDataSet(QString);
+    void editDataSet();
 
     void execCmdQueue(QList<int>);
     void doCLI();
@@ -140,6 +141,7 @@ private:
                              QStringList prefix = QStringList());
     void setWidgetFontSize(QWidget *widget, int fontSize);
     bool setComboValue(QString widget, QString value);
+    void updateDataSetButtons(const QString &setName);
     QJsonArray runRemoteActions(const QJsonArray &actions);
     QString applyRemoteAction(const QJsonObject &action);
 

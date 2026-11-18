@@ -1,6 +1,8 @@
 #include <QToolButton>
 #include <QStyle>
 #include <QDebug>
+#include <QMenu>
+#include <QContextMenuEvent>
 #include "ScLineEdit.h"
 
 ScLineEdit::ScLineEdit(QWidget *parent)
@@ -17,6 +19,23 @@ ScLineEdit::ScLineEdit(QWidget *parent)
     setMinimumSize(qMax(msz.width(), clearButton->sizeHint().height() + frameWidth * 2 + 2),
                    qMax(msz.height(), clearButton->sizeHint().height() + frameWidth * 2 + 2));
     noSave = false;
+    dataSetEditable = false;
+}
+
+void ScLineEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu *menu = createStandardContextMenu();
+    if (dataSetEditable) {
+        menu->addSeparator();
+        QAction *editAction = menu->addAction(tr("Edit data set..."));
+        connect(editAction, SIGNAL(triggered()), this, SIGNAL(editDataSetRequested()));
+    }
+    menu->exec(event->globalPos());
+    delete menu;
+}
+
+void ScLineEdit::setDataSetEditable(bool editable) {
+    dataSetEditable = editable;
 }
 
 void ScLineEdit::resizeEvent(QResizeEvent *)

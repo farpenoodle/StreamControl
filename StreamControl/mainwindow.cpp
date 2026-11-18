@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "configwindow.h"
 #include "csv.h"
+#include "dialogs/csveditordialog.h"
 #include "ScCompleter.h"
 #include "ScLineEdit.h"
 #include "ScComboBox.h"
@@ -1913,7 +1914,7 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
         dataAssoc[newComboBox] = dataField;
         completerList[newComboBox] = new ScCompleter(parent);
         bool hasMaster;
-        ((ScLineEdit*)widgetList[newComboBox])->setName(newComboBox,dataSetName);
+        ((ScComboBox*)widgetList[newComboBox])->setName(newComboBox,dataSetName);
         if (element.hasAttribute("master")) {
             QStringListModel *model = new QStringListModel(condensedDataSets[dataSetName][dataField]);
             completerList[newComboBox]->setModel(model);
@@ -1927,6 +1928,8 @@ void MainWindow::addComboBox(QDomElement element, QWidget *parent) {
             connect(((ScLineEdit*)widgetList[newComboBox]),SIGNAL(editTextChanged(QString)), this, SLOT(checkComboDataSet(QString)));
             connect(((ScLineEdit*)widgetList[newComboBox]),SIGNAL(clearButtonClicked()), this, SLOT(removeComboFromDataSet()));
             ((ScComboBox*)widgetList[newComboBox])->addModel(model);
+            ((ScComboBox*)widgetList[newComboBox])->setDataSetEditable(true);
+            connect(((ScComboBox*)widgetList[newComboBox]), SIGNAL(editDataSetRequested()), this, SLOT(editDataSet()));
             hasMaster = false;
 
         }
@@ -2340,6 +2343,8 @@ void MainWindow::addLineEdit(QDomElement element, QWidget *parent) {
             completerList[newLineEdit]->setModel(model);
             connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(textChanged(QString)), this, SLOT(checkLineDataSet(QString)));
             connect(((ScLineEdit*)widgetList[newLineEdit]),SIGNAL(clearButtonClicked()), this, SLOT(removeLineFromDataSet()));
+            ((ScLineEdit*)widgetList[newLineEdit])->setDataSetEditable(true);
+            connect(((ScLineEdit*)widgetList[newLineEdit]), SIGNAL(editDataSetRequested()), this, SLOT(editDataSet()));
             hasMaster = false;
 
         }
@@ -2502,6 +2507,117 @@ void MainWindow::checkComboDataSet(QString line) {
         ((ScComboBox*)widgetList[scSender])->setButtonVisible(true);
     } else {
         ((ScComboBox*)widgetList[scSender])->setButtonVisible(false);
+    }
+}
+
+void MainWindow::editDataSet() {
+    QString scSender;
+    QString scSetName;
+    QString currentValue;
+    if (ScLineEdit *lineEdit = qobject_cast<ScLineEdit*>(sender())) {
+        scSender = lineEdit->getName();
+        scSetName = lineEdit->getDataSetName();
+        currentValue = lineEdit->text();
+    } else if (ScComboBox *comboBox = qobject_cast<ScComboBox*>(sender())) {
+        scSender = comboBox->getName();
+        scSetName = comboBox->getDataSetName();
+        currentValue = comboBox->currentText();
+    } else {
+        return;
+    }
+
+    if (!dataSets.contains(scSetName))
+        return;
+
+    // dataSets are stored column-major; the editor wants rows
+    const QList<QStringList> &columns = dataSets[scSetName];
+    int numColumns = columns.length();
+    int numRows = 0;
+    for (int c = 0; c < numColumns; c++)
+        numRows = qMax(numRows, (int)columns[c].length());
+
+    QList<QStringList> rows;
+    for (int r = 0; r < numRows; r++) {
+        QStringList row;
+        bool blank = true;
+        for (int c = 0; c < numColumns; c++) {
+            QString value = r < columns[c].length() ? columns[c][r] : QString();
+            if (!value.isEmpty())
+                blank = false;
+            row.append(value);
+        }
+        if (!blank)
+            rows.append(row);
+    }
+
+    QStringList headers;
+    for (int c = 0; c < numColumns; c++)
+        headers.append(QString::number(c + 1));
+
+    int focusColumn = dataAssoc.value(scSender, 0);
+    CsvEditorDialog dialog(scSetName, rows, headers, focusColumn, this);
+
+    // jump to the row the field currently holds, if it's in the set
+    if (!currentValue.isEmpty()) {
+        for (int r = 0; r < rows.length(); r++) {
+            if (focusColumn < rows[r].length() && rows[r][focusColumn] == currentValue) {
+                dialog.focusRow(r);
+                break;
+            }
+        }
+    }
+
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+
+    QList<QStringList> newRows = dialog.rows();
+    for (int r = 0; r < newRows.length(); r++) {
+        while (newRows[r].length() < numColumns)
+            newRows[r].append("");
+        while (newRows[r].length() > numColumns)
+            newRows[r].removeLast();
+    }
+
+    QString outputFile = QFileInfo(settings["layoutPath"]).path() + "/" + scSetName;
+    if (!CSV::write(newRows, outputFile, "UTF-8")) {
+        QMessageBox::warning(this, tr("Edit Data Set"),
+                             tr("Could not write to %1").arg(QDir::toNativeSeparators(outputFile)));
+        return;
+    }
+
+    QList<QStringList> newColumns;
+    for (int c = 0; c < numColumns; c++) {
+        QStringList column;
+        for (int r = 0; r < newRows.length(); r++)
+            column.append(newRows[r][c]);
+        newColumns.append(column);
+    }
+
+    dataSets[scSetName] = newColumns;
+    condensedDataSets[scSetName] = condenseDataSet(newColumns);
+    removedSetQueue.removeAll(scSetName);
+
+    updateCompleters();
+    updateDataSetButtons(scSetName);
+}
+
+void MainWindow::updateDataSetButtons(const QString &setName) {
+    QMapIterator<QString, ScCompleter *> i(completerList);
+    while (i.hasNext()) {
+        i.next();
+        ScCompleter *completer = i.value();
+        if (completer->hasMaster() || completer->getDataSetName() != setName)
+            continue;
+
+        QString name = i.key();
+        const QStringList &column = dataSets[setName][completer->getDataField()];
+        if (widgetType[name] == "lineEdit") {
+            ScLineEdit *lineEdit = (ScLineEdit*)widgetList[name];
+            lineEdit->setButtonVisible(column.contains(lineEdit->text()));
+        } else if (widgetType[name] == "comboBox") {
+            ScComboBox *comboBox = (ScComboBox*)widgetList[name];
+            comboBox->setButtonVisible(column.contains(comboBox->currentText()));
+        }
     }
 }
 

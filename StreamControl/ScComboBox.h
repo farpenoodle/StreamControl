@@ -21,18 +21,25 @@ public slots:
     void clearButtonSlot();
     void setNoSaveOnChange(bool);
     bool noSaveOnChange();
+    void setDataSetEditable(bool);
+
+private slots:
+    void lineEditContextMenu(const QPoint &pos);
 
 protected:
     void resizeEvent(QResizeEvent *);
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     QToolButton *clearButton;
     QString comboBoxName;
     QString dataSetName;
     bool noSave;
+    bool dataSetEditable;
 
 signals:
     void clearButtonClicked();
+    void editDataSetRequested();
 
 };
 

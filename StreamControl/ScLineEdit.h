@@ -14,6 +14,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *);
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private slots:
 
@@ -25,6 +26,7 @@ public slots:
     void clearButtonSlot();
     void setNoSaveOnChange(bool);
     bool noSaveOnChange();
+    void setDataSetEditable(bool);
 
 
 private:
@@ -32,9 +34,11 @@ private:
     QString lineEditName;
     QString dataSetName;
     bool noSave;
+    bool dataSetEditable;
 
 signals:
     void clearButtonClicked();
+    void editDataSetRequested();
 
 };
 
