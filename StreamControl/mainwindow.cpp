@@ -2555,7 +2555,7 @@ void MainWindow::editDataSet() {
         headers.append(QString::number(c + 1));
 
     int focusColumn = dataAssoc.value(scSender, 0);
-    CsvEditorDialog dialog(scSetName, rows, headers, focusColumn, this);
+    CsvEditorDialog dialog(scSetName, scSender, rows, headers, focusColumn, this);
 
     // fill the master field and its slaves from a row, as picking it from the completer does
     connect(&dialog, &CsvEditorDialog::rowActivated, this, [this, scSender](const QStringList &row) {

@@ -14,6 +14,7 @@
 #include "csveditordialog.h"
 
 CsvEditorDialog::CsvEditorDialog(const QString &dataSetName,
+                                 const QString &fieldName,
                                  const QList<QStringList> &rows,
                                  const QStringList &headers,
                                  int focusCol,
@@ -83,7 +84,7 @@ CsvEditorDialog::CsvEditorDialog(const QString &dataSetName,
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     resize(600, 400);
-    setWindowTitle(tr("Edit Data Set - %1").arg(dataSetName));
+    setWindowTitle(tr("Edit Data Set - %1 (%2)").arg(dataSetName, fieldName));
 
     // Enter in the filter jumps to the first match; don't let it press Save as well
     foreach (QPushButton *button, findChildren<QPushButton*>()) {

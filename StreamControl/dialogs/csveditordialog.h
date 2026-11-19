@@ -15,6 +15,7 @@ class CsvEditorDialog : public QDialog
 public:
     // rows are row-major: one QStringList per CSV line
     CsvEditorDialog(const QString &dataSetName,
+                    const QString &fieldName,
                     const QList<QStringList> &rows,
                     const QStringList &headers,
                     int focusColumn,
