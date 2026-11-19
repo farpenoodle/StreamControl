@@ -6,6 +6,7 @@
 
 class QTableWidget;
 class QPushButton;
+class QLineEdit;
 
 class CsvEditorDialog : public QDialog
 {
@@ -28,11 +29,20 @@ public:
 public slots:
     void addRow();
     void removeRows();
+    void useRow();
     void selectionChanged();
+    void applyFilter(const QString &text);
+    void selectFirstVisibleRow();
+
+signals:
+    // the current row, as shown in the table (including unsaved edits)
+    void rowActivated(const QStringList &row);
 
 private:
     QTableWidget *table;
+    QLineEdit *filterEdit;
     QPushButton *removeButton;
+    QPushButton *useButton;
     int focusColumn;
 };
 

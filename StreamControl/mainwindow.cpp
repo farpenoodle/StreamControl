@@ -2557,6 +2557,22 @@ void MainWindow::editDataSet() {
     int focusColumn = dataAssoc.value(scSender, 0);
     CsvEditorDialog dialog(scSetName, rows, headers, focusColumn, this);
 
+    // fill the master field and its slaves from a row, as picking it from the completer does
+    connect(&dialog, &CsvEditorDialog::rowActivated, this, [this, scSender](const QStringList &row) {
+        QStringList targets = dataMaster.value(scSender);
+        targets.prepend(scSender);
+        foreach (const QString &id, targets) {
+            int field = dataAssoc.value(id, -1);
+            if (field < 0 || field >= row.length())
+                continue;
+            if (widgetType[id] == "lineEdit") {
+                ((ScLineEdit*)widgetList[id])->setText(row[field]);
+            } else if (widgetType[id] == "comboBox") {
+                setComboValue(id, row[field]);
+            }
+        }
+    });
+
     // jump to the row the field currently holds, if it's in the set
     if (!currentValue.isEmpty()) {
         for (int r = 0; r < rows.length(); r++) {
